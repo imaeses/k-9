@@ -988,6 +988,9 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
             			if( body instanceof BinaryTempFileBody ) {
             					
             				Log.d( K9.LOG_TAG, "Decrypted data is a BinaryTempFileBody" );
+            				pgpData.setDecryptedData( MimeUtility.getTextFromPart( mimeMsg ) );
+            				
+            				/*
             				ByteArrayOutputStream baos = new ByteArrayOutputStream();
             				BinaryTempFileBody btfb = ( BinaryTempFileBody )body;
             				btfb.writeTo( baos );
@@ -996,6 +999,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
             				if( contents != null && contents.length() > 0 ) {
             					pgpData.setDecryptedData( baos.toString() );
             				}
+            				*/
             				
             			} else {
             				

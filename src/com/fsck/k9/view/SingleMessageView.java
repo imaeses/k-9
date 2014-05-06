@@ -738,7 +738,8 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     public int renderAttachments(Part part, int depth, Message message, Account account,
                                   MessagingController controller, MessagingListener listener, int numAttachments) throws MessagingException {
 
-    	if( mFilterPgpAttachments && ( part.getMimeType().contains( "application/pgp-" ) || part.getMimeType().contains( "application/octet-stream" ) ) ) {
+    	//if( mFilterPgpAttachments && ( part.getMimeType().contains( "application/pgp-" ) || part.getMimeType().contains( "application/octet-stream" ) ) ) {
+    	if( mFilterPgpAttachments && ( part.getMimeType().contains( "application/pgp-encrypted" ) || part.getMimeType().contains( "application/pgp-signature" ) || part.getMimeType().contains( "application/octet-stream" ) ) ) {
     		return numAttachments;
         }
     	

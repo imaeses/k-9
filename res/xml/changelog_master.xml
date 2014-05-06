@@ -8,6 +8,9 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.701.05" versioncode="19007">
+        <change>Sending and receiving public keys as attachments now works as expected</change>
+    </release>
     <release version="4.701.04" versioncode="19006">
         <change>When answering decrypted messages, quoted text is now properly displayed and included in the reply</change>
         <change>When replying to messages using plain text, quoted text should not be HTML formatted</change>

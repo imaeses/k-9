@@ -3173,8 +3173,8 @@ public class MessagingController implements Runnable {
                 	
                 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 	remoteMessage.writeTo( baos );
-                	String contents = new String( baos.toByteArray() );
-                	Log.i( K9.LOG_TAG, "I have the original signed message:\n" + contents );
+                	//String contents = new String( baos.toByteArray() );
+                	//Log.i( K9.LOG_TAG, "I have the original signed message:\n" + contents );
 
                 	message.setSignedMultipart( signedMultipart ); 
                 	setSignedMultipart( remoteMessage, localFolder );            
