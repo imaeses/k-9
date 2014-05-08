@@ -8,6 +8,11 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.701.06" versioncode="19008">
+        <change>Fixed the way encrypted attachments are handled</change>
+        <change>Fixed some HTML formatting issues with encypted messages</change>
+        <change>Note: it is not currently possible to save encrypted attachments, only open them with a third-party app</change>
+    </release>
     <release version="4.701.05" versioncode="19007">
         <change>Sending and receiving public keys as attachments now works as expected</change>
     </release>

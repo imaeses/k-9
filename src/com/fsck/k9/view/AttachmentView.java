@@ -131,6 +131,8 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
             String extension = MimeUtility.getExtensionByMimeType(contentType);
             name = "noname" + ((extension != null) ? "." + extension : "");
         }
+        
+        //Log.w( K9.LOG_TAG, "contentType: " + contentType + ", name: " + name );
 
         // Inline parts with a content-id are almost certainly components of an HTML message
         // not attachments. Only show them if the user pressed the button to show more

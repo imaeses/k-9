@@ -1022,7 +1022,6 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
 		    			
 	            			if( p != null ) {
 	            				
-	            				
 	            				// is this necessary?
 	            				String contentTransferEncoding = p.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
 	                    		p.setBody( MimeUtility.decodeBody( p.getBody().getInputStream(), contentTransferEncoding, p.getMimeType() ) ); 
@@ -1049,11 +1048,6 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
             
     	} 
         
-    	String text = pgpData.getDecryptedData();
-		if( text != null && !text.trim().startsWith( "<html>" ) ) {
-            pgpData.setDecryptedData( HtmlConverter.textToHtml( text ) );
-        }
-		
         try {
         	mMessageView.setMessage(account, message, pgpData, controller, listener, replacement);
         } catch (MessagingException e) {

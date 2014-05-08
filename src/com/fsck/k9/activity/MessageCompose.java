@@ -1985,24 +1985,18 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
 	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-	        		/*
-	        		if( mPgpData.hasSignatureKey() ) {
-	        			
-	        			MimeMessage m = new MimeMessage();
-	        			m.setBody( buildPgpMimeSigned( mPgpData.getSignature() ) );
-	        			m.writeTo( baos );
-	        			
-	        		} else if (mMessageFormat == SimpleMessageFormat.HTML) {
-	        		*/
 	        		if (mMessageFormat == SimpleMessageFormat.HTML) {
 	        	        // HTML message (with alternative text part)
 	
 	        	        // This is the compiled MIME part for an HTML message.
 	        	        MimeMultipart mp = new MimeMultipart();
-	        	        mp.setSubType("alternative");   // Let the receiver select either the text or the HTML part.
-	        	        mp.addBodyPart( new MimeBodyPart( textBody, "text/html" ) );
+	        	        
+	        	        MimeMultipart alt = new MimeMultipart();
+	        	        alt.setSubType("alternative");   // Let the receiver select either the text or the HTML part.
+	        	        alt.addBodyPart( new MimeBodyPart( textBody, "text/html" ) );
 	        	        Body bodyPlain = buildText( false, SimpleMessageFormat.TEXT );
-	        	        mp.addBodyPart( new MimeBodyPart(bodyPlain, "text/plain" ) );
+	        	        alt.addBodyPart( new MimeBodyPart(bodyPlain, "text/plain" ) );
+	        	        mp.addBodyPart( new MimeBodyPart( alt ) );
 	        	        
 	        	        if( mAttachments.getChildCount() > 0 ) {
 		        			addAttachmentsToMessage( mp );

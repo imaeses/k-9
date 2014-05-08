@@ -748,7 +748,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
             for (int i = 0; i < mp.getCount(); i++) {
             	numAttachments = renderAttachments(mp.getBodyPart(i), depth + 1, message, account, controller, listener, numAttachments);
             }
-        } else if (part instanceof LocalStore.LocalAttachmentBodyPart) {
+        } else if(part instanceof LocalStore.LocalAttachmentBodyPart) {
             AttachmentView view = (AttachmentView)mInflater.inflate(R.layout.message_view_attachment, null);
             view.setCallback(attachmentCallback);
 
@@ -762,21 +762,35 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
             } catch (Exception e) {
                 Log.e(K9.LOG_TAG, "Error adding attachment view", e);
             }
-        // mixed multiparts resulting from PGP/MIME decryption
-        } else if( !part.getContentType().startsWith( "text/" ) ) {
-        	AttachmentView view = (AttachmentView)mInflater.inflate(R.layout.message_view_attachment, null);
-            view.setCallback(attachmentCallback);
-
-            try {
-                if (view.populateFromPart(part, message, account, controller, listener)) {
-                    addAttachment(view);
-                } else {
-                    addHiddenAttachment(view);
-                }
-                numAttachments++;
-            } catch (Exception e) {
-                Log.e(K9.LOG_TAG, "Error adding attachment view", e);
+        // attachments revealed from PGP/MIME decryption
+        } else {
+        	
+        	String contentType = part.getContentType();
+        	String contentDisposition = MimeUtility.unfoldAndDecode(part.getDisposition());
+            
+            String name = MimeUtility.getHeaderParameter(contentType, "name");
+            if (name == null) {
+                name = MimeUtility.getHeaderParameter(contentDisposition, "filename");
             }
+            
+            if( name != null ) {
+           
+	        	AttachmentView view = (AttachmentView)mInflater.inflate(R.layout.message_view_attachment, null);
+	            view.setCallback(attachmentCallback);
+	
+	            try {
+	                if (view.populateFromPart(part, message, account, controller, listener)) {
+	                    addAttachment(view);
+	                } else {
+	                    addHiddenAttachment(view);
+	                }
+	                numAttachments++;
+	            } catch (Exception e) {
+	                Log.e(K9.LOG_TAG, "Error adding attachment view", e);
+	            }
+	            
+            }
+            
         }
         return numAttachments;
     }
