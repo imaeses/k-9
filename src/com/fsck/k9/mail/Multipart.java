@@ -64,6 +64,10 @@ public abstract class Multipart implements CompositeBody {
 
         /* Nothing else to do.  Each subpart has its own separate encoding */
     }
+    
+    public String getEncoding() {
+    	return null;
+    }
 
     public void setCharset(String charset) throws MessagingException {
         if (mParts.isEmpty())

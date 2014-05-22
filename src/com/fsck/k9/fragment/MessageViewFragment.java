@@ -649,8 +649,8 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         			ByteArrayOutputStream baos = new ByteArrayOutputStream();
         			msgPart.writeTo( baos );
             		 
-        			String signedData = new String( baos.toByteArray() );
         			/*
+        			String signedData = new String( baos.toByteArray() );
         			Log.w( K9.LOG_TAG, "Signed data:\n" + signedData );
         			if( signedData.length() > 2000 ) {
         				Log.w( K9.LOG_TAG, "End of signed data:\n" + signedData.substring( signedData.length() - 2000 ) );
@@ -916,7 +916,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         
     	if( pgpData.isPgpSigned() ) {
 
-        	Message m = mMessage;
+        	Message m = new MimeMessage();
             
             // Did we just verify a signed message that was also decrypted?
             if( mPgpSignedMessage != null ) {
@@ -925,7 +925,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         			
         			ByteArrayInputStream bais = new ByteArrayInputStream( mPgpSignedMessage.getBytes() );
         			replacement = new MimeMessage( bais );
-        			m = replacement;
+        			//m = replacement;
         			
         		} catch( Throwable e ) {
         			
@@ -934,25 +934,45 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         			
         		}
         		
+            } 
+          
+            try {
+            	
+            	if( replacement == null ) {
+            		m.setBody( mMessage.getSignedMultipart() );
+            	} else {
+            		m.setBody( replacement.getSignedMultipart() );
+            	}
+            	
+            } catch( Exception e ) {
+            	Log.w( K9.LOG_TAG, "Unable to set body", e );
             }
             	
             try {
             	
+    			boolean isPlainText = false;
             	Part msgPart = MimeUtility.findFirstPartByMimeType( m, "text/html" );
             	if( msgPart == null ) {
+            		
             		msgPart = MimeUtility.findFirstPartByMimeType( m, "text/plain" );
+            		isPlainText = true;
+            		
             	}
             	
             	if( msgPart != null ) {
+
+	            	String[] header = msgPart.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING );
+	            	if( header != null ) {
+	            		msgPart.setBody( MimeUtility.decodeBody( msgPart.getBody().getInputStream(), header[ 0 ], msgPart.getMimeType() ) ); 
+	            	}
             		
-            		String contentTransferEncoding = msgPart.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
-            		msgPart.setBody( MimeUtility.decodeBody( msgPart.getBody().getInputStream(), contentTransferEncoding, msgPart.getMimeType() ) ); 
-		
             		String text = MimeUtility.getTextFromPart( msgPart );
-                	if( text.trim().startsWith( "<pre class=\"k9mail" ) ) {
-                		text = "<html>" + text + "</html>";
-                	}
+            		
+                	if( isPlainText ) {
+            			text = HtmlConverter.textToHtml( text );
+            		}
                 	
+            		//Log.w( K9.LOG_TAG, "SIGNED:\n" + text );
                 	pgpData.setDecryptedData( text );
                 	
             	}
@@ -988,18 +1008,13 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
             			if( body instanceof BinaryTempFileBody ) {
             					
             				Log.d( K9.LOG_TAG, "Decrypted data is a BinaryTempFileBody" );
-            				pgpData.setDecryptedData( MimeUtility.getTextFromPart( mimeMsg ) );
-            				
-            				/*
-            				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            				BinaryTempFileBody btfb = ( BinaryTempFileBody )body;
-            				btfb.writeTo( baos );
-            				
-            				String contents = baos.toString();
-            				if( contents != null && contents.length() > 0 ) {
-            					pgpData.setDecryptedData( baos.toString() );
+            				String text = MimeUtility.getTextFromPart( mimeMsg );
+            				String header[] = mimeMsg.getHeader( MimeHeader.HEADER_CONTENT_TYPE );
+            				if( header != null && header[ 0 ].contains( "text/plain" ) ) {
+            					text = HtmlConverter.textToHtml( text );
             				}
-            				*/
+            				
+            				pgpData.setDecryptedData( text );
             				
             			} else {
             				
@@ -1010,27 +1025,34 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
 	            			// in case a decrypted PGP/MIME message revealed a signed message
 	            			if( mp.getContentType().contains( "multipart/signed" ) && handlePgpMimeSigned( mAccount, mp ) ) {
 		    				
-	            				mPgpSignedMessage = decryptedMsg;
+	            				mPgpSignedMessage = pgpData.getDecryptedData();
 	            				return;
 		    				
 	            			}
+	            			
 		    			
+	            			boolean isPlainText = false;
 	            			Part p = MimeUtility.findFirstPartByMimeType( mimeMsg, "text/html" );
 	            			if( p == null ) {
+	            				
 	            				p = MimeUtility.findFirstPartByMimeType( mimeMsg, "text/plain" );
+	            				isPlainText = true;
+	            				
 	            			}
 		    			
 	            			if( p != null ) {
 	            				
-	            				// is this necessary?
-	            				String contentTransferEncoding = p.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING )[ 0 ];
-	                    		p.setBody( MimeUtility.decodeBody( p.getBody().getInputStream(), contentTransferEncoding, p.getMimeType() ) ); 
-	        		
 	                    		String text = MimeUtility.getTextFromPart( p );
+	                    		
+	                    		if( isPlainText ) {
+	                    			text = HtmlConverter.textToHtml( text );
+	                    		}
+	                    		
+	                    		//Log.w( K9.LOG_TAG, "DECRYPTED:\n" + text );
 	            				pgpData.setDecryptedData( text );
 	            				
 	            			}
-		    			
+	            			
 	            			replacement = mimeMsg;
 	            			mMessageView.setFilterPgpAttachments( true );
 	            			

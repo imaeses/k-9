@@ -2054,18 +2054,23 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	            
 	        	boolean success = false;
 	            TextBody textBody = buildText(false);
+	            String mimeType = "text/html";
+	            if( mMessageFormat != SimpleMessageFormat.HTML ) {
+	            	mimeType = "text/plain";
+	            }
+	            
 	        	if( usePgpMime ) {
 	      		
 	        		if( mAttachments.getChildCount() > 0 ) {
 	        			
 	        			MimeMultipart mp = new MimeMultipart();
-	        			mp.addBodyPart( new MimeBodyPart( textBody ) );
+	        			mp.addBodyPart( new MimeBodyPart( textBody, mimeType ) );
 	        			addAttachmentsToMessage( mp );
 	        			
 	        			mSignedPart = new MimeBodyPart( mp );
 	        			
 	        		} else {
-	        			mSignedPart = new MimeBodyPart( textBody );
+	        			mSignedPart = new MimeBodyPart( textBody, mimeType );
 	        		}
 	        	
 	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();

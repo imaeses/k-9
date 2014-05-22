@@ -83,6 +83,19 @@ public class MimeHeader {
         }
         return values.toArray(EMPTY_STRING_ARRAY);
     }
+    
+    public String[] getRawHeader( String name ) {
+    	ArrayList<String> values = new ArrayList<String>();
+        for (Field field : mFields) {
+            if (field.name.equalsIgnoreCase(name)) {
+                values.add(new String(field.rawByteValue));
+            }
+        }
+        if (values.isEmpty()) {
+            return null;
+        }
+        return values.toArray(EMPTY_STRING_ARRAY);
+    }
 
     public void removeHeader(String name) {
         ArrayList<Field> removeFields = new ArrayList<Field>();

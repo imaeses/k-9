@@ -468,6 +468,18 @@ public class MimeMessage extends Message {
     }
 
     @Override
+    public String getEncoding() throws UnavailableStorageException {
+    	
+    	String header[] = getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING );
+    	if( header != null && header.length > 0 ) {
+    		return header[ 0 ];
+    	} else {
+    		return null;
+    	}
+    	
+    }
+    
+    @Override
     public void setCharset(String charset) throws MessagingException {
         mHeader.setCharset(charset);
         if (mBody instanceof Multipart) {
@@ -527,9 +539,16 @@ public class MimeMessage extends Message {
             Part e = (Part)stack.peek();
             try {
             	String contentType = e.getContentType();
-            	MimeMultipart multiPart = new MimeMultipart(contentType);
+            	MimeMultipart multiPart = null;
             	if( bd.getMimeType().contains( "multipart/signed" ) ) {
+            		
+            		multiPart = new MimeMultipart(contentType);
             		signedMultipart = multiPart;
+            		
+            	} else if( signedMultipart != null && bd.getMimeType().contains( "alternative" ) ) {
+            		multiPart = new MimeMultipart( ( ( MimeBodyPart )e ).getRawHeader( MimeHeader.HEADER_CONTENT_TYPE )[ 0 ] );
+            	} else {
+            		multiPart = new MimeMultipart(contentType);
             	}
             	
                 e.setBody(multiPart);
@@ -635,7 +654,6 @@ public class MimeMessage extends Message {
         		} 
         		
         	}
-        	
             try {
                 ((Part)stack.peek()).addHeader(parsedField.getName(), parsedField.getBody().trim(), rawByteValue);
             } catch (MessagingException me) {

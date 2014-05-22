@@ -1,14 +1,11 @@
 
 package com.fsck.k9.mail.internet;
 
-import android.util.Log;
-
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.BodyPart;
 import com.fsck.k9.mail.CompositeBody;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
-import com.imaeses.squeaky.K9;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -61,6 +58,10 @@ public class MimeBodyPart extends BodyPart {
     public String[] getHeader(String name) throws MessagingException {
         return mHeader.getHeader(name);
     }
+    
+    public String[] getRawHeader(String name) throws MessagingException {
+    	return mHeader.getRawHeader(name);
+    }
 
     public void removeHeader(String name) throws MessagingException {
         mHeader.removeHeader(name);
@@ -87,10 +88,9 @@ public class MimeBodyPart extends BodyPart {
 			if( mimeType.contains( "application/pgp-signature" ) || mimeType.contains( "application/pgp-encrypted" ) || mimeType.contains( "application/octet-stream" ) ) {    
 				contentType = mimeType;
 				setEncoding(MimeUtil.ENC_7BIT);
-			} else {	
+			} else {
 			    contentType = String.format("%s; charset=utf-8", mimeType);
 			    setEncoding(MimeUtil.ENC_QUOTED_PRINTABLE);
-			    //( ( TextBody )body ).setRawOutput( true );
 			}
 			String name = MimeUtility.getHeaderParameter(getContentType(), "name");
 			if (name != null) {

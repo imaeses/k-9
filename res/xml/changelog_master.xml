@@ -8,6 +8,11 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.701.07" versioncode="19009">
+        <change>Properly handle non-Western character encodings in PGP/MIME messages</change>
+        <change>Send proper mime type with signed PGP/MIME messages in HTML format</change>
+        <change>Properly validate signatures on PGP/MIME messages with alternative parts</change>
+    </release>
     <release version="4.701.06" versioncode="19008">
         <change>Fixed the way encrypted attachments are handled</change>
         <change>Fixed some HTML formatting issues with encypted messages</change>
