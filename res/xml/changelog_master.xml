@@ -8,6 +8,12 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.701.08" versioncode="19010">
+        <change>Enabled forwarding of encrypted and signed messages</change>
+        <change>Fixed the broken button for selecting email addresses from Contacts</change>
+        <change>Attachments no longer disappear for encrypted messages when the screen is tilted or turned</change>
+        <change>It is now possible to save encrypted attachments</change>
+    </release>
     <release version="4.701.07" versioncode="19009">
         <change>Properly handle non-Western character encodings in PGP/MIME messages</change>
         <change>Send proper mime type with signed PGP/MIME messages in HTML format</change>

@@ -765,10 +765,9 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
                         
                         if( !isPgpMime ) {
                        
-                        	Log.d( K9.LOG_TAG, "Not PGP/MIME message, so I'm just going to display it as normal" );
+                        	//Log.w( K9.LOG_TAG, "Not PGP/MIME message, so I'm just going to display it as normal" );
                         	mMessageView.setMessage(account, (LocalMessage) message, mPgpData,
                         			mController, mListener);
-                        	//mFragmentListener.updateMenu();
                         	
                         }
 
@@ -911,7 +910,6 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         LocalMessage message = (LocalMessage) mMessage;
         MessagingController controller = mController;
         Listener listener = mListener;
-       
         MimeMessage replacement = null;
         
     	if( pgpData.isPgpSigned() ) {
@@ -1030,6 +1028,9 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
 		    				
 	            			}
 	            			
+	            			// useful when we've already decrypted a message with more than one part and don't need to again
+	            			// i.e. forwarding or screen reorientation
+            				pgpData.setFullDecryptedMimeMessage( decryptedMsg );
 		    			
 	            			boolean isPlainText = false;
 	            			Part p = MimeUtility.findFirstPartByMimeType( mimeMsg, "text/html" );
@@ -1054,6 +1055,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
 	            			}
 	            			
 	            			replacement = mimeMsg;
+	            			mMessage.copyInternals( replacement );
 	            			mMessageView.setFilterPgpAttachments( true );
 	            			
             			}
@@ -1068,7 +1070,17 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
             		
             }
             
-    	} 
+    	// This is a decrypted PGP inline message 
+    	} else if( pgpData.getDecryptedData() != null ) {
+    		
+    		String decrypted = pgpData.getDecryptedData().trim();
+    		//Log.w( K9.LOG_TAG, "Decrypted inline msg:\n" + decrypted );
+    		
+    		if( !decrypted.startsWith( "<html>" ) && !decrypted.startsWith( "<HTML>" ) ) {
+    			pgpData.setDecryptedData( HtmlConverter.textToHtml( decrypted ) );
+    		} 
+    		
+    	}
         
         try {
         	mMessageView.setMessage(account, message, pgpData, controller, listener, replacement);

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:versionCode="19009"
-    android:versionName="4.701.07" package="com.imaeses.squeaky"
+    android:versionCode="19010"
+    android:versionName="4.701.08" package="com.imaeses.squeaky"
     >
     <uses-sdk
        android:minSdkVersion="8"

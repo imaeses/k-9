@@ -167,9 +167,11 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         decrypt.setVisibility( View.GONE );
         downloadButton = (Button) findViewById(R.id.download);
         
+        /*
         if( !( part instanceof LocalAttachmentBodyPart ) ) {
         	downloadButton.setVisibility( View.GONE );
         }
+        */
         
         if( ( name.endsWith( ".asc" ) && contentType.equals( "text/plain" ) ) ||
             ( ( name.endsWith( ".gpg" ) || name.endsWith( ".pgp" ) ) && contentType.equals( "application/octet-stream" ) ) ) {
@@ -270,28 +272,54 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
      * Writes the attachment onto the given path
      * @param directory: the base dir where the file should be saved.
      */
-    public void writeFile(File directory) {
-    	if( !( part instanceof LocalAttachmentBodyPart ) ) {
-    		return;
-    	}
+    public void writeFile( File directory ) {
     	
-        try {
-            String filename = Utility.sanitizeFilename(name);
-            File file = Utility.createUniqueFile(directory, filename);
-            Uri uri = AttachmentProvider.getAttachmentUri(mAccount, ( ( LocalAttachmentBodyPart )part ).getAttachmentId());
-            InputStream in = mContext.getContentResolver().openInputStream(uri);
-            OutputStream out = new FileOutputStream(file);
-            IOUtils.copy(in, out);
+    	InputStream in = null;
+    	OutputStream out = null;
+    	try  {
+    		
+    		if( part instanceof LocalAttachmentBodyPart ) {
+    		
+    			Uri uri = AttachmentProvider.getAttachmentUri (mAccount, ( ( LocalAttachmentBodyPart )part ).getAttachmentId() );
+                in = mContext.getContentResolver().openInputStream( uri );
+                
+    		} else {
+    			in = part.getBody().getInputStream();
+    		}
+                
+            String filename = Utility.sanitizeFilename( name );
+            File file = Utility.createUniqueFile( directory, filename );
+            
+            out = new FileOutputStream( file );
+            IOUtils.copy( in, out );
             out.flush();
-            out.close();
-            in.close();
-            attachmentSaved(file.toString());
-            new MediaScannerNotifier(mContext, file);
-        } catch (IOException ioe) {
-            if (K9.DEBUG) {
-                Log.e(K9.LOG_TAG, "Error saving attachment", ioe);
-            }
+            
+            attachmentSaved( file.toString() );
+            new MediaScannerNotifier( mContext, file );
+            
+        } catch( Exception e ) {
+        	
+            Log.e( K9.LOG_TAG, "Error saving attachment", e );
             attachmentNotSaved();
+            
+        } finally {
+        	
+        	if( in != null ) {
+        		try {
+        			in.close();
+        		} catch( IOException e ) {
+        			Log.w( K9.LOG_TAG, e.getMessage(), e );
+        		}
+        	}
+        	
+        	if( out != null ) {
+        		try {
+        			out.close();
+        		} catch( IOException e ) {
+        			Log.w( K9.LOG_TAG, e.getMessage(), e );
+        		}
+        	}
+        	
         }
     }
 
@@ -304,9 +332,11 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
     }
 
     public void saveFile() {
+    	/*
     	if( !( part instanceof LocalAttachmentBodyPart ) ) {
     		return;
     	}
+    	*/
         //TODO: Can the user save attachments on the internal filesystem or sd card only?
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             /*
@@ -368,7 +398,7 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         try {
         	Uri uri = null;
             if( part instanceof LocalAttachmentBodyPart ) {
-            	AttachmentProvider.getAttachmentUriForViewing(mAccount, ( ( LocalAttachmentBodyPart )part ).getAttachmentId());
+            	uri = AttachmentProvider.getAttachmentUriForViewing(mAccount, ( ( LocalAttachmentBodyPart )part ).getAttachmentId());
             } else if( part.getBody() instanceof BinaryTempFileBody ){
             	uri = Uri.fromFile( ( ( BinaryTempFileBody )part.getBody() ).getFile() );
             } else {

@@ -1420,7 +1420,14 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
 
     @Override
     public void onForward(Message mMessage, PgpData mPgpData) {
-        MessageCompose.actionForward(this, mAccount, mMessage, mPgpData.getDecryptedData());
+    	
+    	String fullDecryptedMimeMessage = mPgpData.getFullDecryptedMimeMessage();
+    	if( fullDecryptedMimeMessage != null ) {
+    		MessageCompose.actionForward(this, mAccount, mMessage, fullDecryptedMimeMessage, mMessage.getSubject(), true);
+    	} else {
+    		MessageCompose.actionForward(this, mAccount, mMessage, mPgpData.getDecryptedData());
+    	}
+    	
     }
 
     @Override

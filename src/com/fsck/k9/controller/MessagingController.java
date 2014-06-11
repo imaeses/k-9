@@ -89,6 +89,7 @@ import com.fsck.k9.mail.internet.MimeMultipart;
 import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.mail.internet.TextBody;
 import com.fsck.k9.mail.store.LocalStore;
+import com.fsck.k9.mail.store.LocalStore.LocalAttachmentBodyPart;
 import com.fsck.k9.mail.store.LocalStore.LocalFolder;
 import com.fsck.k9.mail.store.LocalStore.LocalMessage;
 import com.fsck.k9.mail.store.LocalStore.PendingCommand;
@@ -3352,23 +3353,27 @@ public class MessagingController implements Runnable {
                 Folder remoteFolder = null;
                 LocalFolder localFolder = null;
                 try {
-                    LocalStore localStore = account.getLocalStore();
-
-                    List<Part> attachments = MimeUtility.collectAttachments(message);
-                    for (Part attachment : attachments) {
-                        attachment.setBody(null);
-                    }
-                    Store remoteStore = account.getRemoteStore();
-                    localFolder = localStore.getFolder(message.getFolder().getName());
-                    remoteFolder = remoteStore.getFolder(message.getFolder().getName());
-                    remoteFolder.open(Folder.OPEN_MODE_RW);
-
-                    //FIXME: This is an ugly hack that won't be needed once the Message objects have been united.
-                    Message remoteMessage = remoteFolder.getMessage(message.getUid());
-                    remoteMessage.setBody(message.getBody());
-                    remoteFolder.fetchPart(remoteMessage, part, null);
-
-                    localFolder.updateMessage((LocalMessage)message);
+                	if( part instanceof LocalAttachmentBodyPart ) {
+                		
+	                    LocalStore localStore = account.getLocalStore();
+	
+	                    List<Part> attachments = MimeUtility.collectAttachments(message);
+	                    for (Part attachment : attachments) {
+	                        attachment.setBody(null);
+	                    }
+	                    Store remoteStore = account.getRemoteStore();
+	                    localFolder = localStore.getFolder(message.getFolder().getName());
+	                    remoteFolder = remoteStore.getFolder(message.getFolder().getName());
+	                    remoteFolder.open(Folder.OPEN_MODE_RW);
+	
+	                    //FIXME: This is an ugly hack that won't be needed once the Message objects have been united.
+	                    Message remoteMessage = remoteFolder.getMessage(message.getUid());
+	                    remoteMessage.setBody(message.getBody());
+	                    remoteFolder.fetchPart(remoteMessage, part, null);
+	
+	                    localFolder.updateMessage((LocalMessage)message);
+	                    
+                	}
                     for (MessagingListener l : getListeners(listener)) {
                         l.loadAttachmentFinished(account, message, part, tag);
                     }

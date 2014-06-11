@@ -1118,6 +1118,7 @@ public class MimeUtility {
                     
                     try {
                         
+                    	//Log.w( K9.LOG_TAG, "charset: " + charset );
                     	String text = readToString(in, charset);
                         TextBody textBody = new TextBody( text );
                         
@@ -2219,7 +2220,7 @@ public class MimeUtility {
             return (MimeUtil.ENC_BASE64);
         } else if (MimeUtil.isMessage(type)) {
             return (MimeUtil.ENC_8BIT);
-        } else if (type.contains("application/pgp-signature") || type.contains("application/pgp-encrypted") || type.toLowerCase(Locale.US).startsWith("message/")) {
+        } else if (type.toLowerCase(Locale.US).contains("application/pgp-signature") || type.toLowerCase(Locale.US).contains("application/pgp-encrypted") || type.toLowerCase(Locale.US).startsWith("message/")) {
             return (MimeUtil.ENC_7BIT);
         } else if (type.toLowerCase(Locale.US).startsWith("multipart/")) {
             return (MimeUtil.ENC_8BIT);

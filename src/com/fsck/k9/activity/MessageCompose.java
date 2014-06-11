@@ -75,6 +75,7 @@ import com.fsck.k9.mail.Message.RecipientType;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Multipart;
 import com.fsck.k9.mail.Part;
+import com.fsck.k9.mail.internet.BinaryTempFileBody;
 import com.fsck.k9.mail.internet.MimeBodyPart;
 import com.fsck.k9.mail.internet.MimeHeader;
 import com.fsck.k9.mail.internet.MimeMessage;
@@ -141,6 +142,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     private static final String EXTRA_ACCOUNT = "account";
     private static final String EXTRA_MESSAGE_BODY  = "messageBody";
     private static final String EXTRA_MESSAGE_REFERENCE = "message_reference";
+    private static final String EXTRA_MESSAGE_BODY_IS_MIME_MESSAGE = "messageBodyIsMimeMessage";
+    private static final String EXTRA_MESSAGE_SUBJECT = "messageSubject";
 
     private static final String STATE_KEY_ATTACHMENTS =
         "com.fsck.k9.activity.MessageCompose.attachments";
@@ -239,7 +242,9 @@ public class MessageCompose extends K9Activity implements OnClickListener,
      * </p>
      */
     private String mSourceMessageBody;
-
+    private boolean mSourceMessageBodyIsMimeMessage;
+    private String mSourceMessageSubject;
+    
     /**
      * When sending PGP/MIME signed messages, this is the body part including headers that was actually signed.
      */
@@ -492,12 +497,32 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         Account account,
         Message message,
         String messageBody) {
-        Intent i = new Intent(context, MessageCompose.class);
-        i.putExtra(EXTRA_MESSAGE_BODY, messageBody);
-        i.putExtra(EXTRA_MESSAGE_REFERENCE, message.makeMessageReference());
-        i.setAction(ACTION_FORWARD);
-        context.startActivity(i);
+        MessageCompose.actionForward( context, account, message, messageBody, null, false );
     }
+    
+    public static void actionForward(
+    		
+            Context context,
+            Account account,
+            Message message,
+            String messageBody,
+            String subject,
+            boolean messageBodyIsMimeMessage ) {
+    	
+            Intent i = new Intent( context, MessageCompose.class );
+            
+            i.putExtra( EXTRA_MESSAGE_BODY, messageBody );
+            i.putExtra( EXTRA_MESSAGE_BODY_IS_MIME_MESSAGE, messageBodyIsMimeMessage );
+            i.putExtra( EXTRA_MESSAGE_REFERENCE, message.makeMessageReference() );
+            
+            if( subject != null ) {
+            	i.putExtra( EXTRA_MESSAGE_SUBJECT, subject );
+            }
+            
+            i.setAction( ACTION_FORWARD );
+            context.startActivity( i );
+            
+     }
 
     /**
      * Continue composition of the given message. This action modifies the way this Activity
@@ -555,6 +580,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         mMessageReference = intent.getParcelableExtra(EXTRA_MESSAGE_REFERENCE);
         mSourceMessageBody = intent.getStringExtra(EXTRA_MESSAGE_BODY);
+        mSourceMessageBodyIsMimeMessage = intent.getBooleanExtra( EXTRA_MESSAGE_BODY_IS_MIME_MESSAGE, false );
+        mSourceMessageSubject = intent.getStringExtra( EXTRA_MESSAGE_SUBJECT );
 
         if (K9.DEBUG && mSourceMessageBody != null)
             Log.d(K9.LOG_TAG, "Composing message with explicitly specified message body.");
@@ -804,18 +831,33 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
             if (mAction == Action.REPLY || mAction == Action.REPLY_ALL ||
                     mAction == Action.FORWARD || mAction == Action.EDIT_DRAFT) {
-                /*
+            	
+            	/*
                  * If we need to load the message we add ourself as a message listener here
                  * so we can kick it off. Normally we add in onResume but we don't
                  * want to reload the message every time the activity is resumed.
                  * There is no harm in adding twice.
                  */
-                MessagingController.getInstance(getApplication()).addListener(mListener);
-
-                final Account account = Preferences.getPreferences(this).getAccount(mMessageReference.accountUuid);
+            	MessagingController.getInstance(getApplication()).addListener(mListener);
+            	
+            	final Account account = Preferences.getPreferences(this).getAccount(mMessageReference.accountUuid);
                 final String folderName = mMessageReference.folderName;
                 final String sourceMessageUid = mMessageReference.uid;
-                MessagingController.getInstance(getApplication()).loadMessageForView(account, folderName, sourceMessageUid, null);
+                
+            	if( mSourceMessageBodyIsMimeMessage ) {
+            		try {
+            			
+	            		ByteArrayInputStream bais = new ByteArrayInputStream( mSourceMessageBody.getBytes() );
+	            		MimeMessage m = new MimeMessage( bais );
+	            		m.setSubject( mSourceMessageSubject );
+	            		mListener.loadMessageForViewBodyAvailable( account, folderName, sourceMessageUid, m );
+	            		
+            		} catch( Exception e ) {
+            			Log.e( K9.LOG_TAG, "Error parsing saved decrypted full mime message for forwarding", e );	
+            		}
+            	} else {
+	                MessagingController.getInstance(getApplication()).loadMessageForView(account, folderName, sourceMessageUid, null);
+            	}
             }
 
             if (mAction != Action.EDIT_DRAFT) {
@@ -1416,6 +1458,27 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             }
 
             String quotedText = mQuotedText.getCharacters();
+            if( mSourceMessageBody != null ) {
+            	if( mSourceMessageBodyIsMimeMessage ) {
+            	
+            		try {
+            			
+	            		ByteArrayInputStream bais = new ByteArrayInputStream( mSourceMessageBody.getBytes() );
+	            		MimeMessage m = new MimeMessage( bais );
+	            		quotedText = MimeUtility.getTextFromPart( m );
+	            		
+            		} catch( Exception e ) {
+            			
+            			Log.w( K9.LOG_TAG, e.getMessage(), e );
+            			quotedText = mQuotedText.getCharacters();
+            			
+            		}
+            		
+            	} else {
+            		quotedText = HtmlConverter.htmlToText( mSourceMessageBody );
+            	}
+            }
+            
             if (includeQuotedText && quotedText.length() > 0) {
                 if (replyAfterQuote) {
                     composedMessageOffset = quotedText.length() + "\r\n".length();
@@ -2322,6 +2385,22 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         initAttachmentInfoLoader(attachment);
     }
+    
+    private void addBinaryTempAttachment(File f, String contentType, String name) {
+    	Attachment attachment = new Attachment();
+        attachment.state = Attachment.LoadingState.URI_ONLY;
+        //attachment.uri = uri;
+        attachment.filename = f.getAbsolutePath();
+        attachment.contentType = contentType;
+        attachment.loaderId = ++mMaxLoaderId;
+        attachment.name = name;
+        attachment.size = f.length();
+        attachment.state = Attachment.LoadingState.COMPLETE;
+        
+        addAttachmentView(attachment);
+
+        //initAttachmentInfoLoader(attachment);
+    }
 
     private void initAttachmentInfoLoader(Attachment attachment) {
         LoaderManager loaderManager = getSupportLoaderManager();
@@ -2486,8 +2565,9 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             return;
         }
 
-        if (resultCode != RESULT_OK)
+        if (resultCode != RESULT_OK) {
             return;
+        }
         if (data == null) {
             return;
         }
@@ -2667,8 +2747,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             break;
         case R.id.quoted_text_edit:
             mForcePlainText = true;
-            if (mMessageReference != null) { // shouldn't happen...
-                // TODO - Should we check if mSourceMessageBody is already present and bypass the MessagingController call?
+            if (mMessageReference != null && mSourceMessageBody == null ) { // shouldn't happen...
                 MessagingController.getInstance(getApplication()).addListener(mListener);
                 final Account account = Preferences.getPreferences(this).getAccount(mMessageReference.accountUuid);
                 final String folderName = mMessageReference.folderName;
@@ -2960,28 +3039,47 @@ public class MessageCompose extends K9Activity implements OnClickListener,
      */
     private boolean loadAttachments(Part part, int depth) throws MessagingException {
         if (part.getBody() instanceof Multipart) {
-            Multipart mp = (Multipart) part.getBody();
-            boolean ret = true;
-            for (int i = 0, count = mp.getCount(); i < count; i++) {
-                if (!loadAttachments(mp.getBodyPart(i), depth + 1)) {
-                    ret = false;
-                }
-            }
-            return ret;
+        	Multipart mp = (Multipart) part.getBody();
+        	if( part.getMimeType().contains( "multipart/encrypted" ) ) {
+        		return true;
+        	}
+	        boolean ret = true;
+	        for (int i = 0, count = mp.getCount(); i < count; i++) {
+	        	if (!loadAttachments(mp.getBodyPart(i), depth + 1)) {
+	        		ret = false;
+	            }
+	        }
+	        return ret;
         }
 
         String contentType = MimeUtility.unfoldAndDecode(part.getContentType());
+        if( contentType.contains( "application/pgp-signature" ) ) {
+        	return true;
+        }
+        
         String name = MimeUtility.getHeaderParameter(contentType, "name");
         if (name != null) {
             Body body = part.getBody();
-            if (body != null && body instanceof LocalAttachmentBody) {
-                final Uri uri = ((LocalAttachmentBody) body).getContentUri();
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        addAttachment(uri);
-                    }
-                });
+            if (body != null ) {
+            	if( body instanceof LocalAttachmentBody) {
+            		
+            		final Uri uri = ((LocalAttachmentBody) body).getContentUri();
+            		mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            addAttachment(uri);
+                        }
+                    });
+            		
+            	} else if( part.getBody() instanceof BinaryTempFileBody ) {
+                	
+            		//final Uri uri = Uri.fromFile( ( ( BinaryTempFileBody )part.getBody() ).getFile() );
+                	addBinaryTempAttachment( ( ( BinaryTempFileBody )part.getBody() ).getFile(), part.getContentType(), name);
+                	
+                } else {
+                	return false;
+                }
+                
             } else {
                 return false;
             }
@@ -3477,7 +3575,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         // Handle the original message in the reply
         // If we already have mSourceMessageBody, use that.  It's pre-populated if we've got crypto going on.
-        String content = (mSourceMessageBody != null) ?
+        String content = (mSourceMessageBody != null && !mSourceMessageBodyIsMimeMessage) ?
                 mSourceMessageBody :
                 getBodyTextFromMessage(mSourceMessage, mQuotedTextFormat);
 

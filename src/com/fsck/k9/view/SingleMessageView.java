@@ -112,7 +112,6 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     private ClipboardManager mClipboardManager;
     private String mText;
 
-
     public void initialize(Fragment fragment) {
         Activity activity = fragment.getActivity();
         mMessageContentView = (MessageWebView) findViewById(R.id.message_content);
@@ -865,9 +864,17 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
         savedState.hiddenAttachmentsVisible = (mHiddenAttachments != null &&
                 mHiddenAttachments.getVisibility() == View.VISIBLE);
         savedState.showPictures = mShowPictures;
-        savedState.handledPgpMimeEncrypted = mHandledPgpMimeEncrypted;
-        savedState.handledPgpMimeSigned = mHandledPgpMimeSigned;
-        savedState.filterPgpAttachments = mFilterPgpAttachments;
+        
+        // PGP/MIME encrypted messages with attachments must be decrypted each time, as
+        // a MimeMessage is not Parceable (to save in SavedState between configuration changes) 
+        // and I don't feel like serializing the object to a byte stream right now. 
+        if( !mHandledPgpMimeEncrypted || !mHasAttachments ) {
+        	
+	        savedState.handledPgpMimeEncrypted = mHandledPgpMimeEncrypted;
+	        savedState.handledPgpMimeSigned = mHandledPgpMimeSigned;
+	        savedState.filterPgpAttachments = mFilterPgpAttachments;
+	        
+        }
 
         return savedState;
     }

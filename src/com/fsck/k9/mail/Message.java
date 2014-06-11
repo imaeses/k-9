@@ -285,7 +285,11 @@ public abstract class Message implements Part, CompositeBody {
      *         The {@code Message} object to receive the contents of this instance.
      */
     protected void copy(Message destination) {
-        destination.mUid = mUid;
+        copyInternals( destination );
+    }
+    
+    public void copyInternals(Message destination) {
+    	destination.mUid = mUid;
         destination.mInternalDate = mInternalDate;
         destination.mFolder = mFolder;
         destination.mReference = mReference;

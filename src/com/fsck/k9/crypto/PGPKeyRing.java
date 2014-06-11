@@ -58,14 +58,14 @@ public class PGPKeyRing extends CryptoProvider {
     public static final String PROVIDER_USERID = "userid";
     public static final String PROVIDER_IDENTITY = "identity";
     
-    public static final int DECRYPT_MESSAGE = 1;
-    public static final int ENCRYPT_MESSAGE = 2;
-    public static final int SELECT_PUBLIC_KEYS = 3;
-    public static final int SELECT_SECRET_KEY = 4;
-    public static final int DECRYPT_FILE = 5;
-    public static final int VERIFY = 6;
-    public static final int ENCRYPT_FILE = 7;
-    public static final int SIGN = 8;
+    public static final int DECRYPT_MESSAGE = 100;
+    public static final int ENCRYPT_MESSAGE = 101;
+    public static final int SELECT_PUBLIC_KEYS = 102;
+    public static final int SELECT_SECRET_KEY = 103;
+    public static final int DECRYPT_FILE = 104;
+    public static final int VERIFY = 105;
+    public static final int ENCRYPT_FILE = 106;
+    public static final int SIGN = 107;
 
     private Uri uriSelectPrivateSigningKey;
     private Uri uriSelectPublicSigningKey;
@@ -156,7 +156,6 @@ public class PGPKeyRing extends CryptoProvider {
             isSuitable = true;
         } else {
         	post( R.string.error_pgpkeyring_version_not_supported, context );
-            //Toast.makeText( context, R.string.error_pgpkeyring_version_not_supported, Toast.LENGTH_SHORT ).show(); 
         }
 
         return isSuitable;
@@ -187,7 +186,6 @@ public class PGPKeyRing extends CryptoProvider {
             
         } catch( ActivityNotFoundException e ) {
         	post( R.string.error_activity_not_found, activity );
-            //Toast.makeText( activity, R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
         }
         
         return success;
@@ -239,7 +237,6 @@ public class PGPKeyRing extends CryptoProvider {
             
         } catch( ActivityNotFoundException e ) {
         	post( R.string.error_activity_not_found, activity );
-        	//Toast.makeText( activity, R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
         }
         
         return success;
@@ -281,8 +278,7 @@ public class PGPKeyRing extends CryptoProvider {
             }
             
         } catch( SecurityException e ) {
-        	post( R.string.insufficient_pgpkeyring_permissions, context );
-            //Toast.makeText( context, context.getResources().getString( R.string.insufficient_pgpkeyring_permissions ), Toast.LENGTH_SHORT ).show();    
+        	post( R.string.insufficient_pgpkeyring_permissions, context ); 
         } finally {
             if( c != null ) {
                 c.close();
@@ -328,8 +324,7 @@ public class PGPKeyRing extends CryptoProvider {
             }
                 
         } catch( SecurityException e ) {
-        	post( R.string.insufficient_pgpkeyring_permissions, context );
-        	//Toast.makeText( context, context.getResources().getString( R.string.insufficient_pgpkeyring_permissions ), Toast.LENGTH_SHORT ).show();    
+        	post( R.string.insufficient_pgpkeyring_permissions, context );  
         } finally {
             if( c != null ) {
                 c.close();
@@ -433,7 +428,6 @@ public class PGPKeyRing extends CryptoProvider {
             
         } catch( ActivityNotFoundException e ) {
         	post( R.string.error_activity_not_found, activity );
-            //Toast.makeText( activity, R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
         }
         
         return success;
@@ -459,7 +453,6 @@ public class PGPKeyRing extends CryptoProvider {
             
         } catch( ActivityNotFoundException e ) {
         	post( R.string.error_activity_not_found, activity );
-            //Toast.makeText( activity, R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
         }
         
         return success;
@@ -486,7 +479,6 @@ public class PGPKeyRing extends CryptoProvider {
             
             } catch( ActivityNotFoundException e ) {
             	post( R.string.error_activity_not_found, activity );
-                //Toast.makeText(activity, R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
             }
             
     	}
@@ -522,7 +514,6 @@ public class PGPKeyRing extends CryptoProvider {
             
             } catch( ActivityNotFoundException e ) {
             	post( R.string.error_activity_not_found, fragment.getActivity() );
-            	//Toast.makeText( fragment.getActivity(), R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
             }
             
         }
@@ -556,7 +547,6 @@ public class PGPKeyRing extends CryptoProvider {
             
             } catch( ActivityNotFoundException e ) {
             	post( R.string.error_activity_not_found, fragment.getActivity() );
-                //Toast.makeText( fragment.getActivity(), R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
             }
             
         }
@@ -585,7 +575,6 @@ public class PGPKeyRing extends CryptoProvider {
             
             } catch( ActivityNotFoundException e ) {
             	post( R.string.error_activity_not_found, fragment.getActivity() );
-                //Toast.makeText( fragment.getActivity(), R.string.error_activity_not_found, Toast.LENGTH_SHORT ).show();
             }
             
     	}
@@ -947,7 +936,6 @@ public class PGPKeyRing extends CryptoProvider {
             
         } catch( SecurityException e ) {
         	post( R.string.insufficient_pgpkeyring_permissions, context );
-            //Toast.makeText( context, context.getResources().getString( R.string.insufficient_pgpkeyring_permissions ), Toast.LENGTH_LONG ).show();
         }
 
         return true;

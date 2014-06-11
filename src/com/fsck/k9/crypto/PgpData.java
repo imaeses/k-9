@@ -12,6 +12,7 @@ public class PgpData implements Serializable {
     protected String mDecryptedData = null;
     protected String mEncryptedData = null;
     protected String filename = null;
+    protected String fullDecryptedMimeMessage = null;
     protected boolean showFile = false;
     protected boolean pgpEncrypted = false;
     protected boolean pgpSigned = false;
@@ -90,7 +91,15 @@ public class PgpData implements Serializable {
     	this.filename = filename;
     }
     
-    public boolean showFile() {
+    public String getFullDecryptedMimeMessage() {
+		return fullDecryptedMimeMessage;
+	}
+
+	public void setFullDecryptedMimeMessage(String fullDecryptedMimeMessage) {
+		this.fullDecryptedMimeMessage = fullDecryptedMimeMessage;
+	}
+
+	public boolean showFile() {
     	return showFile;
     }
     

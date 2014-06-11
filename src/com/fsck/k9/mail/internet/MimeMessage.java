@@ -545,7 +545,7 @@ public class MimeMessage extends Message {
             		multiPart = new MimeMultipart(contentType);
             		signedMultipart = multiPart;
             		
-            	} else if( signedMultipart != null && bd.getMimeType().contains( "alternative" ) ) {
+            	} else if( signedMultipart != null ) {
             		multiPart = new MimeMultipart( ( ( MimeBodyPart )e ).getRawHeader( MimeHeader.HEADER_CONTENT_TYPE )[ 0 ] );
             	} else {
             		multiPart = new MimeMultipart(contentType);
