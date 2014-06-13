@@ -144,6 +144,10 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     private static final String EXTRA_MESSAGE_REFERENCE = "message_reference";
     private static final String EXTRA_MESSAGE_BODY_IS_MIME_MESSAGE = "messageBodyIsMimeMessage";
     private static final String EXTRA_MESSAGE_SUBJECT = "messageSubject";
+    private static final String EXTRA_MESSAGE_SEND_DATE = "messageSendDate";
+    private static final String EXTRA_MESSAGE_FROM = "messageFrom";
+    private static final String EXTRA_MESSAGE_TO = "messageTo";
+    private static final String EXTRA_MESSAGE_CC = "messageCC";
 
     private static final String STATE_KEY_ATTACHMENTS =
         "com.fsck.k9.activity.MessageCompose.attachments";
@@ -243,7 +247,6 @@ public class MessageCompose extends K9Activity implements OnClickListener,
      */
     private String mSourceMessageBody;
     private boolean mSourceMessageBodyIsMimeMessage;
-    private String mSourceMessageSubject;
     
     /**
      * When sending PGP/MIME signed messages, this is the body part including headers that was actually signed.
@@ -497,7 +500,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         Account account,
         Message message,
         String messageBody) {
-        MessageCompose.actionForward( context, account, message, messageBody, null, false );
+        MessageCompose.actionForward( context, account, message, messageBody, false );
     }
     
     public static void actionForward(
@@ -506,19 +509,31 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             Account account,
             Message message,
             String messageBody,
-            String subject,
             boolean messageBodyIsMimeMessage ) {
     	
             Intent i = new Intent( context, MessageCompose.class );
             
             i.putExtra( EXTRA_MESSAGE_BODY, messageBody );
-            i.putExtra( EXTRA_MESSAGE_BODY_IS_MIME_MESSAGE, messageBodyIsMimeMessage );
             i.putExtra( EXTRA_MESSAGE_REFERENCE, message.makeMessageReference() );
-            
-            if( subject != null ) {
-            	i.putExtra( EXTRA_MESSAGE_SUBJECT, subject );
+            if( messageBodyIsMimeMessage ) {
+            	
+                i.putExtra( EXTRA_MESSAGE_BODY_IS_MIME_MESSAGE, messageBodyIsMimeMessage );
+                i.putExtra( EXTRA_MESSAGE_SUBJECT, message.getSubject() );
+                i.putExtra( EXTRA_MESSAGE_SEND_DATE, message.getSentDate() );
+                i.putExtra( EXTRA_MESSAGE_FROM, message.getFrom()[ 0 ].toString() );
+                
+                try {
+                	
+                	i.putExtra( EXTRA_MESSAGE_TO, Address.toString( message.getRecipients( RecipientType.TO ) ) );
+                    i.putExtra( EXTRA_MESSAGE_CC, Address.toString( message.getRecipients( RecipientType.CC ) ) );
+                    
+                } catch( Exception e ) {
+                	Log.w( K9.LOG_TAG, "Unable to get addresses from undecrypted, original message on forward", e );
+                }
+                
             }
             
+                        
             i.setAction( ACTION_FORWARD );
             context.startActivity( i );
             
@@ -581,8 +596,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         mMessageReference = intent.getParcelableExtra(EXTRA_MESSAGE_REFERENCE);
         mSourceMessageBody = intent.getStringExtra(EXTRA_MESSAGE_BODY);
         mSourceMessageBodyIsMimeMessage = intent.getBooleanExtra( EXTRA_MESSAGE_BODY_IS_MIME_MESSAGE, false );
-        mSourceMessageSubject = intent.getStringExtra( EXTRA_MESSAGE_SUBJECT );
-
+        
         if (K9.DEBUG && mSourceMessageBody != null)
             Log.d(K9.LOG_TAG, "Composing message with explicitly specified message body.");
 
@@ -849,7 +863,12 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             			
 	            		ByteArrayInputStream bais = new ByteArrayInputStream( mSourceMessageBody.getBytes() );
 	            		MimeMessage m = new MimeMessage( bais );
-	            		m.setSubject( mSourceMessageSubject );
+	            		m.setSubject( intent.getStringExtra( EXTRA_MESSAGE_SUBJECT ) );
+	            		m.setSentDate( ( Date )intent.getSerializableExtra( EXTRA_MESSAGE_SEND_DATE ) );
+	            		m.setFrom( new Address( intent.getStringExtra( EXTRA_MESSAGE_FROM ) ) );
+	            		m.setRecipients( RecipientType.TO, Address.parse( intent.getStringExtra( EXTRA_MESSAGE_CC ) ) );
+	            		m.setRecipients( RecipientType.TO, Address.parse( intent.getStringExtra( EXTRA_MESSAGE_TO ) ) );
+	            		
 	            		mListener.loadMessageForViewBodyAvailable( account, folderName, sourceMessageUid, m );
 	            		
             		} catch( Exception e ) {
@@ -1457,7 +1476,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 }
             }
 
-            String quotedText = mQuotedText.getCharacters();
+            String quotedText = null;
             if( mSourceMessageBody != null ) {
             	if( mSourceMessageBodyIsMimeMessage ) {
             	
@@ -1465,7 +1484,23 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             			
 	            		ByteArrayInputStream bais = new ByteArrayInputStream( mSourceMessageBody.getBytes() );
 	            		MimeMessage m = new MimeMessage( bais );
-	            		quotedText = MimeUtility.getTextFromPart( m );
+	            		Part p = MimeUtility.findFirstPartByMimeType( m, "text/plain" );
+	            		boolean isHtmlText = false;
+	            		if( p == null ) {
+	            			
+	            			p = MimeUtility.findFirstPartByMimeType( m, "text/html" );
+	            			isHtmlText = true;
+	            			
+	            		}
+	            		
+	            		if( p != null ) {
+	            			
+	            			quotedText = MimeUtility.getTextFromPart( p );
+	            			if( isHtmlText ) {
+	            				quotedText = HtmlConverter.htmlToText( quotedText );
+	            			}
+	            			
+	            		}
 	            		
             		} catch( Exception e ) {
             			
@@ -1477,6 +1512,17 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             	} else {
             		quotedText = HtmlConverter.htmlToText( mSourceMessageBody );
             	}
+            	
+            	try {
+            		quotedText = quoteOriginalTextMessage(mSourceMessage, quotedText, mQuoteStyle);
+            	} catch( Exception e ) {
+            		Log.w( K9.LOG_TAG, "Unable to quote original, decrypted plain text", e );
+            	}
+            	
+            }
+
+            if( quotedText == null ) {
+            	quotedText = mQuotedText.getCharacters();
             }
             
             if (includeQuotedText && quotedText.length() > 0) {

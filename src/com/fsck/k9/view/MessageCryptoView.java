@@ -125,17 +125,6 @@ public class MessageCryptoView extends LinearLayout {
             this.setVisibility(View.VISIBLE);
         } else {
             this.setVisibility(View.GONE);
-            /*
-            try {
-                // check for PGP/MIME encryption
-                Part pgp = MimeUtility.findFirstPartByMimeType(message, "application/pgp-encrypted");
-                if (pgp != null) {
-                    Toast.makeText(mContext, R.string.pgp_mime_unsupported, Toast.LENGTH_LONG).show();
-                }
-            } catch (MessagingException e) {
-                // nothing to do...
-            }
-            */
         }
     }
 

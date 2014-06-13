@@ -1423,7 +1423,7 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
     	
     	String fullDecryptedMimeMessage = mPgpData.getFullDecryptedMimeMessage();
     	if( fullDecryptedMimeMessage != null ) {
-    		MessageCompose.actionForward(this, mAccount, mMessage, fullDecryptedMimeMessage, mMessage.getSubject(), true);
+    		MessageCompose.actionForward(this, mAccount, mMessage, fullDecryptedMimeMessage, true);
     	} else {
     		MessageCompose.actionForward(this, mAccount, mMessage, mPgpData.getDecryptedData());
     	}
