@@ -1479,7 +1479,6 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             String quotedText = null;
             if( mSourceMessageBody != null ) {
             	if( mSourceMessageBodyIsMimeMessage ) {
-            	
             		try {
             			
 	            		ByteArrayInputStream bais = new ByteArrayInputStream( mSourceMessageBody.getBytes() );
@@ -1503,10 +1502,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	            		}
 	            		
             		} catch( Exception e ) {
-            			
             			Log.w( K9.LOG_TAG, e.getMessage(), e );
-            			quotedText = mQuotedText.getCharacters();
-            			
             		}
             		
             	} else {
@@ -1519,11 +1515,11 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             		Log.w( K9.LOG_TAG, "Unable to quote original, decrypted plain text", e );
             	}
             	
+            	mQuotedText.setCharacters( quotedText );
+            	
             }
 
-            if( quotedText == null ) {
-            	quotedText = mQuotedText.getCharacters();
-            }
+            quotedText = mQuotedText.getCharacters();
             
             if (includeQuotedText && quotedText.length() > 0) {
                 if (replyAfterQuote) {
@@ -1541,7 +1537,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 }
             }
         }
-
+        
         TextBody body = new TextBody(text);
         body.setComposedMessageLength(composedMessageLength);
         body.setComposedMessageOffset(composedMessageOffset);

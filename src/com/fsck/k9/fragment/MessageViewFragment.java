@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
@@ -648,7 +649,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         				
         			ByteArrayOutputStream baos = new ByteArrayOutputStream();
         			msgPart.writeTo( baos );
-            		 
+        			
         			/*
         			String signedData = new String( baos.toByteArray() );
         			Log.w( K9.LOG_TAG, "Signed data:\n" + signedData );
@@ -966,7 +967,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
             		
             		String text = MimeUtility.getTextFromPart( msgPart );
             		
-                	if( isPlainText ) {
+                	if( isPlainText && text != null ) {
             			text = HtmlConverter.textToHtml( text );
             		}
                 	
@@ -1045,7 +1046,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
 	            				
 	                    		String text = MimeUtility.getTextFromPart( p );
 	                    		
-	                    		if( isPlainText ) {
+	                    		if( isPlainText && text != null ) {
 	                    			text = HtmlConverter.textToHtml( text );
 	                    		}
 	                    		
