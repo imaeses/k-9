@@ -87,7 +87,7 @@ public class None extends CryptoProvider {
     }
     
     @Override
-    public boolean decrypt(Fragment fragment, String data, PgpData pgpData) {
+    public boolean decrypt(Fragment fragment, String data, String charset, PgpData pgpData) {
         return false;
     }
     

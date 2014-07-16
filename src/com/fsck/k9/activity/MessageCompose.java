@@ -1352,6 +1352,11 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     private TextBody buildText( boolean isDraft, SimpleMessageFormat messageFormat ) {
     	return buildText( isDraft, messageFormat, mMessageContentView.getCharacters() );
     }
+    
+    private TextBody buildText(boolean isDraft, SimpleMessageFormat messageFormat, String text ) {
+    	return buildText( isDraft, messageFormat, text, false );
+    }
+    
     /**
      * Build the {@link Body} that will contain the text of the message.
      *
@@ -1369,7 +1374,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
      * @return {@link TextBody} instance that contains the entered text and possibly the quoted
      *         original message.
      */
-    private TextBody buildText(boolean isDraft, SimpleMessageFormat messageFormat, String text ) {
+    private TextBody buildText(boolean isDraft, SimpleMessageFormat messageFormat, String text, boolean pgpInlineSignedMsg ) {
         // The length of the formatted version of the user-supplied text/reply
         int composedMessageLength;
 
@@ -1383,7 +1388,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
          * include the quoted text when we're saving a draft. That's so the user is able to
          * "un-hide" the quoted text if (s)he opens a saved draft.
          */
-        boolean includeQuotedText = (mQuotedTextMode.equals(QuotedTextMode.SHOW) || isDraft);
+        boolean includeQuotedText = (mQuotedTextMode.equals(QuotedTextMode.SHOW) || isDraft) && !pgpInlineSignedMsg;
         
         // Reply after quote makes no sense for HEADER style replies
         boolean replyAfterQuote = (mQuoteStyle == QuoteStyle.HEADER) ?
@@ -1406,7 +1411,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
                 if (!isDraft) {
                     // Append signature to the reply
-                    if (replyAfterQuote || signatureBeforeQuotedText) {
+                    if( ( replyAfterQuote || signatureBeforeQuotedText ) && !pgpInlineSignedMsg ) {
                         text = appendSignature(text);
                     }
                 }
@@ -1515,11 +1520,12 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             		Log.w( K9.LOG_TAG, "Unable to quote original, decrypted plain text", e );
             	}
             	
-            	mQuotedText.setCharacters( quotedText );
+            	quotedText = quotedText.replace( "\r\n", "\n" );
+            	quotedText = quotedText.replace( "\n", "\r\n" );
             	
+            } else {
+            	quotedText = mQuotedText.getCharacters();
             }
-
-            quotedText = mQuotedText.getCharacters();
             
             if (includeQuotedText && quotedText.length() > 0) {
                 if (replyAfterQuote) {
@@ -1532,7 +1538,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
             if (!isDraft) {
                 // Place signature immediately after the quoted text
-                if (!(replyAfterQuote || signatureBeforeQuotedText)) {
+                if( !( replyAfterQuote || signatureBeforeQuotedText) && !pgpInlineSignedMsg ) {
                     text = appendSignature(text);
                 }
             }
@@ -1589,7 +1595,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         Body msgBody = null;
         boolean usePgpMime = mAccount.isCryptoUsePgpMime() && mAccount.getCryptoProvider().supportsPgpMimeSend( this );
         if (mPgpData.getEncryptedData() != null && !usePgpMime ) {
-            textBody = buildText( isDraft, mMessageFormat, mPgpData.getEncryptedData());
+            textBody = buildText( isDraft, mMessageFormat, mPgpData.getEncryptedData(), true );
         } else {
             textBody = buildText(isDraft);
         }
@@ -2069,7 +2075,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             return;
         }
 
-        // When encrypting non-PGP/MIME text messages, we can sign and encrypt in a single operation
+        // When encrypting inline text messages, we can sign and encrypt in a single operation
         // (so we can simply refer to mPgpData.getEncryptedData() regardless).
         // When using PGP/MIME, however, we must first package the signature in MIME format before
         // then applying the encryption, which is subsequently packaged in its own MIME format.
@@ -2232,7 +2238,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     		
     		signedMultipart = new MimeMultipart();
     		String boundary = signedMultipart.generateBoundary();
-    		signedMultipart = new MimeMultipart( "multipart/signed; micalg=pgp-md5; protocol=\"application/pgp-signature\"; boundary=" + boundary );
+    		signedMultipart = new MimeMultipart( "multipart/signed; micalg=pgp-" + CryptoProvider.SIG_ALG + "; protocol=\"application/pgp-signature\"; boundary=" + boundary );
     		signedMultipart.addBodyPart( mSignedPart );
     		
     		MimeBodyPart sigBodyPart = new MimeBodyPart();

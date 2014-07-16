@@ -8,6 +8,14 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.701.10" versioncode="19012">
+        <change>IMPORTANT!! PGP/MIME messages are now signed using SHA-256 regardless of the preferred algorithm in PGP KeyRing. PGP inline messages are signed using the preferred algorithm. If you upgrade to at least PGP KeyRing 1.7.10, you don't have to do anything (except maybe change your preferred algorithm to something safer than MD-5). Otherwise, you will have to manually change the preferred signature algorithm (in Settings) to SHA-256. If you do not upgrade and do not manually change your preferred signature algorithm, any signed PGP/MIME messages you send will be malformed.</change>
+    	<change>Fixed signature verification for inline PGP messages using non-Western charsets. This fix applies to new messages only.</change>
+    	<change>Cleaned up double quoted text in replies to inline PGP messages</change>
+    </release>
+    <release version="4.701.09" versioncode="19011">
+        <change>Fixed a problem with signed, unencrypted plain text messages derived from a PGP/MIME message (i.e., forwarded or in reply to)</change>
+    </release>
     <release version="4.701.08" versioncode="19010">
         <change>Proper forwarding of encrypted and signed messages</change>
         <change>Fixed a problem selecting email addresses from Contacts</change>
@@ -39,7 +47,6 @@
     <release version="4.701.02" versioncode="19004">
         <change>Support for sending PGP/MIME messages (go to Settings to disable)</change>
         <change>You will have to upgrade PGP KeyRing to version 1.7 to send PGP/MIME messages</change>
-        <change>Consider setting the Signature Algorithm in PGP KeyRing to MD5 if you have done so already. Some email clients don't work well with other algorithms.</change>
         <change>Squeaky Mail has changed the way it stores unencrypted, signed messages. You may have to reload existing unencrypted, signed messages for them to verify correctly. Sorry for the inconvenience!</change>
     </release>
     <release version="4.701.01" versioncode="19003" >

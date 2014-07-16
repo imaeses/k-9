@@ -11,6 +11,7 @@ import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
+import com.fsck.k9.mail.internet.MimeMessage;
 import com.fsck.k9.mail.internet.MimeUtility;
 
 import com.imaeses.squeaky.K9;
@@ -108,7 +109,7 @@ public class MessageCryptoView extends LinearLayout {
                     if (part != null) {
                         data = MimeUtility.getTextFromPart(part);
                     }
-                    cryptoProvider.decrypt(mFragment, data, pgpData);
+                    cryptoProvider.decrypt(mFragment, data, message.getOriginalCharset(), pgpData);
                 } catch (MessagingException me) {
                     Log.e(K9.LOG_TAG, "Unable to decrypt email.", me);
                 }

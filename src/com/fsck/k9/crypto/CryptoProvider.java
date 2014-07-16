@@ -17,6 +17,8 @@ import com.fsck.k9.mail.Message;
 abstract public class CryptoProvider {
     static final long serialVersionUID = 0x21071234;
 
+    public static final String SIG_ALG = "sha256";
+    
     abstract public boolean isAvailable(Context context);
     abstract public boolean isEncrypted(Message message);
     abstract public boolean isSigned(Message message);
@@ -29,7 +31,7 @@ abstract public class CryptoProvider {
     abstract public boolean encrypt(Activity activity, String data, PgpData pgpData);
     abstract public boolean encryptFile( Activity activity, String filename, PgpData pgpData );
     abstract public boolean sign( Activity activity, String filename, PgpData pgpData );
-    abstract public boolean decrypt(Fragment fragment, String filename, PgpData pgpData);
+    abstract public boolean decrypt(Fragment fragment, String data, String originalCharset, PgpData pgpData);
     abstract public boolean decryptFile( Fragment fragment, String filename, boolean showFile, PgpData pgpData );
     abstract public boolean verify( Fragment fragment, String filename, String sig, PgpData pgpData );
     abstract public long[] getSecretKeyIdsFromEmail(Context context, String email);

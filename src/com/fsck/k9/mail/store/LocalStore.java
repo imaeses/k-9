@@ -1916,7 +1916,7 @@ public class LocalStore extends Store implements Serializable {
 	                                            }    
                                             	
                                             }
-                                        } else if (mimeType != null && mimeType.equalsIgnoreCase("text/plain")) {
+                                        } else if (mimeType != null && mimeType.contains("text/plain")) {
                                             // If it's text, add only the plain part. The MIME
                                             // container will drop away below.
                                             if (textContent != null) {
@@ -1924,7 +1924,8 @@ public class LocalStore extends Store implements Serializable {
                                                 MimeBodyPart bp = new MimeBodyPart(body, "text/plain");
                                                 mp.addBodyPart(bp);
                                             }
-                                        } else if (mimeType != null && mimeType.equalsIgnoreCase("text/html")) {
+                                            message.setOriginalCharset( MimeUtility.getHeaderParameter( mimeType, "charset" ) );
+                                        } else if (mimeType != null && mimeType.contains("text/html")) {
                                             // If it's html, add only the html part. The MIME
                                             // container will drop away below.
                                             if (htmlContent != null) {
@@ -1932,6 +1933,7 @@ public class LocalStore extends Store implements Serializable {
                                                 MimeBodyPart bp = new MimeBodyPart(body, "text/html");
                                                 mp.addBodyPart(bp);
                                             }
+                                            message.setOriginalCharset( MimeUtility.getHeaderParameter( mimeType, "charset" ) );
                                         } else {
                                             // MIME type not set. Grab whatever part we can get,
                                             // with Text taking precedence. This preserves pre-HTML
@@ -2599,11 +2601,14 @@ public class LocalStore extends Store implements Serializable {
                                     cv.put("attachment_count", attachments.size());
                                     cv.put("internal_date",  message.getInternalDate() == null
                                            ? System.currentTimeMillis() : message.getInternalDate().getTime());
+                                    cv.put("mime_type", message.getContentType() );
+                                    /*
                                     if( mimeType.contains( "multipart/signed") || mimeType.contains( "multipart/encrypted" ) ) {
                                     	cv.put("mime_type", message.getContentType() );
                                     } else {
                                     	cv.put("mime_type", mimeType);
                                     }
+                                    */
                                     cv.put("empty", 0);
                                     
                                     String messageId = message.getMessageId();

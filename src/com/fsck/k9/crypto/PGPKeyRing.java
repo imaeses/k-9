@@ -93,6 +93,8 @@ public class PGPKeyRing extends CryptoProvider {
     public static final String EXTRAS_CHOSEN_KEY = "chosen.key";
     public static final String EXTRAS_SIGNATURE_UNKNOWN = "sig.unknown";
     public static final String EXTRAS_SHOW_KEYID_IN_SINGLE_SELECTION = "show.keyid.single.selection";
+    public static final String EXTRAS_CHARSET = "charset";
+    public static final String EXTRAS_SIGNATURE_ALG = "sig.algorithm";
     
     public static class PGPKeyRingIntent {
         
@@ -445,6 +447,7 @@ public class PGPKeyRing extends CryptoProvider {
         i.putExtra( EXTRAS_FILENAME, filename );
         i.putExtra( EXTRAS_ENCRYPTION_KEYIDS, pgpData.getEncryptionKeys() );
         i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
+        i.putExtra( EXTRAS_SIGNATURE_ALG, SIG_ALG );
         
         try {
             
@@ -471,6 +474,7 @@ public class PGPKeyRing extends CryptoProvider {
             i.setType( "text/plain" );
             i.putExtra( EXTRAS_FILENAME, filename );
             i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
+            i.putExtra( EXTRAS_SIGNATURE_ALG, SIG_ALG );
             
             try {
                 
@@ -496,7 +500,7 @@ public class PGPKeyRing extends CryptoProvider {
      * @return success or failure
      */
     @Override
-    public boolean decrypt( Fragment fragment, String data, PgpData pgpData ) {
+    public boolean decrypt( Fragment fragment, String data, String originalCharset, PgpData pgpData ) {
         
         boolean success = false;
         
@@ -506,6 +510,12 @@ public class PGPKeyRing extends CryptoProvider {
             i.addCategory( Intent.CATEGORY_DEFAULT );
             i.setType( "text/plain" );
             i.putExtra( EXTRAS_MSG, data );
+            
+            // For inline encrypted messages, the charset is contained in the PGP headers. However, for signed messages,
+            // we need to specify the charset as there is no PGP header.
+            if( originalCharset != null ) {
+            	i.putExtra( EXTRAS_CHARSET, originalCharset );
+            }
             
             try {
             

@@ -36,12 +36,23 @@ public abstract class Message implements Part, CompositeBody {
     // this is the content that was originally signed for unencrypted PGP/MIME messages
     protected MimeMultipart signedMultipart;
     
+   // this is the original charset before the messages was converted and stored as utf-8 (useful for inline signed messages)
+    private String mOriginalCharset;
+    
     public void setSignedMultipart( MimeMultipart signedMultipart ) {
     	this.signedMultipart = signedMultipart;
     }
     
     public MimeMultipart getSignedMultipart() {
     	return signedMultipart;
+    }
+
+    public void setOriginalCharset( String charset ) {
+    	mOriginalCharset = charset;
+    }
+    
+    public String getOriginalCharset() {
+    	return mOriginalCharset;
     }
 
     public boolean olderThan(Date earliestDate) {

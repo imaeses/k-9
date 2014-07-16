@@ -60,9 +60,6 @@ public class MimeMessage extends Message {
     protected Body mBody;
     protected int mSize;
     
-    // this is the content that was originally signed for unencrypted PGP/MIME messages
-    private MimeMultipart signedMultipart;
-
     public MimeMessage() {
     }
 
@@ -143,14 +140,6 @@ public class MimeMessage extends Message {
             }
         }
         return mSentDate;
-    }
-
-    public void setSignedMultipart( MimeMultipart signedMultipart ) {
-    	this.signedMultipart = signedMultipart;
-    }
-    
-    public MimeMultipart getSignedMultipart() {
-    	return signedMultipart;
     }
 
     /**
@@ -404,8 +393,8 @@ public class MimeMessage extends Message {
                 setEncoding(MimeUtil.ENC_8BIT);
             }
         } else if (body instanceof TextBody) {
-            setHeader(MimeHeader.HEADER_CONTENT_TYPE, String.format("%s; charset=utf-8",
-                      getMimeType()));
+        	setHeader(MimeHeader.HEADER_CONTENT_TYPE, String.format("%s; charset=utf-8",
+                    getMimeType()));
             setEncoding(MimeUtil.ENC_8BIT);
         }
     }
@@ -489,7 +478,7 @@ public class MimeMessage extends Message {
             ((TextBody)mBody).setCharset(charset);
         }
     }
-
+    
     class MimeMessageBuilder implements ContentHandler {
         private final LinkedList<Object> stack = new LinkedList<Object>();
         

@@ -487,7 +487,7 @@ public class Apg extends CryptoProvider {
      * @return success or failure
      */
     @Override
-    public boolean decrypt(Fragment fragment, String data, PgpData pgpData) {
+    public boolean decrypt(Fragment fragment, String data, String originalCharset, PgpData pgpData) {
         android.content.Intent intent = new android.content.Intent(Apg.Intent.DECRYPT_AND_RETURN);
         intent.putExtra(EXTRA_INTENT_VERSION, INTENT_VERSION);
         intent.setType("text/plain");
