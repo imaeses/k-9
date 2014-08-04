@@ -8,8 +8,11 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.701.11" versioncode="19013">
+        <change>Fixed a problem verifying signatures on PGP/MIME messages with an empty but present epilogue/prologue</change>
+    </release>
     <release version="4.701.10" versioncode="19012">
-        <change>IMPORTANT!! PGP/MIME messages are now signed using SHA-256 regardless of the preferred algorithm in PGP KeyRing. PGP inline messages are signed using the preferred algorithm. If you upgrade to at least PGP KeyRing 1.7.10, you don't have to do anything (except maybe change your preferred algorithm to something safer than MD-5). Otherwise, you will have to manually change the preferred signature algorithm (in Settings) to SHA-256. If you do not upgrade and do not manually change your preferred signature algorithm, any signed PGP/MIME messages you send will be malformed.</change>
+        <change>PGP/MIME messages are now signed using SHA-256 regardless of the preferred algorithm in PGP KeyRing. PGP inline messages are signed using the preferred algorithm.</change>
     	<change>Fixed signature verification for inline PGP messages using non-Western charsets. This fix applies to new messages only.</change>
     	<change>Cleaned up double quoted text in replies to inline PGP messages</change>
     </release>

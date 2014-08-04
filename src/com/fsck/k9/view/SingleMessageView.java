@@ -575,19 +575,21 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
 
         mText = text;
         
-        mHasAttachments = message.hasAttachments();
+        //mHasAttachments = message.hasAttachments();
         
         Message showMyAttachments = message;
         if( replacement != null ) {
         	showMyAttachments = replacement;
         }
         
-        if(mHasAttachments ) {
-        	int numAttachments = renderAttachments( showMyAttachments, 0, message, account, controller, listener, 0 );
+        //if(mHasAttachments ) {
+        	int numAttachments = renderAttachments( showMyAttachments, 0, message, account, controller, listener, 0, showMyAttachments.getContentType().contains( "multipart/encrypted" ) );
         	if( numAttachments == 0 ) {
         		mHasAttachments = false;
+        	} else {
+        		mHasAttachments = true;
         	}
-        } 
+        //} 
 
         mHiddenAttachments.setVisibility(View.GONE);
 
@@ -735,16 +737,16 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     }
 
     public int renderAttachments(Part part, int depth, Message message, Account account,
-                                  MessagingController controller, MessagingListener listener, int numAttachments) throws MessagingException {
+                                  MessagingController controller, MessagingListener listener, int numAttachments, boolean isPgpMimeEncrypted) throws MessagingException {
 
-    	if( mFilterPgpAttachments && ( part.getMimeType().contains( "application/pgp-encrypted" ) || part.getMimeType().contains( "application/pgp-signature" ) || part.getMimeType().contains( "application/octet-stream" ) ) ) {
+    	if( mFilterPgpAttachments && ( part.getMimeType().contains( "application/pgp-encrypted" ) || part.getMimeType().contains( "application/pgp-signature" ) || ( isPgpMimeEncrypted && part.getMimeType().contains( "application/octet-stream" ) ) ) ) {
     		return numAttachments;
         }
     	
     	if (part.getBody() instanceof Multipart) {
             Multipart mp = (Multipart) part.getBody();
             for (int i = 0; i < mp.getCount(); i++) {
-            	numAttachments = renderAttachments(mp.getBodyPart(i), depth + 1, message, account, controller, listener, numAttachments);
+            	numAttachments = renderAttachments(mp.getBodyPart(i), depth + 1, message, account, controller, listener, numAttachments, isPgpMimeEncrypted);
             }
         } else if(part instanceof LocalStore.LocalAttachmentBodyPart) {
             AttachmentView view = (AttachmentView)mInflater.inflate(R.layout.message_view_attachment, null);

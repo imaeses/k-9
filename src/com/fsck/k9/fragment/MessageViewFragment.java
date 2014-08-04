@@ -649,9 +649,9 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
         				
         			ByteArrayOutputStream baos = new ByteArrayOutputStream();
         			msgPart.writeTo( baos );
+        			String signedData = new String( baos.toByteArray() );
         			
         			/*
-        			String signedData = new String( baos.toByteArray() );
         			Log.w( K9.LOG_TAG, "Signed data:\n" + signedData );
         			if( signedData.length() > 2000 ) {
         				Log.w( K9.LOG_TAG, "End of signed data:\n" + signedData.substring( signedData.length() - 2000 ) );
@@ -664,7 +664,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
 
         			mPgpData.setPgpSigned( true );
         				
-        			isPgpMime = mMessageView.handlePgpSigned( MessageViewFragment.this, account, baos.toByteArray(), sig, mPgpData ); 
+        			isPgpMime = mMessageView.handlePgpSigned( MessageViewFragment.this, account, signedData.getBytes(), sig, mPgpData ); 
         				
         		}
         		
@@ -747,7 +747,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
                     	
                     	boolean isPgpMime = false;
                     	
-                    	if( message.getBody() instanceof MimeMultipart && mMessage.isSet(Flag.X_DOWNLOADED_FULL) ) {
+                    	if( message.getBody() instanceof MimeMultipart && mMessage.isSet( Flag.X_DOWNLOADED_FULL ) ) {
                     		
                             MimeMultipart mp = ( MimeMultipart )message.getBody();
                             

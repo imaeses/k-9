@@ -103,7 +103,9 @@ public class MimeMultipart extends Multipart {
 
         if (mPreamble != null) {
             writer.write(mPreamble);
-            writer.write("\r\n");
+            if( !mPreamble.endsWith( "\r\n" ) ) {
+            	writer.write("\r\n");
+            }
         }
 
         if (mParts.isEmpty()) {
@@ -128,7 +130,9 @@ public class MimeMultipart extends Multipart {
         
         if( mEpilogue != null ) {
         	writer.write(mEpilogue);
-        	writer.write( "\r\n" );
+        	if( !mEpilogue.endsWith( "\r\n" ) ) {
+        		writer.write( "\r\n" );
+        	}
         }
         
         writer.flush();

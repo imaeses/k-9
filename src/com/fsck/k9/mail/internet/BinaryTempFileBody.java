@@ -12,10 +12,7 @@ import org.apache.james.mime4j.util.MimeUtil;
 import java.io.*;
 
 /**
- * A Body that is backed by a temp file. The Body exposes a getOutputStream method that allows
- * the user to write to the temp file. After the write the body is available via getInputStream
- * and writeTo one time. After writeTo is called, or the InputStream returned from
- * getInputStream is closed the file is deleted and the Body should be considered disposed of.
+ * A Body that is backed by a temp file.
  */
 public class BinaryTempFileBody implements Body {
     private static File mTempDirectory;
@@ -99,9 +96,7 @@ public class BinaryTempFileBody implements Body {
 		            out = new QuotedPrintableOutputStream(out, false);
 		            closeStream = true;
 		        }
-            } /*else {
-            	rawOutput = false;
-            }*/
+            } 
             try {
                 IOUtils.copy(in, out);
             } finally {
