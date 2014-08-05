@@ -41,6 +41,7 @@ import com.fsck.k9.helper.Contacts;
 import com.fsck.k9.helper.HtmlConverter;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.*;
+import com.fsck.k9.mail.internet.MimeHeader;
 import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.mail.store.LocalStore;
 import com.fsck.k9.mail.store.LocalStore.LocalMessage;
@@ -575,22 +576,20 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
 
         mText = text;
         
-        //mHasAttachments = message.hasAttachments();
-        
         Message showMyAttachments = message;
         if( replacement != null ) {
         	showMyAttachments = replacement;
         }
         
-        //if(mHasAttachments ) {
-        	int numAttachments = renderAttachments( showMyAttachments, 0, message, account, controller, listener, 0, showMyAttachments.getContentType().contains( "multipart/encrypted" ) );
-        	if( numAttachments == 0 ) {
-        		mHasAttachments = false;
-        	} else {
-        		mHasAttachments = true;
-        	}
-        //} 
-
+        // PGP/MIME messages that were signed and then encrypted in separate operations must have any attachments decoded
+        boolean decodePgpMimeBodies = ( pgpData.isPgpEncrypted() && pgpData.isPgpSigned() );
+        int numAttachments = renderAttachments( showMyAttachments, 0, message, account, controller, listener, 0, decodePgpMimeBodies, showMyAttachments.getContentType().contains( "multipart/encrypted" ) );
+        if( numAttachments == 0 ) {
+        	mHasAttachments = false;
+        } else {
+        	mHasAttachments = true;
+        }
+       
         mHiddenAttachments.setVisibility(View.GONE);
 
         boolean lookForImages = true;
@@ -737,7 +736,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     }
 
     public int renderAttachments(Part part, int depth, Message message, Account account,
-                                  MessagingController controller, MessagingListener listener, int numAttachments, boolean isPgpMimeEncrypted) throws MessagingException {
+                                  MessagingController controller, MessagingListener listener, int numAttachments, boolean decodePgpMimeBodies, boolean isPgpMimeEncrypted) throws MessagingException {
 
     	if( mFilterPgpAttachments && ( part.getMimeType().contains( "application/pgp-encrypted" ) || part.getMimeType().contains( "application/pgp-signature" ) || ( isPgpMimeEncrypted && part.getMimeType().contains( "application/octet-stream" ) ) ) ) {
     		return numAttachments;
@@ -746,7 +745,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     	if (part.getBody() instanceof Multipart) {
             Multipart mp = (Multipart) part.getBody();
             for (int i = 0; i < mp.getCount(); i++) {
-            	numAttachments = renderAttachments(mp.getBodyPart(i), depth + 1, message, account, controller, listener, numAttachments, isPgpMimeEncrypted);
+            	numAttachments = renderAttachments(mp.getBodyPart(i), depth + 1, message, account, controller, listener, numAttachments, decodePgpMimeBodies, isPgpMimeEncrypted);
             }
         } else if(part instanceof LocalStore.LocalAttachmentBodyPart) {
             AttachmentView view = (AttachmentView)mInflater.inflate(R.layout.message_view_attachment, null);
@@ -765,6 +764,19 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
         // attachments revealed from PGP/MIME decryption
         } else {
         	
+        	if( decodePgpMimeBodies ) {
+            
+        		try {
+        			
+	            	String[] header = part.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING );
+	            	part.setBody( MimeUtility.decodeBody( part.getBody().getInputStream(), header[ 0 ], part.getMimeType() ) );
+	            	
+        		} catch( Exception e ) {
+        			Log.w( K9.LOG_TAG, "Unable to decode attachment in separately signed and encrypted PGP/MIME message" );
+        		}
+            	
+            }
+            
         	String contentType = part.getContentType();
         	String contentDisposition = MimeUtility.unfoldAndDecode(part.getDisposition());
             
