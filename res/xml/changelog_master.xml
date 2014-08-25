@@ -8,8 +8,11 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.701.11.01" versioncode="19014">
+        <change>Fixed a bug sending non-PGP/MIME messages with attachments</change>
+    </release>
     <release version="4.701.11" versioncode="19013">
-        <change>Fixed a problem verifying signatures in PGP/MIME messages with an empty but present epilogue/prologue</change>
+        <change>Fixed an issue with PGP/MIME messages, signed and encrypted in separate operations, and their attachments</change>
     </release>
     <release version="4.701.10" versioncode="19012">
         <change>PGP/MIME messages are now signed using SHA-256 regardless of the preferred algorithm in PGP KeyRing. PGP inline messages are signed using the preferred algorithm.</change>

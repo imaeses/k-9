@@ -1863,14 +1863,11 @@ public class LocalStore extends Store implements Serializable {
                                         if (mimeType != null && mimeType.toLowerCase(Locale.US).startsWith("multipart/")) {
                                             // If this is a multipart message, preserve both text
                                             // and html parts, as well as the subtype.
-                                        	if( ( mimeType.contains( "multipart/signed" ) && mimeType.length() > "multipart/signed".length() ) || ( mimeType.contains( "multipart/encrypted") && mimeType.length() > "multipart/encrypted".length() ) ) {
-                                        		
+                                        	if( ( mimeType.contains( "multipart/signed" ) && mimeType.length() > "multipart/signed".length() ) || ( mimeType.contains( "multipart/encrypted") && mimeType.length() > "multipart/encrypted".length() ) ) {	
                                         		pgpMime = true;
-                                        		mp.setContentType( mimeType );
-                                        	
-                                        	} else {
-                                        		mp.setSubType(mimeType.toLowerCase(Locale.US).replaceFirst("^multipart/", ""));
                                         	}
+                                        		
+                                        	mp.setContentType( mimeType );
                                         	
                                             if (textContent != null) {
                                                 LocalTextBody body = new LocalTextBody(textContent, htmlContent);
