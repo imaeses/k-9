@@ -8,6 +8,10 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.701.12" versioncode="19015">
+        <change>Uncheck signing checkbox when action canceled</change>
+        <change>Bug fixes</change>
+    </release>
     <release version="4.701.11.01" versioncode="19014">
         <change>Fixed a bug sending non-PGP/MIME messages with attachments</change>
     </release>

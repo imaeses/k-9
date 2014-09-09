@@ -1980,13 +1980,20 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         if (mPgpData.hasEncryptionKeys()) {
             onSend();
         } else {
+        	
+        	mPgpData.setSignatureKeyId( 0L );
+        	mPgpData.setSignatureUserId( null );
+        	updateEncryptLayout();
+        	
             Toast.makeText(this, R.string.send_aborted, Toast.LENGTH_SHORT).show();
+            
         }
+        
     }
 
     public void onEncryptDone() {
     	
-    	if(mPgpData.getFilename() != null ) {
+    	if( mPgpData.getFilename() != null ) {
     		
     		File f = new File( mPgpData.getFilename() );
     		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -2024,8 +2031,15 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         if (mPgpData.getEncryptedData() != null || ( mPgpData.getSignature() != null && mAccount.isCryptoUsePgpMime() && mAccount.getCryptoProvider().supportsPgpMimeSend( this ) ) ) {
             onSend();
         } else {
+        	
+        	mPgpData.setSignatureKeyId( 0L );
+        	mPgpData.setSignatureUserId( null );
+        	updateEncryptLayout();
+        	
             Toast.makeText(this, R.string.send_aborted, Toast.LENGTH_SHORT).show();
+            
         }
+        
     }
 
     private void onSend() {

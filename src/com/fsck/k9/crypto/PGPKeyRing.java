@@ -609,16 +609,16 @@ public class PGPKeyRing extends CryptoProvider {
         
         case SELECT_SECRET_KEY:
             
-            if( resultCode != Activity.RESULT_OK || data == null ) {
-                break;
-            }
-            
-            ContentValues values = ( ContentValues )data.getParcelableExtra( EXTRAS_CHOSEN_KEY );
-            if( values != null ) {
-            
-            	pgpData.setSignatureKeyId( new BigInteger( values.getAsString( PROVIDER_KEYID ), 16 ).longValue() );
-            	pgpData.setSignatureUserId( values.getAsString( PROVIDER_IDENTITY ) );
-            
+            if( resultCode == Activity.RESULT_OK && data != null ) {
+          
+	            ContentValues values = ( ContentValues )data.getParcelableExtra( EXTRAS_CHOSEN_KEY );
+	            if( values != null ) {
+	            
+	            	pgpData.setSignatureKeyId( new BigInteger( values.getAsString( PROVIDER_KEYID ), 16 ).longValue() );
+	            	pgpData.setSignatureUserId( values.getAsString( PROVIDER_IDENTITY ) );
+	            
+	            }
+	            
             }
             
         	( ( MessageCompose )activity ).updateEncryptLayout();
