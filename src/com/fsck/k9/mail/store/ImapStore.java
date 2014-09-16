@@ -1285,7 +1285,7 @@ public class ImapStore extends Store {
                 int count = 0;
                 int start = 1;
 
-                List<ImapResponse> responses = executeSimpleCommand(String.format("SEARCH %d:* %s", start, criteria));
+                List<ImapResponse> responses = executeSimpleCommand(String.format(Locale.US, "SEARCH %d:* %s", start, criteria));
                 for (ImapResponse response : responses) {
                     if (ImapResponseParser.equalsIgnoreCase(response.get(0), "SEARCH")) {
                         count += response.size() - 1;
@@ -1348,7 +1348,7 @@ public class ImapStore extends Store {
         throws MessagingException {
             if (start < 1 || end < 1 || end < start) {
                 throw new MessagingException(
-                    String.format("Invalid message set %d %d",
+                    String.format(Locale.US, "Invalid message set %d %d",
                                   start, end));
             }
             final StringBuilder dateSearchString = new StringBuilder();
@@ -1362,7 +1362,7 @@ public class ImapStore extends Store {
 
             ImapSearcher searcher = new ImapSearcher() {
                 public List<ImapResponse> search() throws IOException, MessagingException {
-                    return executeSimpleCommand(String.format("UID SEARCH %d:%d%s%s", start, end, dateSearchString, includeDeleted ? "" : " NOT DELETED"));
+                    return executeSimpleCommand(String.format(Locale.US, "UID SEARCH %d:%d%s%s", start, end, dateSearchString, includeDeleted ? "" : " NOT DELETED"));
                 }
             };
             return search(searcher, listener).toArray(EMPTY_MESSAGE_ARRAY);
@@ -1507,7 +1507,7 @@ public class ImapStore extends Store {
             if (fp.contains(FetchProfile.Item.BODY_SANE)) {
                 // If the user wants to download unlimited-size messages, don't go only for the truncated body
                 if (mAccount.getMaximumAutoDownloadMessageSize() > 0) {
-                    fetchFields.add(String.format("BODY.PEEK[]<0.%d>", mAccount.getMaximumAutoDownloadMessageSize()));
+                    fetchFields.add(String.format(Locale.US, "BODY.PEEK[]<0.%d>", mAccount.getMaximumAutoDownloadMessageSize()));
                 } else {
                     fetchFields.add("BODY.PEEK[]");
                 }
@@ -1963,7 +1963,7 @@ public class ImapStore extends Store {
                 }
 
                 if (MimeUtility.getHeaderParameter(contentDisposition.toString(), "size") == null) {
-                    contentDisposition.append(String.format("; size=%d", size));
+                    contentDisposition.append(String.format(Locale.US, "; size=%d", size));
                 }
 
                 /*
@@ -2012,7 +2012,7 @@ public class ImapStore extends Store {
                 Map<String, String> uidMap = new HashMap<String, String>();
                 for (Message message : messages) {
                     mConnection.sendCommand(
-                        String.format("APPEND %s (%s) {%d}",
+                        String.format(Locale.US, "APPEND %s (%s) {%d}",
                                       encodeString(encodeFolderName(getPrefixedName())),
                                       combineFlags(message.getFlags()),
                                       message.calculateSize()), false);
@@ -2629,7 +2629,7 @@ public class ImapStore extends Store {
                 if (mSettings.getPathDelimeter() == null) {
                     try {
                         List<ImapResponse> nameResponses =
-                            executeSimpleCommand(String.format("LIST \"\" \"\""));
+                        		executeSimpleCommand("LIST \"\" \"\"");
                         for (ImapResponse response : nameResponses) {
                             if (ImapResponseParser.equalsIgnoreCase(response.get(0), "LIST")) {
                                 mSettings.setPathDelimeter(response.getString(2));
@@ -2979,6 +2979,7 @@ public class ImapStore extends Store {
                     if (K9.DEBUG)
                         Log.i(K9.LOG_TAG, "Pusher starting for " + getLogId());
 
+                    long lastUidNext = -1L;
                     while (!stop.get()) {
                         try {
                             long oldUidNext = -1L;
@@ -2991,6 +2992,18 @@ public class ImapStore extends Store {
                             } catch (Exception e) {
                                 Log.e(K9.LOG_TAG, "Unable to get oldUidNext for " + getLogId(), e);
                             }
+                            
+                            /*
+                             * This makes sure 'oldUidNext' is never smaller than 'UIDNEXT' from
+                             * the last loop iteration. This way we avoid looping endlessly causing
+                             * the battery to drain.
+                             *
+                             * See issue 4907
+                             */
+                            if (oldUidNext < lastUidNext) {
+                            	oldUidNext = lastUidNext;
+                            }
+                            
                             ImapConnection oldConnection = mConnection;
                             internalOpen(OPEN_MODE_RO);
                             ImapConnection conn = mConnection;
@@ -3039,6 +3052,8 @@ public class ImapStore extends Store {
                             if (startUid < newUidNext - mAccount.getDisplayCount()) {
                                 startUid = newUidNext - mAccount.getDisplayCount();
                             }
+                            
+                            lastUidNext = newUidNext;
                             if (startUid < 1) {
                                 startUid = 1;
                             }

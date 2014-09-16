@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 
@@ -1199,7 +1200,7 @@ public class MessageViewFragment extends SherlockFragment implements OnClickList
     }
 
     private String getDialogTag(int dialogId) {
-        return String.format("dialog-%d", dialogId);
+        return String.format(Locale.US, "dialog-%d", dialogId);
     }
 
     public void zoom(KeyEvent event) {

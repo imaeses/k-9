@@ -228,7 +228,7 @@ public class LocalStore extends Store implements Serializable {
         }
 
         private void upgradeDatabase(final SQLiteDatabase db) {
-            Log.i(K9.LOG_TAG, String.format("Upgrading database from version %d to version %d",
+            Log.i(K9.LOG_TAG, String.format(Locale.US, "Upgrading database from version %d to version %d",
                                             db.getVersion(), DB_VERSION));
 
             AttachmentProvider.clear(mApplication);
@@ -785,10 +785,13 @@ public class LocalStore extends Store implements Serializable {
             public Long doDbWork(final SQLiteDatabase db) {
                 final File[] files = attachmentDirectory.listFiles();
                 long attachmentLength = 0;
-                for (File file : files) {
-                    if (file.exists()) {
-                        attachmentLength += file.length();
-                    }
+                
+                if (files != null) {
+                	for (File file : files) {
+                		if (file.exists()) {
+                			attachmentLength += file.length();
+                		}
+                	}
                 }
 
                 final File dbFile = storageManager.getDatabase(uUid, database.getStorageProviderId());
@@ -2011,14 +2014,14 @@ public class LocalStore extends Store implements Serializable {
                                                                            type,
                                                                            name));
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_DISPOSITION,
-                                                             String.format("%s; filename=\"%s\"; size=%d",
+                                                             String.format(Locale.US, "%s; filename=\"%s\"; size=%d",
                                                                            contentDisposition,
                                                                            name, // TODO: Should use encoded word defined in RFC 2231.
                                                                            size));
                                             } else {
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_TYPE, type);
                                                 bp.setHeader(MimeHeader.HEADER_CONTENT_DISPOSITION,
-                                                        String.format("%s; size=%d",
+                                                        String.format(Locale.US, "%s; size=%d",
                                                                       contentDisposition,
                                                                       size));
                                             }

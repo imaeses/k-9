@@ -53,11 +53,16 @@ public class AccountSetupAccountType extends K9Activity implements OnClickListen
 
     private void onPop() {
         try {
-            URI uri = new URI(mAccount.getStoreUri());
-            uri = new URI("pop3", uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
-            mAccount.setStoreUri(uri.toString());
-            AccountSetupIncoming.actionIncomingSettings(this, mAccount, mMakeDefault);
-            finish();
+        	URI uri = new URI(mAccount.getStoreUri());
+        	uri = new URI("pop3+ssl+", uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
+        	mAccount.setStoreUri(uri.toString());
+        	
+        	uri = new URI(mAccount.getTransportUri());
+        	uri = new URI("smtp+tls+", uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
+        	mAccount.setTransportUri(uri.toString());
+        	
+        	AccountSetupIncoming.actionIncomingSettings(this, mAccount, mMakeDefault);
+        	finish();
         } catch (Exception use) {
             failure(use);
         }
@@ -66,11 +71,16 @@ public class AccountSetupAccountType extends K9Activity implements OnClickListen
 
     private void onImap() {
         try {
-            URI uri = new URI(mAccount.getStoreUri());
-            uri = new URI("imap", uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
-            mAccount.setStoreUri(uri.toString());
-            AccountSetupIncoming.actionIncomingSettings(this, mAccount, mMakeDefault);
-            finish();
+        	URI uri = new URI(mAccount.getStoreUri());
+        	uri = new URI("imap+ssl+", uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
+        	mAccount.setStoreUri(uri.toString());
+        	
+        	uri = new URI(mAccount.getTransportUri());
+        	uri = new URI("smtp+tls+", uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
+        	mAccount.setTransportUri(uri.toString());
+        	
+        	AccountSetupIncoming.actionIncomingSettings(this, mAccount, mMakeDefault);
+        	finish();
         } catch (Exception use) {
             failure(use);
         }
@@ -79,11 +89,11 @@ public class AccountSetupAccountType extends K9Activity implements OnClickListen
 
     private void onWebDav() {
         try {
-            URI uri = new URI(mAccount.getStoreUri());
-            uri = new URI("webdav", uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
-            mAccount.setStoreUri(uri.toString());
-            AccountSetupIncoming.actionIncomingSettings(this, mAccount, mMakeDefault);
-            finish();
+        	URI uri = new URI(mAccount.getStoreUri());
+        	uri = new URI("webdav+ssl+", uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
+        	mAccount.setStoreUri(uri.toString());
+        	AccountSetupIncoming.actionIncomingSettings(this, mAccount, mMakeDefault);
+        	finish();
         } catch (Exception use) {
             failure(use);
         }

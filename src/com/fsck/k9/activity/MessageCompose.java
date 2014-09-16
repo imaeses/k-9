@@ -1729,7 +1729,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
              *  title*2*=%2A%2A%2Afun%2A%2A%2A%20
              *  title*3="isn't it!"
              */
-            bp.addHeader(MimeHeader.HEADER_CONTENT_DISPOSITION, String.format(
+            bp.addHeader(MimeHeader.HEADER_CONTENT_DISPOSITION, String.format(Locale.US,
                              "attachment; filename=\"%s\"; size=%d",
                              attachment.name, attachment.size));
 
@@ -3277,7 +3277,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         if (mAction == Action.REPLY_ALL) {
             if (message.getReplyTo().length > 0) {
                 for (Address address : message.getFrom()) {
-                    if (!mAccount.isAnIdentity(address)) {
+                    if (!mAccount.isAnIdentity(address) && !Utility.arrayContains(replyToAddresses, address)) {
                         addAddress(mToView, address);
                     }
                 }

@@ -8,6 +8,13 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.904" versioncode="19016">
+        <change>Eased battery drain from IMAP polling</change>
+        <change>Improved images on KitKat</change>
+        <change>Disable pull-to-refresh when remote search is not allowed</change>
+        <change>Enable connection security by default on account setup</change>
+        <change>Use SSL/TLS as fallback when importing server settings</change>
+    </release>
     <release version="4.701.12" versioncode="19015">
         <change>Uncheck signing checkbox when action canceled</change>
         <change>Bug fixes</change>
