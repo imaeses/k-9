@@ -959,7 +959,7 @@ public class PGPKeyRing extends CryptoProvider {
             uriSelectPublicEncKey = Uri.parse( "content://" + AUTHORITY_TRIAL + "/keys/public/encrypt" );
             uriSelectPublicKeysByEmail = Uri.parse( "content://" + AUTHORITY_TRIAL + "/keys/public/email" );
             uriSelectPrivateKeysByEmail = Uri.parse( "content://" + AUTHORITY_TRIAL + "/keys/private/email" );
-            uriSelectPrimaryUserIdByKeyid = Uri.parse( "content://" + AUTHORITY_TRIAL + "/userid/keyid" );
+            uriSelectPrimaryUserIdByKeyid = Uri.parse( "content://" + AUTHORITY_TRIAL + "/userid/primary/keyid" );
             
         } else {
 
@@ -967,7 +967,7 @@ public class PGPKeyRing extends CryptoProvider {
             uriSelectPublicEncKey = Uri.parse( "content://" + AUTHORITY_PAID + "/keys/public/encrypt" );
             uriSelectPublicKeysByEmail = Uri.parse( "content://" + AUTHORITY_PAID + "/keys/public/email" );
             uriSelectPrivateKeysByEmail = Uri.parse( "content://" + AUTHORITY_PAID + "/keys/private/email" );
-            uriSelectPrimaryUserIdByKeyid = Uri.parse( "content://" + AUTHORITY_PAID + "/userid/keyid" );
+            uriSelectPrimaryUserIdByKeyid = Uri.parse( "content://" + AUTHORITY_PAID + "/userid/primary/keyid" );
             
         }
         
