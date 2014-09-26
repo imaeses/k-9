@@ -561,7 +561,7 @@ public class StorageManager {
      */
     public String getDefaultProviderId() {
         // assume there is at least 1 provider defined
-        return mProviders.entrySet().iterator().next().getKey();
+    	return mProviders.keySet().iterator().next();
     }
 
     /**

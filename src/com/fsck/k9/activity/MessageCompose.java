@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.util.Rfc822Tokenizer;
 import android.util.AttributeSet;
@@ -1396,6 +1397,11 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         boolean signatureBeforeQuotedText = mAccount.isSignatureBeforeQuotedText();
 
+        // remove trailing whitespace for PGP MIME signed messages
+        if( mPgpData.hasSignatureKey() && !pgpInlineSignedMsg ) {
+        	text = text.replaceAll( "\\s+$", "" );
+        }
+        
         // Get the user-supplied text
         //String text = mMessageContentView.getCharacters();
 
@@ -1542,6 +1548,13 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                     text = appendSignature(text);
                 }
             }
+        }
+        
+        if( mPgpData.hasSignatureKey() && mPgpData.hasSignatureKey() && !pgpInlineSignedMsg && !text.endsWith( "\r\n" ) ) {
+        	
+        	text = text + "\r\n";
+        	composedMessageLength += "\r\n".length();
+        	
         }
         
         TextBody body = new TextBody(text);
@@ -2207,7 +2220,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 	        		if( filename != null ) {
 	        			success = crypto.sign(this, Uri.fromFile( new File( filename) ).toString(), mPgpData);
 	        		}
-	        		
+	        	
 	        	} else {
 	                success = crypto.encrypt(this, textBody.getText(), mPgpData);
 	        	}
@@ -2252,7 +2265,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     		
     		signedMultipart = new MimeMultipart();
     		String boundary = signedMultipart.generateBoundary();
-    		signedMultipart = new MimeMultipart( "multipart/signed; micalg=pgp-" + CryptoProvider.SIG_ALG + "; protocol=\"application/pgp-signature\"; boundary=" + boundary );
+    		signedMultipart = new MimeMultipart( "multipart/signed; micalg=pgp-" + CryptoProvider.SIG_ALG + ";\r\n protocol=\"application/pgp-signature\";\r\n boundary=\"" + boundary + "\"" );
     		signedMultipart.addBodyPart( mSignedPart );
     		
     		MimeBodyPart sigBodyPart = new MimeBodyPart();
@@ -2279,7 +2292,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     	
     		encryptedMultipart = new MimeMultipart();
     		String boundary = encryptedMultipart.generateBoundary();
-    		encryptedMultipart = new MimeMultipart( "multipart/encrypted; protocol=\"application/pgp-encrypted\"; boundary=" + boundary );
+    		encryptedMultipart = new MimeMultipart( "multipart/encrypted; protocol=\"application/pgp-encrypted\"; boundary=\"" + boundary + "\"" );
     		
     		MimeBodyPart bodyPart = new MimeBodyPart();
     		bodyPart.addHeader( MimeHeader.HEADER_CONTENT_TYPE, "application/pgp-encrypted" );
@@ -3228,12 +3241,9 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         if (message.getMessageId() != null && message.getMessageId().length() > 0) {
             mInReplyTo = message.getMessageId();
 
-            if (message.getReferences() != null && message.getReferences().length > 0) {
-                StringBuilder buffy = new StringBuilder();
-                for (int i = 0; i < message.getReferences().length; i++)
-                    buffy.append(message.getReferences()[i]);
-
-                mReferences = buffy.toString() + " " + mInReplyTo;
+            String[] refs = message.getReferences();
+            if (refs != null && refs.length > 0) {
+            	mReferences = TextUtils.join("", refs) + " " + mInReplyTo;
             } else {
                 mReferences = mInReplyTo;
             }

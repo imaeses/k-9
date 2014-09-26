@@ -108,7 +108,9 @@ public class MimeBodyPart extends BodyPart {
         if (mBody != null) {
             mBody.setEncoding(encoding);
         }
-        setHeader(MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING, encoding);
+        if( encoding != null && !MimeUtil.ENC_7BIT.equals( encoding ) ) {
+        	setHeader(MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING, encoding);
+        }
     }
 
     public String getContentType() throws MessagingException {
@@ -161,6 +163,7 @@ public class MimeBodyPart extends BodyPart {
         if (mBody != null) {
             mBody.writeTo(out);
         }
+        writer.write("\r\n");
     }
 
     @Override

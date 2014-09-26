@@ -46,7 +46,7 @@ public class MimeMultipart extends Multipart {
     public String generateBoundary() {
         Random random = new Random();
         StringBuilder sb = new StringBuilder();
-        sb.append("----");
+        //sb.append("----");
         for (int i = 0; i < 30; i++) {
             sb.append(Integer.toString(random.nextInt(36), 36));
         }
@@ -127,7 +127,7 @@ public class MimeMultipart extends Multipart {
         writer.write("--");
         writer.write(mBoundary);
         writer.write("--\r\n");
-        
+       
         if( mEpilogue != null ) {
         	writer.write(mEpilogue);
         	if( !mEpilogue.equals( "\r\n" ) ) {

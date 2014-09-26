@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public class Pop3Store extends Store {
     public static final String STORE_TYPE = "POP3";
@@ -330,10 +331,9 @@ public class Pop3Store extends Store {
                 if (mConnectionSecurity == CONNECTION_SECURITY_SSL_REQUIRED ||
                         mConnectionSecurity == CONNECTION_SECURITY_SSL_OPTIONAL) {
                     SSLContext sslContext = SSLContext.getInstance("TLS");
-                    final boolean secure = mConnectionSecurity == CONNECTION_SECURITY_SSL_REQUIRED;
                     sslContext.init(null,
                             new TrustManager[] { TrustManagerFactory.get(mHost,
-                                    mPort, secure) }, new SecureRandom());
+                                    mPort) }, new SecureRandom());
                     mSocket = TrustedSocketFactory.createSocket(sslContext);
                 } else {
                     mSocket = new Socket();
@@ -362,7 +362,7 @@ public class Pop3Store extends Store {
                         boolean secure = mConnectionSecurity == CONNECTION_SECURITY_TLS_REQUIRED;
                         sslContext.init(null,
                                 new TrustManager[] { TrustManagerFactory.get(
-                                        mHost, mPort, secure) },
+                                        mHost, mPort) },
                                 new SecureRandom());
                         mSocket = TrustedSocketFactory.createSocket(sslContext, mSocket, mHost,
                                 mPort, true);
@@ -630,7 +630,7 @@ public class Pop3Store extends Store {
 
         private void indexUids(ArrayList<String> uids)
         throws MessagingException, IOException {
-            HashSet<String> unindexedUids = new HashSet<String>();
+            Set<String> unindexedUids = new HashSet<String>();
             for (String uid : uids) {
                 if (mUidToMsgMap.get(uid) == null) {
                     if (K9.DEBUG && K9.DEBUG_PROTOCOL_POP3) {
@@ -803,7 +803,7 @@ public class Pop3Store extends Store {
                     }
                 }
             } else {
-                HashSet<String> msgUidIndex = new HashSet<String>();
+                Set<String> msgUidIndex = new HashSet<String>();
                 for (Message message : messages) {
                     msgUidIndex.add(message.getUid());
                 }

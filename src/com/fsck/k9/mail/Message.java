@@ -27,7 +27,7 @@ public abstract class Message implements Part, CompositeBody {
 
     protected String mUid;
 
-    protected HashSet<Flag> mFlags = new HashSet<Flag>();
+    protected Set<Flag> mFlags = new HashSet<Flag>();
 
     protected Date mInternalDate;
 

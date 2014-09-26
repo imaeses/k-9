@@ -184,7 +184,6 @@ public class SmtpTransport extends Transport {
     }
 
 
-    Account mAccount;
     String mHost;
     int mPort;
     String mUsername;
@@ -205,7 +204,6 @@ public class SmtpTransport extends Transport {
             throw new MessagingException("Error while decoding transport URI", e);
         }
 
-        mAccount = account;
         mHost = settings.host;
         mPort = settings.port;
 
@@ -242,10 +240,9 @@ public class SmtpTransport extends Transport {
                     if (mConnectionSecurity == CONNECTION_SECURITY_SSL_REQUIRED ||
                             mConnectionSecurity == CONNECTION_SECURITY_SSL_OPTIONAL) {
                         SSLContext sslContext = SSLContext.getInstance("TLS");
-                        boolean secure = mConnectionSecurity == CONNECTION_SECURITY_SSL_REQUIRED;
                         sslContext.init(null,
                                 new TrustManager[] { TrustManagerFactory.get(
-                                        mHost, mPort, secure) },
+                                        mHost, mPort) },
                                 new SecureRandom());
                         mSocket = TrustedSocketFactory.createSocket(sslContext);
                         mSocket.connect(socketAddress, SOCKET_CONNECT_TIMEOUT);
@@ -305,7 +302,7 @@ public class SmtpTransport extends Transport {
                     boolean secure = mConnectionSecurity == CONNECTION_SECURITY_TLS_REQUIRED;
                     sslContext.init(null,
                             new TrustManager[] { TrustManagerFactory.get(mHost,
-                                    mPort, secure) }, new SecureRandom());
+                                    mPort) }, new SecureRandom());
                     mSocket = TrustedSocketFactory.createSocket(sslContext, mSocket, mHost,
                               mPort, true);
                     mIn = new PeekableInputStream(new BufferedInputStream(mSocket.getInputStream(),

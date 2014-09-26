@@ -68,8 +68,6 @@ public class PGPKeyRing extends CryptoProvider {
     public static final int SIGN = 107;
 
     private Uri uriSelectPrivateSigningKey;
-    private Uri uriSelectPublicSigningKey;
-    private Uri uriSelectPrivateEncKey;
     private Uri uriSelectPublicEncKey;
     private Uri uriSelectPublicKeysByEmail;
     private Uri uriSelectPrivateKeysByEmail;
@@ -218,10 +216,12 @@ public class PGPKeyRing extends CryptoProvider {
                     
             if( !pgpData.hasEncryptionKeys() ) {
                
+            	/*
                 if( pgpData.hasSignatureKey() ) {        
                     preselected = new long[] { pgpData.getSignatureKeyId() };
                 }
-                
+                */
+            	
                 if( emails != null && emails.length() > 0 ) {
                     i.putExtra( EXTRAS_EMAIL_ADDRESSES, emails.split( "," ) );
                 }
@@ -246,7 +246,7 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     /**
-     * Get key ids in secret key rings based on a given email. For encrypting keys.
+     * Get key ids in secret key rings based on a given email. For signing keys.
      *
      * @param context
      * @param email The email in question.
@@ -955,23 +955,19 @@ public class PGPKeyRing extends CryptoProvider {
         
         if( isTrialVersion ) {
             
-            uriSelectPublicSigningKey = Uri.parse( "content://" + AUTHORITY_TRIAL + "/keys/public/sign" );
             uriSelectPrivateSigningKey = Uri.parse( "content://" + AUTHORITY_TRIAL + "/keys/private/sign" );
             uriSelectPublicEncKey = Uri.parse( "content://" + AUTHORITY_TRIAL + "/keys/public/encrypt" );
-            uriSelectPrivateEncKey = Uri.parse( "content://" + AUTHORITY_TRIAL + "/keys/private/encrypt" );
             uriSelectPublicKeysByEmail = Uri.parse( "content://" + AUTHORITY_TRIAL + "/keys/public/email" );
             uriSelectPrivateKeysByEmail = Uri.parse( "content://" + AUTHORITY_TRIAL + "/keys/private/email" );
-            uriSelectPrimaryUserIdByKeyid = Uri.parse( "content://" + AUTHORITY_TRIAL + "/userid/keyid/subkey" );
+            uriSelectPrimaryUserIdByKeyid = Uri.parse( "content://" + AUTHORITY_TRIAL + "/userid/keyid" );
             
         } else {
 
-            uriSelectPublicSigningKey = Uri.parse( "content://" + AUTHORITY_PAID + "/keys/public/sign" );
             uriSelectPrivateSigningKey = Uri.parse( "content://" + AUTHORITY_PAID + "/keys/private/sign" );
             uriSelectPublicEncKey = Uri.parse( "content://" + AUTHORITY_PAID + "/keys/public/encrypt" );
-            uriSelectPrivateEncKey = Uri.parse( "content://" + AUTHORITY_PAID + "/keys/private/encrypt" );
             uriSelectPublicKeysByEmail = Uri.parse( "content://" + AUTHORITY_PAID + "/keys/public/email" );
             uriSelectPrivateKeysByEmail = Uri.parse( "content://" + AUTHORITY_PAID + "/keys/private/email" );
-            uriSelectPrimaryUserIdByKeyid = Uri.parse( "content://" + AUTHORITY_PAID + "/userid/keyid/subkey" );
+            uriSelectPrimaryUserIdByKeyid = Uri.parse( "content://" + AUTHORITY_PAID + "/userid/keyid" );
             
         }
         
@@ -982,7 +978,7 @@ public class PGPKeyRing extends CryptoProvider {
     	
     		@Override
     		public void run() {
-    			Toast.makeText( context, resourceId, Toast.LENGTH_LONG );
+    			Toast.makeText( context, resourceId, Toast.LENGTH_LONG ).show();
     		}
     	
     	});
