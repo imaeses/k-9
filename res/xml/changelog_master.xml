@@ -8,6 +8,10 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.904.03" versioncode="19019">
+       <change>Show correctly decoded first line of PGP/MIME signed messages in Message List</change>
+       <change>Auto-select Sign/Encrypt based on message being replied to</change>
+    </release>    
     <release version="4.904.02" versioncode="19018">
         <change>Fixed crash on message compose with auto-sign</change>
     </release>

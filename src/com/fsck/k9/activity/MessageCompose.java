@@ -707,7 +707,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             @Override
             public void afterTextChanged(android.text.Editable s) {
                 final CryptoProvider crypto = mAccount.getCryptoProvider();
-                if (mAutoEncrypt && crypto.isAvailable(getApplicationContext())) {
+                if (!mEncryptCheckbox.isChecked() && mAutoEncrypt && crypto.isAvailable(getApplicationContext())) {
                     for (Address address : getRecipientAddresses()) {
                         if (crypto.hasPublicKeyForEmail(getApplicationContext(),
                                 address.getAddress())) {
@@ -914,12 +914,6 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             }
         });
 
-        if (mSourceMessageBody != null) {
-            // mSourceMessageBody is set to something when replying to and forwarding decrypted
-            // messages, so the sender probably wants the message to be encrypted.
-            mEncryptCheckbox.setChecked(true);
-        }
-
         initializeCrypto();
         final CryptoProvider crypto = mAccount.getCryptoProvider();
         if (crypto.isAvailable(this)) {
@@ -940,8 +934,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                     }
                 }
             });
-
-            if (mAccount.getCryptoAutoSignature()) {
+             
+            if (mAccount.getCryptoAutoSignature() ) {
                 long ids[] = crypto.getSecretKeyIdsFromEmail(this, mIdentity.getEmail());
                 if (ids != null && ids.length > 0) {
                     mPgpData.setSignatureKeyId(ids[0]);
@@ -3957,9 +3951,42 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             }
 
             mSourceMessage = message;
+            
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                	
+                	final CryptoProvider crypto = mAccount.getCryptoProvider();
+                	if( crypto.isAvailable( MessageCompose.this ) ) {
+        	            try {
+        	            	
+        	            	String mimeType = mSourceMessage.getMimeType();
+        		            if( !mCryptoSignatureCheckbox.isChecked() && mimeType.contains( "multipart/signed" ) ) {
+        			                
+        		            	long ids[] = crypto.getSecretKeyIdsFromEmail( MessageCompose.this, mIdentity.getEmail() );
+        			            if( ids != null && ids.length > 0 ) {
+        			                	
+        			            	mPgpData.setSignatureKeyId( ids[ 0 ] );
+        			                mPgpData.setSignatureUserId( crypto.getUserId( MessageCompose.this, ids[ 0 ] ) );
+        			                    
+        			            } else {
+        			                	
+        			                mPgpData.setSignatureKeyId( 0 );
+        			                mPgpData.setSignatureUserId( null );
+        			            
+        			            }
+        			                
+        			            updateEncryptLayout();
+        			              
+        		            } else if( !mEncryptCheckbox.isChecked() && mimeType.contains( "multipart/encrypted" ) ) {
+        		            	mEncryptCheckbox.setChecked( true );
+        		            }
+        		            
+        	            } catch( Exception e ) {
+        	            	Log.w( K9.LOG_TAG, e );
+        	            }
+                	}
+                	
                     // We check to see if we've previously processed the source message since this
                     // could be called when switching from HTML to text replies. If that happens, we
                     // only want to update the UI with quoted text (which picks the appropriate

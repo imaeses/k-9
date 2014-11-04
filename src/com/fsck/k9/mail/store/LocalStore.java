@@ -2574,8 +2574,44 @@ public class LocalStore extends Store implements Serializable {
                                     html = HtmlConverter.convertEmoji2Img(container.html);
                                 }
 
-                                String preview = Message.calculateContentPreview(text);
+                                String preview = null;
                                 String mimeType = message.getMimeType();
+                                
+                                // multipart/signed messages have not yet been decoded
+                                if( mimeType.contains( "multipart/signed" ) ) {
+                                	
+	                                Part msgPart = MimeUtility.findFirstPartByMimeType( message, "text/html" );
+	                            	if( msgPart == null ) {       		
+	                            		msgPart = MimeUtility.findFirstPartByMimeType( message, "text/plain" );	
+	                            	}
+	                            	
+	                            	if( msgPart != null ) {
+
+	                            		String[] header = msgPart.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING );
+	                            		if( header != null && header[ 0 ] != null && MimeUtil.ENC_QUOTED_PRINTABLE.equalsIgnoreCase( header[ 0 ] ) ) {
+	                            			
+	                            			InputStream is = new QuotedPrintableInputStream( new ByteArrayInputStream( text.getBytes() ) );
+	                            			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	                            			
+	                            			try {
+	                            				
+		                            			IOUtils.copy( is, baos );
+		                            			text = baos.toString();
+		                            			
+	                            			} catch( Exception e ) {
+	                            				Log.w( K9.LOG_TAG, "Unable to decode signed text", e );
+	                            			}
+	                            		}
+	                            		
+	                            	}
+	                            	
+                                }
+                                
+                                if( mimeType.contains( "multipart/encrypted" ) ) {
+                                	preview = mApplication.getResources().getString( R.string.pgp_mime_encrypted_msg );
+                                } else {
+                                	preview = Message.calculateContentPreview(text);
+                                }
 
                                 try {
                                     ContentValues cv = new ContentValues();
@@ -2602,13 +2638,6 @@ public class LocalStore extends Store implements Serializable {
                                     cv.put("internal_date",  message.getInternalDate() == null
                                            ? System.currentTimeMillis() : message.getInternalDate().getTime());
                                     cv.put("mime_type", message.getContentType() );
-                                    /*
-                                    if( mimeType.contains( "multipart/signed") || mimeType.contains( "multipart/encrypted" ) ) {
-                                    	cv.put("mime_type", message.getContentType() );
-                                    } else {
-                                    	cv.put("mime_type", mimeType);
-                                    }
-                                    */
                                     cv.put("empty", 0);
                                     
                                     String messageId = message.getMessageId();
