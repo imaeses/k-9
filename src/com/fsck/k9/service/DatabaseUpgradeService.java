@@ -111,9 +111,7 @@ public class DatabaseUpgradeService extends Service {
 
     @Override
     public void onCreate() {
-        super.onCreate();
-
-        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+    	mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
     }
 
     @Override
