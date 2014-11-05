@@ -246,6 +246,9 @@ public class GlobalSettings {
         s.put("messageViewSpamActionVisible", Settings.versions(
                 new V(30, new BooleanSetting(false))
             ));
+        s.put("hideUserAgent", Settings.versions(
+        		new V(32, new BooleanSetting(false))
+        ));
 
         SETTINGS = Collections.unmodifiableMap(s);
 
