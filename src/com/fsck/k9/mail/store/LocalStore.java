@@ -113,7 +113,7 @@ public class LocalStore extends Store implements Serializable {
 
     private static final String GET_FOLDER_COLS =
         "folders.id, name, visible_limit, last_updated, status, push_state, last_pushed, " +
-        "integrate, top_group, poll_class, push_class, display_class";
+        "integrate, top_group, poll_class, push_class, display_class, notify_class";
 
     private static final int FOLDER_ID_INDEX = 0;
     private static final int FOLDER_NAME_INDEX = 1;
@@ -127,6 +127,7 @@ public class LocalStore extends Store implements Serializable {
     private static final int FOLDER_SYNC_CLASS_INDEX = 9;
     private static final int FOLDER_PUSH_CLASS_INDEX = 10;
     private static final int FOLDER_DISPLAY_CLASS_INDEX = 11;
+    private static final int FOLDER_NOTIFY_CLASS_INDEX = 12;
 
     private static final String[] UID_CHECK_PROJECTION = { "uid" };
 
@@ -151,7 +152,7 @@ public class LocalStore extends Store implements Serializable {
      */
     private static final int THREAD_FLAG_UPDATE_BATCH_SIZE = 500;
 
-    public static final int DB_VERSION = 50;
+    public static final int DB_VERSION = 51;
 
 
     public static String getColumnNameForFlag(Flag flag) {
@@ -243,7 +244,7 @@ public class LocalStore extends Store implements Serializable {
                     db.execSQL("CREATE TABLE folders (id INTEGER PRIMARY KEY, name TEXT, "
                                + "last_updated INTEGER, unread_count INTEGER, visible_limit INTEGER, status TEXT, "
                                + "push_state TEXT, last_pushed INTEGER, flagged_count INTEGER default 0, "
-                               + "integrate INTEGER, top_group INTEGER, poll_class TEXT, push_class TEXT, display_class TEXT"
+                               + "integrate INTEGER, top_group INTEGER, poll_class TEXT, push_class TEXT, display_class TEXT, notify_class TEXT"
                                + ")");
 
                     db.execSQL("CREATE INDEX IF NOT EXISTS folder_name ON folders (name)");
@@ -430,10 +431,10 @@ public class LocalStore extends Store implements Serializable {
                                 throw e;
                             }
                         }
+                        
                         Cursor cursor = null;
 
                         try {
-
                             SharedPreferences prefs = getPreferences();
                             cursor = db.rawQuery("SELECT id, name FROM folders", null);
                             while (cursor.moveToNext()) {
@@ -445,12 +446,8 @@ public class LocalStore extends Store implements Serializable {
                                     Log.e(K9.LOG_TAG, " error trying to ugpgrade a folder class", e);
                                 }
                             }
-                        }
-
-
-                        catch (SQLiteException e) {
+                        } catch (SQLiteException e) {
                             Log.e(K9.LOG_TAG, "Exception while upgrading database to v41. folder classes may have vanished", e);
-
                         } finally {
                             Utility.closeQuietly(cursor);
                         }
@@ -715,6 +712,22 @@ public class LocalStore extends Store implements Serializable {
                          } catch (SQLiteException e) {
                              Log.e(K9.LOG_TAG, "Unable to add signed_multipart column to messages");
                          }
+                    }
+                    if (db.getVersion() < 51) {
+                    	try {
+                    		db.execSQL("ALTER TABLE folders ADD notify_class TEXT default '" +
+                    				Folder.FolderClass.INHERITED.name() + "'");
+                    	} catch (SQLiteException e) {
+                    		if (! e.getMessage().startsWith("duplicate column name:")) {
+                    			throw e;
+                    		}
+                    	}
+                    	
+                    	ContentValues cv = new ContentValues();
+                    	cv.put("notify_class", Folder.FolderClass.FIRST_CLASS.name());
+                    	
+                    	db.update("folders", cv, "name = ?",
+                    			new String[] { getAccount().getInboxFolderName() });
                     }
                 }
 
@@ -1288,6 +1301,7 @@ public class LocalStore extends Store implements Serializable {
                         prefHolder.displayClass = LocalFolder.FolderClass.FIRST_CLASS;
                         if (name.equalsIgnoreCase(mAccount.getInboxFolderName())) {
                             prefHolder.integrate = true;
+                            prefHolder.notifyClass = LocalFolder.FolderClass.FIRST_CLASS;
                             prefHolder.pushClass = LocalFolder.FolderClass.FIRST_CLASS;
                         } else {
                             prefHolder.pushClass = LocalFolder.FolderClass.INHERITED;
@@ -1302,12 +1316,13 @@ public class LocalStore extends Store implements Serializable {
                     }
                     folder.refresh(name, prefHolder);   // Recover settings from Preferences
 
-                    db.execSQL("INSERT INTO folders (name, visible_limit, top_group, display_class, poll_class, push_class, integrate) VALUES (?, ?, ?, ?, ?, ?, ?)", new Object[] {
+                    db.execSQL("INSERT INTO folders (name, visible_limit, top_group, display_class, poll_class, notify_class, push_class, integrate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", new Object[] {
                                    name,
                                    visibleLimit,
                                    prefHolder.inTopGroup ? 1 : 0,
                                    prefHolder.displayClass.name(),
                                    prefHolder.syncClass.name(),
+                                   prefHolder.notifyClass.name(),
                                    prefHolder.pushClass.name(),
                                    prefHolder.integrate ? 1 : 0,
                                });
@@ -1352,6 +1367,7 @@ public class LocalStore extends Store implements Serializable {
         private FolderClass mDisplayClass = FolderClass.NO_CLASS;
         private FolderClass mSyncClass = FolderClass.INHERITED;
         private FolderClass mPushClass = FolderClass.SECOND_CLASS;
+        private FolderClass mNotifyClass = FolderClass.INHERITED;
         private boolean mInTopGroup = false;
         private String mPushState = null;
         private boolean mIntegrate = false;
@@ -1445,6 +1461,8 @@ public class LocalStore extends Store implements Serializable {
             String noClass = FolderClass.NO_CLASS.toString();
             String displayClass = cursor.getString(FOLDER_DISPLAY_CLASS_INDEX);
             mDisplayClass = Folder.FolderClass.valueOf((displayClass == null) ? noClass : displayClass);
+            String notifyClass = cursor.getString(FOLDER_NOTIFY_CLASS_INDEX);
+            mNotifyClass = Folder.FolderClass.valueOf((notifyClass == null) ? noClass : notifyClass);
             String pushClass = cursor.getString(FOLDER_PUSH_CLASS_INDEX);
             mPushClass = Folder.FolderClass.valueOf((pushClass == null) ? noClass : pushClass);
             String syncClass = cursor.getString(FOLDER_SYNC_CLASS_INDEX);
@@ -1510,6 +1528,7 @@ public class LocalStore extends Store implements Serializable {
         private class PreferencesHolder {
             FolderClass displayClass = mDisplayClass;
             FolderClass syncClass = mSyncClass;
+            FolderClass notifyClass = mNotifyClass;
             FolderClass pushClass = mPushClass;
             boolean inTopGroup = mInTopGroup;
             boolean integrate = mIntegrate;
@@ -1692,6 +1711,7 @@ public class LocalStore extends Store implements Serializable {
         public String getPushState() {
             return mPushState;
         }
+        
         @Override
         public FolderClass getDisplayClass() {
             return mDisplayClass;
@@ -1706,6 +1726,14 @@ public class LocalStore extends Store implements Serializable {
             return mSyncClass;
         }
 
+        public FolderClass getNotifyClass() {
+        	return (FolderClass.INHERITED == mNotifyClass) ? getPushClass() : mNotifyClass;
+        }
+        	
+        public FolderClass getRawNotifyClass() {
+        	return mNotifyClass;
+        }
+        	
         @Override
         public FolderClass getPushClass() {
             return (FolderClass.INHERITED == mPushClass) ? getSyncClass() : mPushClass;
@@ -1725,14 +1753,21 @@ public class LocalStore extends Store implements Serializable {
             mSyncClass = syncClass;
             updateFolderColumn("poll_class", mSyncClass.name());
         }
+        
         public void setPushClass(FolderClass pushClass) throws MessagingException {
             mPushClass = pushClass;
             updateFolderColumn("push_class", mPushClass.name());
         }
 
+        public void setNotifyClass(FolderClass notifyClass) throws MessagingException {
+        	mNotifyClass = notifyClass;
+        	updateFolderColumn("notify_class", mNotifyClass.name());
+        }
+        
         public boolean isIntegrate() {
             return mIntegrate;
         }
+        
         public void setIntegrate(boolean integrate) throws MessagingException {
             mIntegrate = integrate;
             updateFolderColumn("integrate", mIntegrate ? 1 : 0);
@@ -1788,6 +1823,12 @@ public class LocalStore extends Store implements Serializable {
                 editor.putString(id + ".syncMode", mSyncClass.name());
             }
 
+            if (mNotifyClass == FolderClass.INHERITED && !mAccount.getInboxFolderName().equals(getName())) {
+            	editor.remove(id + ".notifyMode");
+            } else {
+            	editor.putString(id + ".notifyMode", mNotifyClass.name());
+            }
+            
             if (mPushClass == FolderClass.SECOND_CLASS && !mAccount.getInboxFolderName().equals(getName())) {
                 editor.remove(id + ".pushMode");
             } else {
@@ -1823,6 +1864,16 @@ public class LocalStore extends Store implements Serializable {
             }
             if (prefHolder.syncClass == FolderClass.NONE) {
                 prefHolder.syncClass = FolderClass.INHERITED;
+            }
+            
+            try {
+            	prefHolder.notifyClass = FolderClass.valueOf(preferences.getString(id + ".notifyMode",
+            	prefHolder.notifyClass.name()));
+            } catch (Exception e) {
+            	Log.e(K9.LOG_TAG, "Unable to load notifyMode for " + getName(), e);
+            }
+            if (prefHolder.notifyClass == FolderClass.NONE) {
+            	prefHolder.notifyClass = FolderClass.INHERITED;
             }
 
             try {
