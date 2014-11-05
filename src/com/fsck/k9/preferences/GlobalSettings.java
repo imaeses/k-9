@@ -248,7 +248,10 @@ public class GlobalSettings {
             ));
         s.put("hideUserAgent", Settings.versions(
         		new V(32, new BooleanSetting(false))
-        ));
+        	));
+        s.put("hideTimeZone", Settings.versions(
+        		new V(32, new BooleanSetting(false))
+        	));
 
         SETTINGS = Collections.unmodifiableMap(s);
 

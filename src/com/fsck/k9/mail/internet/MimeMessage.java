@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Set;
@@ -154,6 +155,11 @@ public class MimeMessage extends Message {
         if (mDateFormat == null) {
             mDateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
         }
+        
+        if (K9.hideTimeZone()) {
+        	mDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        }
+        
         addHeader("Date", mDateFormat.format(sentDate));
         setInternalSentDate(sentDate);
     }

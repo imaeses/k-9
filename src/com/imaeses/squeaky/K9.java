@@ -268,6 +268,7 @@ public class K9 extends Application {
     private static String mAttachmentDefaultPath = "";
     private static boolean mWrapFolderNames = false;
     private static boolean mHideUserAgent = false;
+    private static boolean mHideTimeZone = false;
 
     private static boolean useGalleryBugWorkaround = false;
     private static boolean galleryBuggy;
@@ -542,6 +543,7 @@ public class K9 extends Application {
         editor.putBoolean("messageViewShowNext", mMessageViewShowNext);
         editor.putBoolean("wrapFolderNames", mWrapFolderNames);
         editor.putBoolean("hideUserAgent", mHideUserAgent);
+        editor.putBoolean("hideTimeZone", mHideTimeZone);
 
         editor.putString("language", language);
         editor.putInt("theme", theme.ordinal());
@@ -761,6 +763,7 @@ public class K9 extends Application {
         mMessageViewShowNext = sprefs.getBoolean("messageViewShowNext", false);
         mWrapFolderNames = sprefs.getBoolean("wrapFolderNames", false);
         mHideUserAgent = sprefs.getBoolean("hideUserAgent", false);
+        mHideTimeZone = sprefs.getBoolean("hideTimeZone", false);
 
         useGalleryBugWorkaround = sprefs.getBoolean("useGalleryBugWorkaround", K9.isGalleryBuggy());
 
@@ -1327,6 +1330,14 @@ public class K9 extends Application {
     
     public static void setHideUserAgent(final boolean state) {
     	mHideUserAgent = state;
+    }
+    	
+    public static boolean hideTimeZone() {
+    	return mHideTimeZone;
+    }
+    
+    public static void setHideTimeZone(final boolean state) {
+    	mHideTimeZone = state;
     }
     	
     public static String getAttachmentDefaultPath() {
