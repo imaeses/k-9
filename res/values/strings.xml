@@ -332,7 +332,7 @@ Please submit bug reports, contribute new features and ask questions at
 
     <string name="global_settings_confirm_actions_title">Confirm actions</string>
     <string name="global_settings_confirm_actions_summary">Show a dialog whenever you perform selected actions</string>
-    <string name="global_settings_confirm_action_delete">Delete (in message view)</string>
+    <string name="global_settings_confirm_action_delete">Delete</string>
     <string name="global_settings_confirm_action_delete_starred">Delete Starred (in message view)</string>
     <string name="global_settings_confirm_action_spam">Spam</string>
     <string name="global_settings_confirm_action_delete_notif">Delete (from notification)</string>
@@ -1009,7 +1009,7 @@ Please submit bug reports, contribute new features and ask questions at
       (1) http://developer.android.com/guide/topics/resources/string-resource.html#Plurals
 
     -->
-    <plurals name="dialog_confirm_delete_message">
+    <plurals name="dialog_confirm_delete_messages">
         <item quantity="one">Do you really want to delete this message?</item>
         <item quantity="other">Do you really want to delete <xliff:g id="message_count">%1$d</xliff:g> messages?</item>
     </plurals>
