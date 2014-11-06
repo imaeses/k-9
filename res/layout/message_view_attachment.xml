@@ -70,6 +70,18 @@
                 android:layout_alignWithParentIfMissing="true"
                 android:layout_below="@id/attachment_name"
                 android:layout_marginTop="6dip" />
+            <CheckBox
+                android:id="@+id/decrypt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:attr/checkboxStyle"
+                android:paddingRight="20dip"
+                android:text="@string/btn_decrypt"
+                android:singleLine="true"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/view"
+                android:layout_marginTop="6dip" />
+                
         </RelativeLayout>
     </LinearLayout>
     <LinearLayout
@@ -79,6 +91,7 @@
         <ImageView
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:src="@drawable/ic_email_attachment" />
+            android:src="@drawable/ic_email_attachment"
+            android:layout_alignParentLeft="true" />
     </LinearLayout>
 </com.fsck.k9.view.AttachmentView>

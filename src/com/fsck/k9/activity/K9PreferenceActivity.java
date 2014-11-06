@@ -1,28 +1,18 @@
 package com.fsck.k9.activity;
 
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
-import com.imaeses.squeaky.K9;
-
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.PreferenceActivity;
+
+import com.imaeses.squeaky.K9;
 
 
-public class K9PreferenceActivity extends SherlockPreferenceActivity {
+public class K9PreferenceActivity extends PreferenceActivity {
     @Override
     public void onCreate(Bundle icicle) {
         K9ActivityCommon.setLanguage(this, K9.getK9Language());
-
-        if (Build.VERSION.SDK_INT >= 6 && Build.VERSION.SDK_INT < 14) {
-            // There's a display bug in all supported Android versions before 4.0 (SDK 14) which
-            // causes PreferenceScreens to have a black background.
-            // http://code.google.com/p/android/issues/detail?id=4611
-            setTheme(K9.getK9ThemeResourceId(K9.Theme.DARK));
-        } else {
-            setTheme(K9.getK9ThemeResourceId());
-        }
-
+        setTheme(K9.getK9ThemeResourceId());
         super.onCreate(icicle);
     }
 

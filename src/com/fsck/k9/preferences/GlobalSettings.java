@@ -102,7 +102,8 @@ public class GlobalSettings {
                 new V(1, new FontSizeSetting(FontSizes.FONT_DEFAULT))
             ));
         s.put("fontSizeMessageViewContent", Settings.versions(
-                new V(1, new WebFontSizeSetting(3))
+        		new V(1, new WebFontSizeSetting(3)),
+        		new V(31, null)
             ));
         s.put("fontSizeMessageViewDate", Settings.versions(
                 new V(1, new FontSizeSetting(FontSizes.FONT_DEFAULT))
@@ -246,6 +247,9 @@ public class GlobalSettings {
         s.put("messageViewSpamActionVisible", Settings.versions(
                 new V(30, new BooleanSetting(false))
             ));
+        s.put("fontSizeMessageViewContentPercent", Settings.versions(
+        		new V(31, new IntegerRangeSetting(40, 250, 100))
+        	));
         s.put("hideUserAgent", Settings.versions(
         		new V(32, new BooleanSetting(false))
         	));
@@ -258,6 +262,7 @@ public class GlobalSettings {
         Map<Integer, SettingsUpgrader> u = new HashMap<Integer, SettingsUpgrader>();
         u.put(12, new SettingsUpgraderV12());
         u.put(24, new SettingsUpgraderV24());
+        u.put(31, new SettingsUpgraderV31());
 
         UPGRADERS = Collections.unmodifiableMap(u);
     }
@@ -328,6 +333,49 @@ public class GlobalSettings {
         }
     }
 
+   /**
+    * Upgrades the settings from version 30 to 31.
+    *
+    * <p>
+    * Convert value from <em>fontSizeMessageViewContent</em> to
+    * <em>fontSizeMessageViewContentPercent</em>.
+    * </p>
+    */
+    public static class SettingsUpgraderV31 implements SettingsUpgrader {
+    
+    	@Override
+    	public Set<String> upgrade(Map<String, Object> settings) {
+    		int oldSize = ((Integer) settings.get("fontSizeMessageViewContent")).intValue();
+    
+    		int newSize = convertFromOldSize(oldSize);
+    
+    		settings.put("fontSizeMessageViewContentPercent", newSize);
+    
+    		return new HashSet<String>(Arrays.asList("fontSizeMessageViewContent"));
+    	}
+    
+    	public static int convertFromOldSize(int oldSize) {
+    		switch (oldSize) {
+    			case 1: {
+    				return 40;
+    			}
+    			case 2: {
+    				return 75;
+    			}
+    			case 4: {
+    				return 175;
+    			}
+    			case 5: {
+    				return 250;
+    			}
+    			case 3:
+    			default: {
+    				return 100;
+    			}
+    		}
+    	}
+    }
+    
     /**
      * The gallery bug work-around setting.
      *

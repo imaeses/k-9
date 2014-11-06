@@ -368,6 +368,7 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="account_setup_basics_title">Set up a new account</string>
     <string name="account_setup_basics_email_hint">Email address</string>
     <string name="account_setup_basics_password_hint">Password</string>
+    <string name="account_setup_basics_show_password">Show password</string>
     <string name="account_setup_basics_manual_setup_action">Manual setup</string>
 
     <string name="account_setup_check_settings_title"/>
@@ -943,6 +944,8 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="font_size_message_view_subject">Subject</string>
     <string name="font_size_message_view_date">Time and date</string>
     <string name="font_size_message_view_content">Message body</string>
+    <string name="font_size_message_view_content_summary"><xliff:g id="fontsize">%d</xliff:g>%%</string>
+	<string name="font_size_message_view_content_dialog_title"><xliff:g id="title">%1$s</xliff:g>: <xliff:g id="summary">%2$s</xliff:g></string>
 
     <string name="font_size_message_compose">Message composition</string>
     <string name="font_size_message_compose_input">Text input fields</string>
@@ -955,12 +958,6 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="font_size_medium">Medium</string>
     <string name="font_size_large">Large</string>
     <string name="font_size_larger">Larger</string>
-
-    <string name="font_size_webview_smaller">Smallest</string>
-    <string name="font_size_webview_small">Smaller</string>
-    <string name="font_size_webview_normal">Normal</string>
-    <string name="font_size_webview_large">Larger</string>
-    <string name="font_size_webview_larger">Largest</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Check \"Settings\" -&gt; \"Use Gallery bug work-around\" to be able to attach images or videos using Gallery 3D.</string>
