@@ -3,12 +3,15 @@ package com.fsck.k9.net.ssl;
 
 import android.util.Log;
 
-import com.fsck.k9.helper.DomainNameChecker;
 import com.fsck.k9.mail.CertificateChainException;
 import com.fsck.k9.security.LocalKeyStore;
 
+import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import org.apache.http.conn.ssl.StrictHostnameVerifier;
+
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -23,6 +26,7 @@ public final class TrustManagerFactory {
     private static X509TrustManager defaultTrustManager;
 
     private static LocalKeyStore keyStore;
+
 
     private static class SecureX509TrustManager implements X509TrustManager {
         private static final Map<String, SecureX509TrustManager> mTrustManager =
@@ -57,31 +61,25 @@ public final class TrustManagerFactory {
         public void checkServerTrusted(X509Certificate[] chain, String authType)
                 throws CertificateException {
             String message = null;
-            boolean foundInGlobalKeyStore = false;
+            X509Certificate certificate = chain[0];
+
             try {
                 defaultTrustManager.checkServerTrusted(chain, authType);
-                foundInGlobalKeyStore = true;
+                new StrictHostnameVerifier().verify(mHost, certificate);
+                return;
             } catch (CertificateException e) {
+                // cert. chain can't be validated
+                message = e.getMessage();
+            } catch (SSLException e) {
+                // host name doesn't match certificate
                 message = e.getMessage();
             }
 
-            X509Certificate certificate = chain[0];
-
             // Check the local key store if we couldn't verify the certificate using the global
             // key store or if the host name doesn't match the certificate name
-            if (foundInGlobalKeyStore
-                    && DomainNameChecker.match(certificate, mHost)
-                    || keyStore.isValidCertificate(certificate, mHost, mPort)) {
-                return;
+            if (!keyStore.isValidCertificate(certificate, mHost, mPort)) {
+                throw new CertificateChainException(message, chain);
             }
-
-            if (message == null) {
-                message = (foundInGlobalKeyStore) ?
-                        "Certificate domain name does not match " + mHost :
-                        "Couldn't find certificate in local key store";
-            }
-
-            throw new CertificateChainException(message, chain);
         }
 
         public X509Certificate[] getAcceptedIssuers() {
@@ -117,6 +115,6 @@ public final class TrustManagerFactory {
     }
 
     public static X509TrustManager get(String host, int port) {
-    	return SecureX509TrustManager.getInstance(host, port);
+        return SecureX509TrustManager.getInstance(host, port);
     }
 }

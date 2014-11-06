@@ -3,13 +3,12 @@ package com.fsck.k9.mail.store;
 import android.util.Log;
 
 import com.fsck.k9.Account;
+import com.imaeses.squeaky.K9;
 import com.fsck.k9.controller.MessageRetrievalListener;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.*;
-
 import com.fsck.k9.mail.filter.EOLConvertingOutputStream;
 import com.fsck.k9.mail.internet.MimeMessage;
-import com.imaeses.squeaky.K9;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
@@ -37,6 +36,7 @@ import javax.net.ssl.SSLException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -57,13 +57,6 @@ import java.util.zip.GZIPInputStream;
  */
 public class WebDavStore extends Store {
     public static final String STORE_TYPE = "WebDAV";
-
-    // Security options
-    private static final short CONNECTION_SECURITY_NONE = 0;
-    private static final short CONNECTION_SECURITY_TLS_OPTIONAL = 1;
-    private static final short CONNECTION_SECURITY_TLS_REQUIRED = 2;
-    private static final short CONNECTION_SECURITY_SSL_OPTIONAL = 3;
-    private static final short CONNECTION_SECURITY_SSL_REQUIRED = 4;
 
     // Authentication types
     private static final short AUTH_TYPE_NONE = 0;
@@ -90,11 +83,8 @@ public class WebDavStore extends Store {
      *
      * <p>Possible forms:</p>
      * <pre>
-     * webdav://user:password@server:port CONNECTION_SECURITY_NONE
-     * webdav+tls://user:password@server:port CONNECTION_SECURITY_TLS_OPTIONAL
-     * webdav+tls+://user:password@server:port CONNECTION_SECURITY_TLS_REQUIRED
-     * webdav+ssl+://user:password@server:port CONNECTION_SECURITY_SSL_REQUIRED
-     * webdav+ssl://user:password@server:port CONNECTION_SECURITY_SSL_OPTIONAL
+     * webdav://user:password@server:port ConnectionSecurity.NONE
+     * webdav+ssl+://user:password@server:port ConnectionSecurity.SSL_TLS_REQUIRED
      * </pre>
      */
     public static WebDavStoreSettings decodeUri(String uri) {
@@ -117,16 +107,22 @@ public class WebDavStore extends Store {
         }
 
         String scheme = webDavUri.getScheme();
+        /*
+         * Currently available schemes are:
+         * webdav
+         * webdav+ssl+
+         *
+         * The following are obsolete schemes that may be found in pre-existing
+         * settings from earlier versions or that may be found when imported. We
+         * continue to recognize them and re-map them appropriately:
+         * webdav+tls
+         * webdav+tls+
+         * webdav+ssl
+         */
         if (scheme.equals("webdav")) {
             connectionSecurity = ConnectionSecurity.NONE;
-        } else if (scheme.equals("webdav+ssl")) {
-            connectionSecurity = ConnectionSecurity.SSL_TLS_OPTIONAL;
-        } else if (scheme.equals("webdav+ssl+")) {
+        } else if (scheme.startsWith("webdav+")) {
             connectionSecurity = ConnectionSecurity.SSL_TLS_REQUIRED;
-        } else if (scheme.equals("webdav+tls")) {
-            connectionSecurity = ConnectionSecurity.STARTTLS_OPTIONAL;
-        } else if (scheme.equals("webdav+tls+")) {
-            connectionSecurity = ConnectionSecurity.STARTTLS_REQUIRED;
         } else {
             throw new IllegalArgumentException("Unsupported protocol (" + scheme + ")");
         }
@@ -183,7 +179,7 @@ public class WebDavStore extends Store {
         }
 
         return new WebDavStoreSettings(host, port, connectionSecurity, null, username, password,
-                alias, path, authPath, mailboxPath);
+                null, alias, path, authPath, mailboxPath);
     }
 
     /**
@@ -211,17 +207,8 @@ public class WebDavStore extends Store {
 
         String scheme;
         switch (server.connectionSecurity) {
-            case SSL_TLS_OPTIONAL:
-                scheme = "webdav+ssl";
-                break;
             case SSL_TLS_REQUIRED:
                 scheme = "webdav+ssl+";
-                break;
-            case STARTTLS_OPTIONAL:
-                scheme = "webdav+tls";
-                break;
-            case STARTTLS_REQUIRED:
-                scheme = "webdav+tls+";
                 break;
             default:
             case NONE:
@@ -271,10 +258,10 @@ public class WebDavStore extends Store {
         public final String mailboxPath;
 
         protected WebDavStoreSettings(String host, int port, ConnectionSecurity connectionSecurity,
-                String authenticationType, String username, String password, String alias,
+                AuthType authenticationType, String username, String password, String clientCertificateAlias, String alias,
                 String path, String authPath, String mailboxPath) {
             super(STORE_TYPE, host, port, connectionSecurity, authenticationType, username,
-                    password);
+                    password, clientCertificateAlias);
             this.alias = alias;
             this.path = path;
             this.authPath = authPath;
@@ -294,12 +281,12 @@ public class WebDavStore extends Store {
         @Override
         public ServerSettings newPassword(String newPassword) {
             return new WebDavStoreSettings(host, port, connectionSecurity, authenticationType,
-                    username, newPassword, alias, path, authPath, mailboxPath);
+                    username, newPassword, clientCertificateAlias, alias, path, authPath, mailboxPath);
         }
     }
 
 
-    private short mConnectionSecurity;
+    private ConnectionSecurity mConnectionSecurity;
     private String mUsername; /* Stores the username for authentications */
     private String mAlias; /* Stores the alias for the user's mailbox */
     private String mPassword; /* Stores the password for authentications */
@@ -310,7 +297,6 @@ public class WebDavStore extends Store {
     private String mAuthPath; /* Stores the path off of the server to post data to for form based authentication */
     private String mMailboxPath; /* Stores the user specified path to the mailbox */
 
-    private boolean mSecure;
     private WebDavHttpClient mHttpClient = null;
     private HttpContext mContext = null;
     private String mAuthString;
@@ -335,23 +321,7 @@ public class WebDavStore extends Store {
         mHost = settings.host;
         mPort = settings.port;
 
-        switch (settings.connectionSecurity) {
-        case NONE:
-            mConnectionSecurity = CONNECTION_SECURITY_NONE;
-            break;
-        case STARTTLS_OPTIONAL:
-            mConnectionSecurity = CONNECTION_SECURITY_TLS_OPTIONAL;
-            break;
-        case STARTTLS_REQUIRED:
-            mConnectionSecurity = CONNECTION_SECURITY_TLS_REQUIRED;
-            break;
-        case SSL_TLS_OPTIONAL:
-            mConnectionSecurity = CONNECTION_SECURITY_SSL_OPTIONAL;
-            break;
-        case SSL_TLS_REQUIRED:
-            mConnectionSecurity = CONNECTION_SECURITY_SSL_REQUIRED;
-            break;
-        }
+        mConnectionSecurity = settings.connectionSecurity;
 
         mUsername = settings.username;
         mPassword = settings.password;
@@ -384,16 +354,12 @@ public class WebDavStore extends Store {
         // The inbox path would look like: "https://mail.domain.com/Exchange/alias/Inbox".
         mUrl = getRoot() + mPath + mMailboxPath;
 
-        mSecure = mConnectionSecurity == CONNECTION_SECURITY_SSL_REQUIRED;
         mAuthString = "Basic " + Utility.base64Encode(mUsername + ":" + mPassword);
     }
 
     private String getRoot() {
         String root;
-        if (mConnectionSecurity == CONNECTION_SECURITY_TLS_REQUIRED ||
-                mConnectionSecurity == CONNECTION_SECURITY_SSL_REQUIRED ||
-                mConnectionSecurity == CONNECTION_SECURITY_TLS_OPTIONAL ||
-                mConnectionSecurity == CONNECTION_SECURITY_SSL_OPTIONAL) {
+        if (mConnectionSecurity == ConnectionSecurity.SSL_TLS_REQUIRED) {
             root = "https";
         } else {
             root = "http";
@@ -1079,7 +1045,7 @@ public class WebDavStore extends Store {
 
             SchemeRegistry reg = mHttpClient.getConnectionManager().getSchemeRegistry();
             try {
-                Scheme s = new Scheme("https", new WebDavSocketFactory(mHost, 443, mSecure), 443);
+                Scheme s = new Scheme("https", new WebDavSocketFactory(mHost, 443), 443);
                 reg.register(s);
             } catch (NoSuchAlgorithmException nsa) {
                 Log.e(K9.LOG_TAG, "NoSuchAlgorithmException in getHttpClient: " + nsa);

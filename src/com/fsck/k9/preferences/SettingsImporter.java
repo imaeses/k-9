@@ -20,15 +20,16 @@ import android.util.Log;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.Identity;
+import com.imaeses.squeaky.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.helper.Utility;
+import com.fsck.k9.mail.AuthType;
 import com.fsck.k9.mail.ConnectionSecurity;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.Transport;
 import com.fsck.k9.mail.store.WebDavStore;
 import com.fsck.k9.preferences.Settings.InvalidSettingValueException;
-import com.imaeses.squeaky.K9;
 
 public class SettingsImporter {
 
@@ -378,9 +379,10 @@ public class SettingsImporter {
         String storeUri = Store.createStoreUri(incoming);
         putString(editor, accountKeyPrefix + Account.STORE_URI_KEY, Utility.base64Encode(storeUri));
 
-        // Mark account as disabled if the settings file didn't contain a password
-        boolean createAccountDisabled = (incoming.password == null ||
-                incoming.password.length() == 0);
+        // Mark account as disabled if the AuthType isn't EXTERNAL and the
+        // settings file didn't contain a password
+        boolean createAccountDisabled = AuthType.EXTERNAL != incoming.authenticationType &&
+                (incoming.password == null || incoming.password.isEmpty());
 
         if (account.outgoing == null && !WebDavStore.STORE_TYPE.equals(account.incoming.type)) {
             // All account types except WebDAV need to provide outgoing server settings
@@ -393,10 +395,19 @@ public class SettingsImporter {
             String transportUri = Transport.createTransportUri(outgoing);
             putString(editor, accountKeyPrefix + Account.TRANSPORT_URI_KEY, Utility.base64Encode(transportUri));
 
-            // Mark account as disabled if the settings file didn't contain a password
-            if (outgoing.password == null || outgoing.password.length() == 0) {
-                createAccountDisabled = true;
-            }
+            /*
+             * Mark account as disabled if the settings file contained a
+             * username but no password. However, no password is required for
+             * the outgoing server for WebDAV accounts, because incoming and
+             * outgoing servers are identical for this account type. Nor is a
+             * password required if the AuthType is EXTERNAL.
+             */
+            boolean outgoingPasswordNeeded = AuthType.EXTERNAL != outgoing.authenticationType &&
+                    !WebDavStore.STORE_TYPE.equals(outgoing.type) &&
+                    outgoing.username != null &&
+                    !outgoing.username.isEmpty() &&
+                    (outgoing.password == null || outgoing.password.isEmpty());
+            createAccountDisabled = outgoingPasswordNeeded || createAccountDisabled;
         }
 
         // Write key to mark account as disabled if necessary
@@ -608,8 +619,8 @@ public class SettingsImporter {
     }
 
     private static boolean isIdentityDescriptionUsed(String description, List<Identity> identities) {
-        for (Identity identitiy : identities) {
-            if (identitiy.getDescription().equals(description)) {
+        for (Identity identity : identities) {
+            if (identity.getDescription().equals(description)) {
                 return true;
             }
         }
@@ -971,9 +982,12 @@ public class SettingsImporter {
                 } else if (SettingsExporter.CONNECTION_SECURITY_ELEMENT.equals(element)) {
                     server.connectionSecurity = getText(xpp);
                 } else if (SettingsExporter.AUTHENTICATION_TYPE_ELEMENT.equals(element)) {
-                    server.authenticationType = getText(xpp);
+                    String text = getText(xpp);
+                    server.authenticationType = AuthType.valueOf(text);
                 } else if (SettingsExporter.USERNAME_ELEMENT.equals(element)) {
                     server.username = getText(xpp);
+                } else if (SettingsExporter.CLIENT_CERTIFICATE_ALIAS_ELEMENT.equals(element)) {
+                    server.clientCertificateAlias = getText(xpp);
                 } else if (SettingsExporter.PASSWORD_ELEMENT.equals(element)) {
                     server.password = getText(xpp);
                 } else if (SettingsExporter.EXTRA_ELEMENT.equals(element)) {
@@ -1088,7 +1102,8 @@ public class SettingsImporter {
         public ImportedServerSettings(ImportedServer server) {
             super(server.type, server.host, convertPort(server.port),
                     convertConnectionSecurity(server.connectionSecurity),
-                    server.authenticationType, server.username, server.password);
+                    server.authenticationType, server.username, server.password,
+                    server.clientCertificateAlias);
             mImportedServer = server;
         }
 
@@ -1108,6 +1123,16 @@ public class SettingsImporter {
 
         private static ConnectionSecurity convertConnectionSecurity(String connectionSecurity) {
             try {
+                /*
+                 * TODO:
+                 * Add proper settings validation and upgrade capability for server settings.
+                 * Once that exists, move this code into a SettingsUpgrader.
+                 */
+                if ("SSL_TLS_OPTIONAL".equals(connectionSecurity)) {
+                    return ConnectionSecurity.SSL_TLS_REQUIRED;
+                } else if ("STARTTLS_OPTIONAL".equals(connectionSecurity)) {
+                    return ConnectionSecurity.STARTTLS_REQUIRED;
+                }
                 return ConnectionSecurity.valueOf(connectionSecurity);
             } catch (Exception e) {
                 return ConnectionSecurity.SSL_TLS_REQUIRED;
@@ -1140,9 +1165,10 @@ public class SettingsImporter {
         public String host;
         public String port;
         public String connectionSecurity;
-        public String authenticationType;
+        public AuthType authenticationType;
         public String username;
         public String password;
+        public String clientCertificateAlias;
         public ImportedSettings extras;
     }
 

@@ -21,6 +21,7 @@ import android.util.Log;
 import android.util.Xml;
 
 import com.fsck.k9.Account;
+import com.imaeses.squeaky.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.Store;
@@ -28,7 +29,6 @@ import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.Transport;
 import com.fsck.k9.preferences.Settings.InvalidSettingValueException;
 import com.fsck.k9.preferences.Settings.SettingsDescription;
-import com.imaeses.squeaky.K9;
 
 
 public class SettingsExporter {
@@ -61,6 +61,7 @@ public class SettingsExporter {
     public static final String CONNECTION_SECURITY_ELEMENT = "connection-security";
     public static final String AUTHENTICATION_TYPE_ELEMENT = "authentication-type";
     public static final String USERNAME_ELEMENT = "username";
+    public static final String CLIENT_CERTIFICATE_ALIAS_ELEMENT = "client-cert-alias";
     public static final String PASSWORD_ELEMENT = "password";
     public static final String EXTRA_ELEMENT = "extra";
     public static final String IDENTITIES_ELEMENT = "identities";
@@ -229,9 +230,14 @@ public class SettingsExporter {
         if (incoming.port != -1) {
             writeElement(serializer, PORT_ELEMENT, Integer.toString(incoming.port));
         }
-        writeElement(serializer, CONNECTION_SECURITY_ELEMENT, incoming.connectionSecurity.name());
-        writeElement(serializer, AUTHENTICATION_TYPE_ELEMENT, incoming.authenticationType);
+        if (incoming.connectionSecurity != null) {
+            writeElement(serializer, CONNECTION_SECURITY_ELEMENT, incoming.connectionSecurity.name());
+        }
+        if (incoming.authenticationType != null) {
+            writeElement(serializer, AUTHENTICATION_TYPE_ELEMENT, incoming.authenticationType.name());
+        }
         writeElement(serializer, USERNAME_ELEMENT, incoming.username);
+        writeElement(serializer, CLIENT_CERTIFICATE_ALIAS_ELEMENT, incoming.clientCertificateAlias);
         // XXX For now we don't export the password
         //writeElement(serializer, PASSWORD_ELEMENT, incoming.password);
 
@@ -256,9 +262,14 @@ public class SettingsExporter {
         if (outgoing.port != -1) {
             writeElement(serializer, PORT_ELEMENT, Integer.toString(outgoing.port));
         }
-        writeElement(serializer, CONNECTION_SECURITY_ELEMENT, outgoing.connectionSecurity.name());
-        writeElement(serializer, AUTHENTICATION_TYPE_ELEMENT, outgoing.authenticationType);
+        if (outgoing.connectionSecurity != null) {
+            writeElement(serializer, CONNECTION_SECURITY_ELEMENT, outgoing.connectionSecurity.name());
+        }
+        if (outgoing.authenticationType != null) {
+            writeElement(serializer, AUTHENTICATION_TYPE_ELEMENT, outgoing.authenticationType.name());
+        }
         writeElement(serializer, USERNAME_ELEMENT, outgoing.username);
+        writeElement(serializer, CLIENT_CERTIFICATE_ALIAS_ELEMENT, outgoing.clientCertificateAlias);
         // XXX For now we don't export the password
         //writeElement(serializer, PASSWORD_ELEMENT, outgoing.password);
 

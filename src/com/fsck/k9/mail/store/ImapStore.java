@@ -25,7 +25,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
 import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,12 +44,11 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
-import javax.net.ssl.TrustManager;
 
 import org.apache.commons.io.IOUtils;
 
@@ -62,11 +60,14 @@ import android.util.Log;
 
 import com.beetstra.jutf7.CharsetProvider;
 import com.fsck.k9.Account;
+import com.imaeses.squeaky.K9;
+import com.imaeses.squeaky.R;
 import com.fsck.k9.controller.MessageRetrievalListener;
 import com.fsck.k9.helper.StringUtils;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.helper.power.TracingPowerManager;
 import com.fsck.k9.helper.power.TracingPowerManager.TracingWakeLock;
+import com.fsck.k9.mail.AuthType;
 import com.fsck.k9.mail.Authentication;
 import com.fsck.k9.mail.AuthenticationFailedException;
 import com.fsck.k9.mail.Body;
@@ -82,6 +83,7 @@ import com.fsck.k9.mail.PushReceiver;
 import com.fsck.k9.mail.Pusher;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.Store;
+import com.fsck.k9.mail.filter.Base64;
 import com.fsck.k9.mail.filter.EOLConvertingOutputStream;
 import com.fsck.k9.mail.filter.FixedLengthInputStream;
 import com.fsck.k9.mail.filter.PeekableInputStream;
@@ -94,13 +96,9 @@ import com.fsck.k9.mail.store.ImapResponseParser.ImapList;
 import com.fsck.k9.mail.store.ImapResponseParser.ImapResponse;
 import com.fsck.k9.mail.store.imap.ImapUtility;
 import com.fsck.k9.mail.transport.imap.ImapSettings;
-import com.fsck.k9.net.ssl.TrustManagerFactory;
 import com.fsck.k9.net.ssl.TrustedSocketFactory;
 import com.jcraft.jzlib.JZlib;
 import com.jcraft.jzlib.ZOutputStream;
-
-import com.imaeses.squeaky.K9;
-import com.imaeses.squeaky.R;
 
 /**
  * <pre>
@@ -110,14 +108,6 @@ import com.imaeses.squeaky.R;
  */
 public class ImapStore extends Store {
     public static final String STORE_TYPE = "IMAP";
-
-    public static final int CONNECTION_SECURITY_NONE = 0;
-    public static final int CONNECTION_SECURITY_TLS_OPTIONAL = 1;
-    public static final int CONNECTION_SECURITY_TLS_REQUIRED = 2;
-    public static final int CONNECTION_SECURITY_SSL_REQUIRED = 3;
-    public static final int CONNECTION_SECURITY_SSL_OPTIONAL = 4;
-
-    public enum AuthType { PLAIN, CRAM_MD5 }
 
     private static final int IDLE_READ_TIMEOUT_INCREMENT = 5 * 60 * 1000;
     private static final int IDLE_FAILURE_COUNT_LIMIT = 10;
@@ -129,6 +119,10 @@ public class ImapStore extends Store {
     private Set<Flag> mPermanentFlagsIndex = new HashSet<Flag>();
 
     private static final String CAPABILITY_IDLE = "IDLE";
+    private static final String CAPABILITY_AUTH_CRAM_MD5 = "AUTH=CRAM-MD5";
+    private static final String CAPABILITY_AUTH_PLAIN = "AUTH=PLAIN";
+    private static final String CAPABILITY_AUTH_EXTERNAL = "AUTH=EXTERNAL";
+    private static final String CAPABILITY_LOGINDISABLED = "LOGINDISABLED";
     private static final String COMMAND_IDLE = "IDLE";
     private static final String CAPABILITY_NAMESPACE = "NAMESPACE";
     private static final String COMMAND_NAMESPACE = "NAMESPACE";
@@ -148,20 +142,19 @@ public class ImapStore extends Store {
      *
      * <p>Possible forms:</p>
      * <pre>
-     * imap://auth:user:password@server:port CONNECTION_SECURITY_NONE
-     * imap+tls://auth:user:password@server:port CONNECTION_SECURITY_TLS_OPTIONAL
-     * imap+tls+://auth:user:password@server:port CONNECTION_SECURITY_TLS_REQUIRED
-     * imap+ssl+://auth:user:password@server:port CONNECTION_SECURITY_SSL_REQUIRED
-     * imap+ssl://auth:user:password@server:port CONNECTION_SECURITY_SSL_OPTIONAL
+     * imap://auth:user:password@server:port ConnectionSecurity.NONE
+     * imap+tls+://auth:user:password@server:port ConnectionSecurity.STARTTLS_REQUIRED
+     * imap+ssl+://auth:user:password@server:port ConnectionSecurity.SSL_TLS_REQUIRED
      * </pre>
      */
     public static ImapStoreSettings decodeUri(String uri) {
         String host;
         int port;
         ConnectionSecurity connectionSecurity;
-        String authenticationType = null;
+        AuthType authenticationType = null;
         String username = null;
         String password = null;
+        String clientCertificateAlias = null;
         String pathPrefix = null;
         boolean autoDetectNamespace = true;
 
@@ -173,20 +166,26 @@ public class ImapStore extends Store {
         }
 
         String scheme = imapUri.getScheme();
+        /*
+         * Currently available schemes are:
+         * imap
+         * imap+tls+
+         * imap+ssl+
+         *
+         * The following are obsolete schemes that may be found in pre-existing
+         * settings from earlier versions or that may be found when imported. We
+         * continue to recognize them and re-map them appropriately:
+         * imap+tls
+         * imap+ssl
+         */
         if (scheme.equals("imap")) {
             connectionSecurity = ConnectionSecurity.NONE;
             port = 143;
-        } else if (scheme.equals("imap+tls")) {
-            connectionSecurity = ConnectionSecurity.STARTTLS_OPTIONAL;
-            port = 143;
-        } else if (scheme.equals("imap+tls+")) {
+        } else if (scheme.startsWith("imap+tls")) {
             connectionSecurity = ConnectionSecurity.STARTTLS_REQUIRED;
             port = 143;
-        } else if (scheme.equals("imap+ssl+")) {
+        } else if (scheme.startsWith("imap+ssl")) {
             connectionSecurity = ConnectionSecurity.SSL_TLS_REQUIRED;
-            port = 993;
-        } else if (scheme.equals("imap+ssl")) {
-            connectionSecurity = ConnectionSecurity.SSL_TLS_OPTIONAL;
             port = 993;
         } else {
             throw new IllegalArgumentException("Unsupported protocol (" + scheme + ")");
@@ -205,16 +204,21 @@ public class ImapStore extends Store {
 
                 if (userinfo.endsWith(":")) {
                     // Password is empty. This can only happen after an account was imported.
-                    authenticationType = AuthType.valueOf(userInfoParts[0]).name();
+                    authenticationType = AuthType.valueOf(userInfoParts[0]);
                     username = URLDecoder.decode(userInfoParts[1], "UTF-8");
                 } else if (userInfoParts.length == 2) {
-                    authenticationType = AuthType.PLAIN.name();
+                    authenticationType = AuthType.PLAIN;
                     username = URLDecoder.decode(userInfoParts[0], "UTF-8");
                     password = URLDecoder.decode(userInfoParts[1], "UTF-8");
-                } else {
-                    authenticationType = AuthType.valueOf(userInfoParts[0]).name();
+                } else if (userInfoParts.length == 3) {
+                    authenticationType = AuthType.valueOf(userInfoParts[0]);
                     username = URLDecoder.decode(userInfoParts[1], "UTF-8");
-                    password = URLDecoder.decode(userInfoParts[2], "UTF-8");
+
+                    if (AuthType.EXTERNAL == authenticationType) {
+                        clientCertificateAlias = URLDecoder.decode(userInfoParts[2], "UTF-8");
+                    } else {
+                        password = URLDecoder.decode(userInfoParts[2], "UTF-8");
+                    }
                 }
             } catch (UnsupportedEncodingException enc) {
                 // This shouldn't happen since the encoding is hardcoded to UTF-8
@@ -241,7 +245,7 @@ public class ImapStore extends Store {
         }
 
         return new ImapStoreSettings(host, port, connectionSecurity, authenticationType, username,
-                password, autoDetectNamespace, pathPrefix);
+                password, clientCertificateAlias, autoDetectNamespace, pathPrefix);
     }
 
     /**
@@ -258,10 +262,13 @@ public class ImapStore extends Store {
     public static String createUri(ServerSettings server) {
         String userEnc;
         String passwordEnc;
+        String clientCertificateAliasEnc;
         try {
             userEnc = URLEncoder.encode(server.username, "UTF-8");
             passwordEnc = (server.password != null) ?
                     URLEncoder.encode(server.password, "UTF-8") : "";
+            clientCertificateAliasEnc = (server.clientCertificateAlias != null) ?
+                    URLEncoder.encode(server.clientCertificateAlias, "UTF-8") : "";
         }
         catch (UnsupportedEncodingException e) {
             throw new IllegalArgumentException("Could not encode username or password", e);
@@ -269,14 +276,8 @@ public class ImapStore extends Store {
 
         String scheme;
         switch (server.connectionSecurity) {
-            case SSL_TLS_OPTIONAL:
-                scheme = "imap+ssl";
-                break;
             case SSL_TLS_REQUIRED:
                 scheme = "imap+ssl+";
-                break;
-            case STARTTLS_OPTIONAL:
-                scheme = "imap+tls";
                 break;
             case STARTTLS_REQUIRED:
                 scheme = "imap+tls+";
@@ -287,15 +288,13 @@ public class ImapStore extends Store {
                 break;
         }
 
-        AuthType authType;
-        try {
-            authType = AuthType.valueOf(server.authenticationType);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid authentication type: " +
-                    server.authenticationType);
+        AuthType authType = server.authenticationType;
+        String userInfo;
+        if (authType == AuthType.EXTERNAL) {
+            userInfo = authType.name() + ":" + userEnc + ":" + clientCertificateAliasEnc;
+        } else {
+            userInfo = authType.name() + ":" + userEnc + ":" + passwordEnc;
         }
-
-        String userInfo = authType.toString() + ":" + userEnc + ":" + passwordEnc;
         try {
             Map<String, String> extra = server.getExtra();
             String path = null;
@@ -330,10 +329,10 @@ public class ImapStore extends Store {
         public final String pathPrefix;
 
         protected ImapStoreSettings(String host, int port, ConnectionSecurity connectionSecurity,
-                String authenticationType, String username, String password,
+                AuthType authenticationType, String username, String password, String clientCertificateAlias,
                 boolean autodetectNamespace, String pathPrefix) {
             super(STORE_TYPE, host, port, connectionSecurity, authenticationType, username,
-                    password);
+                    password, clientCertificateAlias);
             this.autoDetectNamespace = autodetectNamespace;
             this.pathPrefix = pathPrefix;
         }
@@ -349,7 +348,7 @@ public class ImapStore extends Store {
         @Override
         public ServerSettings newPassword(String newPassword) {
             return new ImapStoreSettings(host, port, connectionSecurity, authenticationType,
-                    username, newPassword, autoDetectNamespace, pathPrefix);
+                    username, newPassword, clientCertificateAlias, autoDetectNamespace, pathPrefix);
         }
     }
 
@@ -358,7 +357,8 @@ public class ImapStore extends Store {
     private int mPort;
     private String mUsername;
     private String mPassword;
-    private int mConnectionSecurity;
+    private String mClientCertificateAlias;
+    private ConnectionSecurity mConnectionSecurity;
     private AuthType mAuthType;
     private volatile String mPathPrefix;
     private volatile String mCombinedPrefix = null;
@@ -377,7 +377,7 @@ public class ImapStore extends Store {
         }
 
         @Override
-        public int getConnectionSecurity() {
+        public ConnectionSecurity getConnectionSecurity() {
             return mConnectionSecurity;
         }
 
@@ -394,6 +394,11 @@ public class ImapStore extends Store {
         @Override
         public String getPassword() {
             return mPassword;
+        }
+
+        @Override
+        public String getClientCertificateAlias() {
+            return mClientCertificateAlias;
         }
 
         @Override
@@ -463,27 +468,12 @@ public class ImapStore extends Store {
         mHost = settings.host;
         mPort = settings.port;
 
-        switch (settings.connectionSecurity) {
-        case NONE:
-            mConnectionSecurity = CONNECTION_SECURITY_NONE;
-            break;
-        case STARTTLS_OPTIONAL:
-            mConnectionSecurity = CONNECTION_SECURITY_TLS_OPTIONAL;
-            break;
-        case STARTTLS_REQUIRED:
-            mConnectionSecurity = CONNECTION_SECURITY_TLS_REQUIRED;
-            break;
-        case SSL_TLS_OPTIONAL:
-            mConnectionSecurity = CONNECTION_SECURITY_SSL_OPTIONAL;
-            break;
-        case SSL_TLS_REQUIRED:
-            mConnectionSecurity = CONNECTION_SECURITY_SSL_REQUIRED;
-            break;
-        }
+        mConnectionSecurity = settings.connectionSecurity;
 
-        mAuthType = AuthType.valueOf(settings.authenticationType);
+        mAuthType = settings.authenticationType;
         mUsername = settings.username;
         mPassword = settings.password;
+        mClientCertificateAlias = settings.clientCertificateAlias;
 
         // Make extra sure mPathPrefix is null if "auto-detect namespace" is configured
         mPathPrefix = (settings.autoDetectNamespace) ? null : settings.pathPrefix;
@@ -1478,7 +1468,7 @@ public class ImapStore extends Store {
             List<String> uids = new ArrayList<String>(messages.length);
             HashMap<String, Message> messageMap = new HashMap<String, Message>();
             for (Message msg : messages) {
-            	String uid = msg.getUid();
+                String uid = msg.getUid();
                 uids.add(uid);
                 messageMap.put(uid, msg);
             }
@@ -2430,7 +2420,7 @@ public class ImapStore extends Store {
             }
 
             try {
-                int connectionSecurity = mSettings.getConnectionSecurity();
+                ConnectionSecurity connectionSecurity = mSettings.getConnectionSecurity();
 
                 // Try all IPv4 and IPv6 addresses of the host
                 InetAddress[] addresses = InetAddress.getAllByName(mSettings.getHost());
@@ -2444,16 +2434,9 @@ public class ImapStore extends Store {
                         SocketAddress socketAddress = new InetSocketAddress(addresses[i],
                                 mSettings.getPort());
 
-                        if (connectionSecurity == CONNECTION_SECURITY_SSL_REQUIRED ||
-                                connectionSecurity == CONNECTION_SECURITY_SSL_OPTIONAL) {
-                            SSLContext sslContext = SSLContext.getInstance("TLS");
-                            sslContext
-                                    .init(null,
-                                            new TrustManager[] { TrustManagerFactory.get(
-                                                    mSettings.getHost(),
-                                                    mSettings.getPort()) },
-                                            new SecureRandom());
-                            mSocket = TrustedSocketFactory.createSocket(sslContext);
+                        if (connectionSecurity == ConnectionSecurity.SSL_TLS_REQUIRED) {
+                            mSocket = TrustedSocketFactory.createSocket(mSettings.getHost(),
+                                    mSettings.getPort(), mSettings.getClientCertificateAlias());
                         } else {
                             mSocket = new Socket();
                         }
@@ -2476,7 +2459,7 @@ public class ImapStore extends Store {
                 mIn = new PeekableInputStream(new BufferedInputStream(mSocket.getInputStream(),
                                               1024));
                 mParser = new ImapResponseParser(mIn);
-                mOut = mSocket.getOutputStream();
+                mOut = new BufferedOutputStream(mSocket.getOutputStream(), 1024);
 
                 capabilities.clear();
                 ImapResponse nullResponse = mParser.readResponse();
@@ -2496,56 +2479,76 @@ public class ImapStore extends Store {
                     }
                 }
 
-                if (mSettings.getConnectionSecurity() == CONNECTION_SECURITY_TLS_OPTIONAL
-                        || mSettings.getConnectionSecurity() == CONNECTION_SECURITY_TLS_REQUIRED) {
+                if (mSettings.getConnectionSecurity() == ConnectionSecurity.STARTTLS_REQUIRED) {
 
                     if (hasCapability("STARTTLS")) {
                         // STARTTLS
                         executeSimpleCommand("STARTTLS");
 
-                        SSLContext sslContext = SSLContext.getInstance("TLS");
-                        sslContext.init(null,
-                                new TrustManager[] { TrustManagerFactory.get(
-                                        mSettings.getHost(),
-                                        mSettings.getPort()) },
-                                new SecureRandom());
-                        mSocket = TrustedSocketFactory.createSocket(sslContext, mSocket,
-                                mSettings.getHost(), mSettings.getPort(), true);
+                        mSocket = TrustedSocketFactory.createSocket(mSocket,
+                                mSettings.getHost(), mSettings.getPort(),
+                                mSettings.getClientCertificateAlias());
                         mSocket.setSoTimeout(Store.SOCKET_READ_TIMEOUT);
                         mIn = new PeekableInputStream(new BufferedInputStream(mSocket
                                                       .getInputStream(), 1024));
                         mParser = new ImapResponseParser(mIn);
-                        mOut = mSocket.getOutputStream();
-                    } else if (mSettings.getConnectionSecurity() == CONNECTION_SECURITY_TLS_REQUIRED) {
-                        throw new MessagingException("TLS not supported but required");
-                    }
-                }
-
-                mOut = new BufferedOutputStream(mOut, 1024);
-
-                try {
-                    if (mSettings.getAuthType() == AuthType.CRAM_MD5) {
-                        authCramMD5();
-                        // The authCramMD5 method called on the previous line does not allow for handling updated capabilities
-                        // sent by the server.  So, to make sure we update to the post-authentication capability list
-                        // we fetch the capabilities here.
+                        mOut = new BufferedOutputStream(mSocket.getOutputStream(), 1024);
+                        // Per RFC 2595 (3.1):  Once TLS has been started, reissue CAPABILITY command
                         if (K9.DEBUG)
-                            Log.i(K9.LOG_TAG, "Updating capabilities after CRAM-MD5 authentication for " + getLogId());
+                            Log.i(K9.LOG_TAG, "Updating capabilities after STARTTLS for " + getLogId());
+                        capabilities.clear();
                         List<ImapResponse> responses = receiveCapabilities(executeSimpleCommand(COMMAND_CAPABILITY));
                         if (responses.size() != 2) {
                             throw new MessagingException("Invalid CAPABILITY response received");
                         }
-
-                    } else if (mSettings.getAuthType() == AuthType.PLAIN) {
-                        receiveCapabilities(executeSimpleCommand(String.format("LOGIN %s %s", ImapStore.encodeString(mSettings.getUsername()), ImapStore.encodeString(mSettings.getPassword())), true));
+                    } else {
+                        /*
+                         * This exception triggers a "Certificate error"
+                         * notification that takes the user to the incoming
+                         * server settings for review. This might be needed if
+                         * the account was configured with an obsolete
+                         * "STARTTLS (if available)" setting.
+                         */
+                        throw new CertificateValidationException(
+                                "STARTTLS connection security not available");
                     }
-                    authSuccess = true;
-                } catch (ImapException ie) {
-                    throw new AuthenticationFailedException(ie.getAlertText(), ie);
-
-                } catch (MessagingException me) {
-                    throw new AuthenticationFailedException(null, me);
                 }
+
+                switch (mSettings.getAuthType()) {
+                case CRAM_MD5:
+                    if (hasCapability(CAPABILITY_AUTH_CRAM_MD5)) {
+                        authCramMD5();
+                    } else {
+                        throw new MessagingException(
+                                "Server doesn't support encrypted passwords using CRAM-MD5.");
+                    }
+                    break;
+
+                case PLAIN:
+                    if (hasCapability(CAPABILITY_AUTH_PLAIN)) {
+                        saslAuthPlain();
+                    } else if (!hasCapability(CAPABILITY_LOGINDISABLED)) {
+                        login();
+                    } else {
+                        throw new MessagingException(
+                                "Server doesn't support unencrypted passwords using AUTH=PLAIN and LOGIN is disabled.");
+                    }
+                    break;
+
+                case EXTERNAL:
+                    if (hasCapability(CAPABILITY_AUTH_EXTERNAL)) {
+                        saslAuthExternal();
+                    } else {
+                        // Provide notification to user of a problem authenticating using client certificates
+                        throw new CertificateValidationException(K9.app.getString(R.string.auth_external_error));
+                    }
+                    break;
+
+                default:
+                    throw new MessagingException(
+                            "Unhandled authentication method found in the server settings (bug).");
+                }
+                authSuccess = true;
                 if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, CAPABILITY_COMPRESS_DEFLATE + " = " + hasCapability(CAPABILITY_COMPRESS_DEFLATE));
                 }
@@ -2626,7 +2629,7 @@ public class ImapStore extends Store {
                 if (mSettings.getPathDelimeter() == null) {
                     try {
                         List<ImapResponse> nameResponses =
-                        		executeSimpleCommand("LIST \"\" \"\"");
+                            executeSimpleCommand("LIST \"\" \"\"");
                         for (ImapResponse response : nameResponses) {
                             if (ImapResponseParser.equalsIgnoreCase(response.get(0), "LIST")) {
                                 mSettings.setPathDelimeter(response.getString(2));
@@ -2639,7 +2642,6 @@ public class ImapStore extends Store {
                         Log.e(K9.LOG_TAG, "Unable to get path delimeter using LIST", e);
                     }
                 }
-
 
             } catch (SSLException e) {
                 throw new CertificateValidationException(e.getMessage(), e);
@@ -2663,48 +2665,134 @@ public class ImapStore extends Store {
             }
         }
 
-        protected void authCramMD5() throws AuthenticationFailedException, MessagingException {
+        protected void login() throws IOException, MessagingException {
+            /*
+             * Use quoted strings which permit spaces and quotes. (Using IMAP
+             * string literals would be better, but some servers are broken
+             * and don't parse them correctly.)
+             */
+
+            // escape double-quotes and backslash characters with a backslash
+            Pattern p = Pattern.compile("[\\\\\"]");
+            String replacement = "\\\\$0";
+            String username = p.matcher(mSettings.getUsername()).replaceAll(
+                    replacement);
+            String password = p.matcher(mSettings.getPassword()).replaceAll(
+                    replacement);
             try {
-                String tag = sendCommand("AUTHENTICATE CRAM-MD5", false);
-                byte[] buf = new byte[1024];
-                int b64NonceLen = 0;
-                for (int i = 0; i < buf.length; i++) {
-                    buf[i] = (byte)mIn.read();
-                    if (buf[i] == 0x0a) {
-                        b64NonceLen = i;
-                        break;
-                    }
-                }
-                if (b64NonceLen == 0) {
-                    throw new AuthenticationFailedException("Error negotiating CRAM-MD5: nonce too long.");
-                }
-                byte[] b64NonceTrim = new byte[b64NonceLen - 2];
-                System.arraycopy(buf, 1, b64NonceTrim, 0, b64NonceLen - 2);
-
-                byte[] b64CRAM = Authentication.computeCramMd5Bytes(mSettings.getUsername(),
-                                 mSettings.getPassword(), b64NonceTrim);
-
-                mOut.write(b64CRAM);
-                mOut.write(new byte[] { 0x0d, 0x0a });
-                mOut.flush();
-
-                int respLen = 0;
-                for (int i = 0; i < buf.length; i++) {
-                    buf[i] = (byte)mIn.read();
-                    if (buf[i] == 0x0a) {
-                        respLen = i;
-                        break;
-                    }
-                }
-
-                String toMatch = tag + " OK";
-                String respStr = new String(buf, 0, respLen);
-                if (!respStr.startsWith(toMatch)) {
-                    throw new AuthenticationFailedException("CRAM-MD5 error: " + respStr);
-                }
-            } catch (IOException ioe) {
-                throw new AuthenticationFailedException("CRAM-MD5 Auth Failed.", ioe);
+                receiveCapabilities(executeSimpleCommand(
+                        String.format("LOGIN \"%s\" \"%s\"", username, password), true));
+            } catch (ImapException e) {
+                throw new AuthenticationFailedException(e.getMessage());
             }
+        }
+
+        protected void authCramMD5() throws MessagingException, IOException {
+            String command = "AUTHENTICATE CRAM-MD5";
+            String tag = sendCommand(command, false);
+            ImapResponse response = readContinuationResponse(tag);
+            if (response.size() != 1 || !(response.get(0) instanceof String)) {
+                throw new MessagingException("Invalid Cram-MD5 nonce received");
+            }
+            byte[] b64Nonce = response.getString(0).getBytes();
+            byte[] b64CRAM = Authentication.computeCramMd5Bytes(
+                    mSettings.getUsername(), mSettings.getPassword(), b64Nonce);
+
+            mOut.write(b64CRAM);
+            mOut.write('\r');
+            mOut.write('\n');
+            mOut.flush();
+            try {
+                receiveCapabilities(readStatusResponse(tag, command, null));
+            } catch (MessagingException e) {
+                throw new AuthenticationFailedException(e.getMessage());
+            }
+        }
+
+        protected void saslAuthPlain() throws IOException, MessagingException {
+            String command = "AUTHENTICATE PLAIN";
+            String tag = sendCommand(command, false);
+            readContinuationResponse(tag);
+            mOut.write(Base64.encodeBase64(("\000" + mSettings.getUsername()
+                    + "\000" + mSettings.getPassword()).getBytes()));
+            mOut.write('\r');
+            mOut.write('\n');
+            mOut.flush();
+            try {
+                receiveCapabilities(readStatusResponse(tag, command, null));
+            } catch (MessagingException e) {
+                throw new AuthenticationFailedException(e.getMessage());
+            }
+        }
+
+        private void saslAuthExternal() throws IOException, MessagingException {
+            try {
+                receiveCapabilities(executeSimpleCommand(
+                        String.format("AUTHENTICATE EXTERNAL %s",
+                                Utility.base64Encode(mSettings.getUsername())), false));
+            } catch (ImapException e) {
+                /*
+                 * Provide notification to the user of a problem authenticating
+                 * using client certificates. We don't use an
+                 * AuthenticationFailedException because that would trigger a
+                 * "Username or password incorrect" notification in
+                 * AccountSetupCheckSettings.
+                 */
+                throw new CertificateValidationException(e.getMessage());
+            }
+        }
+
+        protected ImapResponse readContinuationResponse(String tag)
+                throws IOException, MessagingException {
+            ImapResponse response;
+            do {
+                response = readResponse();
+                if (response.mTag != null) {
+                    if (response.mTag.equalsIgnoreCase(tag)) {
+                        throw new MessagingException(
+                                "Command continuation aborted: " + response);
+                    } else {
+                        Log.w(K9.LOG_TAG, "After sending tag " + tag
+                                + ", got tag response from previous command "
+                                + response + " for " + getLogId());
+                    }
+                }
+            } while (!response.mCommandContinuationRequested);
+            return response;
+        }
+
+        protected ArrayList<ImapResponse> readStatusResponse(String tag,
+                String commandToLog, UntaggedHandler untaggedHandler)
+                throws IOException, MessagingException {
+            ArrayList<ImapResponse> responses = new ArrayList<ImapResponse>();
+            ImapResponse response;
+            do {
+                response = mParser.readResponse();
+                if (K9.DEBUG && K9.DEBUG_PROTOCOL_IMAP)
+                    Log.v(K9.LOG_TAG, getLogId() + "<<<" + response);
+
+                if (response.mTag != null && !response.mTag.equalsIgnoreCase(tag)) {
+                    Log.w(K9.LOG_TAG, "After sending tag " + tag + ", got tag response from previous command " + response + " for " + getLogId());
+                    Iterator<ImapResponse> iter = responses.iterator();
+                    while (iter.hasNext()) {
+                        ImapResponse delResponse = iter.next();
+                        if (delResponse.mTag != null || delResponse.size() < 2
+                                || (!ImapResponseParser.equalsIgnoreCase(delResponse.get(1), "EXISTS") && !ImapResponseParser.equalsIgnoreCase(delResponse.get(1), "EXPUNGE"))) {
+                            iter.remove();
+                        }
+                    }
+                    response.mTag = null;
+                    continue;
+                }
+                if (untaggedHandler != null) {
+                    untaggedHandler.handleAsyncUntaggedResponse(response);
+                }
+                responses.add(response);
+            } while (response.mTag == null);
+            if (response.size() < 1 || !ImapResponseParser.equalsIgnoreCase(response.get(0), "OK")) {
+                throw new ImapException("Command: " + commandToLog + "; response: " + response.toString(), response.getAlertText());
+            }
+            return responses;
         }
 
         protected void setReadTimeout(int millis) throws SocketException {
@@ -2778,10 +2866,8 @@ public class ImapStore extends Store {
             try {
                 open();
                 String tag = Integer.toString(mNextCommandTag++);
-                String commandToSend = tag + " " + command;
+                String commandToSend = tag + " " + command + "\r\n";
                 mOut.write(commandToSend.getBytes());
-                mOut.write('\r');
-                mOut.write('\n');
                 mOut.flush();
 
                 if (K9.DEBUG && K9.DEBUG_PROTOCOL_IMAP) {
@@ -2831,35 +2917,7 @@ public class ImapStore extends Store {
             //if (K9.DEBUG)
             //    Log.v(K9.LOG_TAG, "Sent IMAP command " + commandToLog + " with tag " + tag + " for " + getLogId());
 
-            ArrayList<ImapResponse> responses = new ArrayList<ImapResponse>();
-            ImapResponse response;
-            do {
-                response = mParser.readResponse();
-                if (K9.DEBUG && K9.DEBUG_PROTOCOL_IMAP)
-                    Log.v(K9.LOG_TAG, getLogId() + "<<<" + response);
-
-                if (response.mTag != null && !response.mTag.equalsIgnoreCase(tag)) {
-                    Log.w(K9.LOG_TAG, "After sending tag " + tag + ", got tag response from previous command " + response + " for " + getLogId());
-                    Iterator<ImapResponse> iter = responses.iterator();
-                    while (iter.hasNext()) {
-                        ImapResponse delResponse = iter.next();
-                        if (delResponse.mTag != null || delResponse.size() < 2
-                                || (!ImapResponseParser.equalsIgnoreCase(delResponse.get(1), "EXISTS") && !ImapResponseParser.equalsIgnoreCase(delResponse.get(1), "EXPUNGE"))) {
-                            iter.remove();
-                        }
-                    }
-                    response.mTag = null;
-                    continue;
-                }
-                if (untaggedHandler != null) {
-                    untaggedHandler.handleAsyncUntaggedResponse(response);
-                }
-                responses.add(response);
-            } while (response.mTag == null);
-            if (response.size() < 1 || !ImapResponseParser.equalsIgnoreCase(response.get(0), "OK")) {
-                throw new ImapException("Command: " + commandToLog + "; response: " + response.toString(), response.getAlertText());
-            }
-            return responses;
+            return readStatusResponse(tag, commandToLog, untaggedHandler);
         }
     }
 
@@ -2989,7 +3047,7 @@ public class ImapStore extends Store {
                             } catch (Exception e) {
                                 Log.e(K9.LOG_TAG, "Unable to get oldUidNext for " + getLogId(), e);
                             }
-                            
+
                             /*
                              * This makes sure 'oldUidNext' is never smaller than 'UIDNEXT' from
                              * the last loop iteration. This way we avoid looping endlessly causing
@@ -2998,9 +3056,9 @@ public class ImapStore extends Store {
                              * See issue 4907
                              */
                             if (oldUidNext < lastUidNext) {
-                            	oldUidNext = lastUidNext;
+                                oldUidNext = lastUidNext;
                             }
-                            
+
                             ImapConnection oldConnection = mConnection;
                             internalOpen(OPEN_MODE_RO);
                             ImapConnection conn = mConnection;
@@ -3049,11 +3107,11 @@ public class ImapStore extends Store {
                             if (startUid < newUidNext - mAccount.getDisplayCount()) {
                                 startUid = newUidNext - mAccount.getDisplayCount();
                             }
-                            
-                            lastUidNext = newUidNext;
                             if (startUid < 1) {
                                 startUid = 1;
                             }
+
+                            lastUidNext = newUidNext;
                             if (newUidNext > startUid) {
 
                                 if (K9.DEBUG)
