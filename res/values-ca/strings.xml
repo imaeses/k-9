@@ -535,7 +535,6 @@
     <string name="account_settings_crypto_auto_signature_summary">Utilitza l\'adreça del compte per endevinar la clau de la signatura.</string>
     <string name="account_settings_crypto_auto_encrypt">Encriptació automàtica</string>
     <string name="account_settings_crypto_auto_encrypt_summary">S\'encripta automàticament quan es troba la clau pública del destinatari.</string>
-    <string name="account_settings_crypto_apg_not_installed">No s\'ha instal·lat l\'APG.</string>
 
     <string name="account_settings_mail_check_frequency_label">Freqüència de comprovació de les carpetes</string>
 
@@ -895,13 +894,7 @@
     <string name="font_size_medium">Mitjà</string>
     <string name="font_size_large">Gran</string>
     <string name="font_size_larger">Més gran</string>
-
-    <string name="font_size_webview_smaller">El més petit</string>
-    <string name="font_size_webview_small">Més petit</string>
-    <string name="font_size_webview_normal">Normal</string>
-    <string name="font_size_webview_large">Gran</string>
-    <string name="font_size_webview_larger">El més gran</string>
-
+    
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Comprova \"Configuració\" -&gt; \"Utilitza la galeria la Galeria d\'errors\" per poder adjuntar imatges o vídeos utilitzant la Galeria 3D.</string>
 

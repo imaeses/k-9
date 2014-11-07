@@ -536,8 +536,7 @@
     <string name="account_settings_crypto_auto_signature_summary">Χρήση της διεύθυνσης του λογαριασμού για να βρεις το κλειδί της υπογραφής.</string>
     <string name="account_settings_crypto_auto_encrypt">Αυτόματη κρυπτογράφηση</string>
     <string name="account_settings_crypto_auto_encrypt_summary">Αυτόματη κρυπτογράφηση αν ένα δημόσιο κλειδί ταιριάζει σε παραλήπτη.</string>
-    <string name="account_settings_crypto_apg_not_installed">APG μη εγκατεστημένο</string>
-
+    
     <string name="account_settings_mail_check_frequency_label">Συχνότητα ενημέρωσης φακέλων</string>
 
     <string name="account_settings_storage_title">Αποθήκευση</string>
@@ -895,12 +894,6 @@
     <string name="font_size_medium">Μεσαίο</string>
     <string name="font_size_large">Μεγάλο</string>
     <string name="font_size_larger">Μεγαλύτερο</string>
-
-    <string name="font_size_webview_smaller">Ελάχιστο</string>
-    <string name="font_size_webview_small">Μικρό</string>
-    <string name="font_size_webview_normal">Κανονικό</string>
-    <string name="font_size_webview_large">Μεγάλο</string>
-    <string name="font_size_webview_larger">Μεγαλύτερο</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Ελέγξτε \'Ρυθμίσεις\' -&gt; \'Παράκαμψη σφάλματος πινακοθήκης\' για να μπορείτε να συνάψετε εικόνες ή βίντεο με το Gallery 3D.</string>

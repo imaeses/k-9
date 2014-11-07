@@ -540,7 +540,6 @@
     <string name="account_settings_crypto_auto_signature_summary">Použít emailovou adresu účtu pro odhadnutí podpisového klíče.</string>
     <string name="account_settings_crypto_auto_encrypt">Automaticky zašifrovat</string>
     <string name="account_settings_crypto_auto_encrypt_summary">Automaticky zašifrovat jestliže veřejný klíč odpovídá adresátovy.</string>
-    <string name="account_settings_crypto_apg_not_installed">APG není nainstalován</string>
 
     <string name="account_settings_mail_check_frequency_label">Frekvence dotazování složky</string>
 
@@ -899,12 +898,6 @@
     <string name="font_size_medium">Střední</string>
     <string name="font_size_large">Velký</string>
     <string name="font_size_larger">Největší</string>
-
-    <string name="font_size_webview_smaller">Nejmenší</string>
-    <string name="font_size_webview_small">Malý</string>
-    <string name="font_size_webview_normal">Normální</string>
-    <string name="font_size_webview_large">Velký</string>
-    <string name="font_size_webview_larger">Největší</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Zaškrtněte \"Možnosti\" -&gt; \"Obejít chybu Galerie\", abyste byli schopni připojit obrázky nebo video pomocí Galerie 3D.</string>

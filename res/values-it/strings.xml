@@ -535,8 +535,7 @@
     <string name="account_settings_crypto_auto_signature_summary">Utilizza l\'indirizzo email dell\'account per dedurre la chiave di firma.</string>
     <string name="account_settings_crypto_auto_encrypt">Cifratura automatica</string>
     <string name="account_settings_crypto_auto_encrypt_summary">Cifra automaticamente se la chiave pubblica corrisponde al destinatario</string>
-    <string name="account_settings_crypto_apg_not_installed">APG non installato</string>
-
+    
     <string name="account_settings_mail_check_frequency_label">Frequenza verifica cartelle</string>
 
     <string name="account_settings_storage_title">Memorizzazione</string>
@@ -894,13 +893,7 @@
     <string name="font_size_medium">Medio</string>
     <string name="font_size_large">Grande</string>
     <string name="font_size_larger">Più grande</string>
-
-    <string name="font_size_webview_smaller">Più piccolo</string>
-    <string name="font_size_webview_small">Piccolo</string>
-    <string name="font_size_webview_normal">Normale</string>
-    <string name="font_size_webview_large">Grande</string>
-    <string name="font_size_webview_larger">Più grande</string>
-
+    
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Controlla \"Impostazioni\" -&gt; \"Aggira bug Galleria immagini\" per allegare immagini o video usando Galleria 3D.</string>
 

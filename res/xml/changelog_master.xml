@@ -8,6 +8,14 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="4.905" versioncode="19020">
+        <change>Configure mail notifications by folder class</change>
+        <change>Add support for delete confirmation in message list </change>
+        <change>Add privacy pref to omit K-9 User-Agent header</change>
+        <change>Add preference for setting timezone to UTC</change>
+        <change>Client certificate authentication</change>
+        <change>Change message body font size with slider</change>
+    </release>
     <release version="4.904.03" versioncode="19019">
        <change>Show correctly decoded first line of PGP/MIME signed messages in Message List</change>
        <change>Auto-select Sign/Encrypt based on message being replied to</change>
@@ -18,8 +26,6 @@
     <release version="4.904.01" versioncode="19017">
         <change>Squeaky Mail now uses key flags when selecting keys for encrypting/signing (PGP KeyRing version 1.9 and above)</change>
         <change>Compatible with Enigmail, Mutt, and other PGP mail clients</change>
-        <change>Requires PGP KeyRing 1.9</change>
-        <change>IMPORTANT: *YOU MUST OPEN PGP KeyRing* after installing so it can do some prep work</change>
     </release>    
     <release version="4.904" versioncode="19016">
         <change>Eased battery drain from IMAP polling</change>

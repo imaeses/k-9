@@ -535,8 +535,7 @@
     <string name="account_settings_crypto_auto_signature_summary">Використовувати електронну адресу для формування ключа підпису.</string>
     <string name="account_settings_crypto_auto_encrypt">Автошифрування</string>
     <string name="account_settings_crypto_auto_encrypt_summary">Автоматична установка шифрування, якщо співпадає відкритий ключ одержувача.</string>
-    <!-- NEW: <string name="account_settings_crypto_apg_not_installed">APG not installed</string>-->
-
+    
     <string name="account_settings_mail_check_frequency_label">Частота опитування папок</string>
 
     <string name="account_settings_storage_title">Пам’ять</string>
@@ -894,12 +893,6 @@
     <string name="font_size_medium">Середній</string>
     <string name="font_size_large">Великий</string>
     <string name="font_size_larger">Найбільший</string>
-
-    <string name="font_size_webview_smaller">Менший</string>
-    <string name="font_size_webview_small">Малий</string>
-    <string name="font_size_webview_normal">Нормальний</string>
-    <string name="font_size_webview_large">Великий</string>
-    <string name="font_size_webview_larger">Найбільший</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Виберіть \"Налаштування\" -&gt; \"Використовувати обхід помилок Галереї\" для вкладень зображень та відео з допомогою Gallery 3D.</string>

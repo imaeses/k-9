@@ -535,8 +535,7 @@
     <string name="account_settings_crypto_auto_signature_summary">İmza anahtarını tahmin etmek için hesapların e-posta adreslerini kullan.</string>
     <string name="account_settings_crypto_auto_encrypt">Otomatik şifrele</string>
     <string name="account_settings_crypto_auto_encrypt_summary">Eğer paylaşılan anahtar alıcınınkine eşleşiyorsa otomatik şifrele.</string>
-    <!-- NEW: <string name="account_settings_crypto_apg_not_installed">APG not installed</string>-->
-
+    
     <string name="account_settings_mail_check_frequency_label">Klasör veri toplama sıklığı</string>
 
     <string name="account_settings_storage_title">Depolama</string>
@@ -894,12 +893,6 @@
     <string name="font_size_medium">Orta</string>
     <string name="font_size_large">Büyük</string>
     <string name="font_size_larger">Daha büyük</string>
-
-    <string name="font_size_webview_smaller">En küçük</string>
-    <string name="font_size_webview_small">Daha küçük</string>
-    <string name="font_size_webview_normal">Normal</string>
-    <string name="font_size_webview_large">Daha büyük</string>
-    <string name="font_size_webview_larger">En büyük</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">\"Ayarlar\" -&gt; \"Galeri hata çalışması kullan\" işaretleyerek 3D Galeri kullanarak resimler veya videoları ekleyin.</string>

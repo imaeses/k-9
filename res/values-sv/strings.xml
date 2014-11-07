@@ -536,8 +536,7 @@
     <string name="account_settings_crypto_auto_signature_summary">Använd kontots e-postadress för att gissa signaturnyckeln.</string>
     <string name="account_settings_crypto_auto_encrypt">Auto-kryptera</string>
     <string name="account_settings_crypto_auto_encrypt_summary">Kryptera automatiskt om en publik nyckel machar en mottagare.</string>
-    <string name="account_settings_crypto_apg_not_installed">APG är inte installerat</string>
-
+    
     <string name="account_settings_mail_check_frequency_label">Frekvens för att kontrollera mappar</string>
 
     <string name="account_settings_storage_title">Lagring</string>
@@ -895,12 +894,6 @@
     <string name="font_size_medium">Stor</string>
     <string name="font_size_large">Större</string>
     <string name="font_size_larger">Störst</string>
-
-    <string name="font_size_webview_smaller">Minst</string>
-    <string name="font_size_webview_small">Liten</string>
-    <string name="font_size_webview_normal">Normal</string>
-    <string name="font_size_webview_large">Större</string>
-    <string name="font_size_webview_larger">Störst</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Kontrollera \"Inställningar\" -&gt; \"Använd work-adound för bug i Gallery\" för att kunna bifoga bilder och filmer med Gallery 3D.</string>

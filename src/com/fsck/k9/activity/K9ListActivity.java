@@ -1,20 +1,23 @@
 package com.fsck.k9.activity;
 
+import android.support.v4.app.ListFragment;
+import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.AdapterView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.os.Bundle;
 
-import com.actionbarsherlock.app.SherlockListActivity;
 import com.fsck.k9.activity.K9ActivityCommon.K9ActivityMagic;
 import com.fsck.k9.activity.misc.SwipeGestureDetector.OnSwipeGestureListener;
 import com.imaeses.squeaky.K9;
 
 
-public class K9ListActivity extends SherlockListActivity implements K9ActivityMagic {
+public class K9ListActivity extends ActionBarActivity implements K9ActivityMagic {
 
     private K9ActivityCommon mBase;
+    private ListFragment listFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,5 +78,13 @@ public class K9ListActivity extends SherlockListActivity implements K9ActivityMa
         }
 
         return super.onKeyUp(keyCode, event);
+    }
+    
+    public ListView getListView() {
+    	return listFragment.getListView();
+    }
+    
+    public void setListAdapter( ListAdapter listAdapter ) {
+    	listFragment.setListAdapter( listAdapter );
     }
 }

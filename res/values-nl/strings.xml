@@ -535,8 +535,7 @@
     <string name="account_settings_crypto_auto_signature_summary">Gebruik het e-mailadres van je account om de digitale sleutel te raden.</string>
     <string name="account_settings_crypto_auto_encrypt">Auto-versleutelen</string>
     <string name="account_settings_crypto_auto_encrypt_summary">Automatisch verslutelen aanzetten als een publieke sleutel overeenkomt met een ontvanger.</string>
-    <string name="account_settings_crypto_apg_not_installed">APG niet geinstalleerd</string>
-
+    
     <string name="account_settings_mail_check_frequency_label">Mappen poll controleer frequentie</string>
 
     <string name="account_settings_storage_title">Opslag</string>
@@ -894,12 +893,6 @@
     <string name="font_size_medium">Gemiddeld</string>
     <string name="font_size_large">Groot</string>
     <string name="font_size_larger">Groter</string>
-
-    <string name="font_size_webview_smaller">Kleinste</string>
-    <string name="font_size_webview_small">Kleiner</string>
-    <string name="font_size_webview_normal">Normaal</string>
-    <string name="font_size_webview_large">Langer</string>
-    <string name="font_size_webview_larger">Langste</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Controleer \"Instellingen\" -&gt; \"Use Gallery bug work-around\" to be able to attach images or videos using Gallery 3D.</string>

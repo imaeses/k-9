@@ -24,9 +24,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.Window;
 
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -2913,7 +2913,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getSupportMenuInflater().inflate(R.menu.message_compose_option, menu);
+        getMenuInflater().inflate(R.menu.message_compose_option, menu);
 
         mMenu = menu;
 

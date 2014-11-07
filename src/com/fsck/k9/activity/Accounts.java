@@ -29,9 +29,9 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ContextMenu;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
+import android.support.v7.app.ActionBar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -439,7 +439,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         mHandler.setViewTitle();
 
         // Handle activity restarts because of a configuration change (e.g. rotating the screen)
-        mNonConfigurationInstance = (NonConfigurationInstance) getLastNonConfigurationInstance();
+        mNonConfigurationInstance = (NonConfigurationInstance) getLastCustomNonConfigurationInstance();
         if (mNonConfigurationInstance != null) {
             mNonConfigurationInstance.restore(this);
         }
@@ -526,7 +526,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
      * Save the reference to a currently displayed dialog or a running AsyncTask (if available).
      */
     @Override
-    public Object onRetainNonConfigurationInstance() {
+    public Object onRetainCustomNonConfigurationInstance() {
         Object retain = null;
         if (mNonConfigurationInstance != null && mNonConfigurationInstance.retain()) {
             retain = mNonConfigurationInstance;
@@ -1327,7 +1327,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getSupportMenuInflater().inflate(R.menu.accounts_option, menu);
+        getMenuInflater().inflate(R.menu.accounts_option, menu);
         mRefreshMenuItem = menu.findItem(R.id.check_mail);
         return true;
     }

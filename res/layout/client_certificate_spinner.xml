@@ -14,7 +14,7 @@
         android:id="@+id/client_certificate_spinner_delete"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="@drawable/abs__list_selector_holo_light"
+        android:background="@drawable/selectable_item_background"
         android:contentDescription="@string/client_certificate_spinner_delete"
         android:padding="8dp"
         android:src="?attr/iconActionCancel" />

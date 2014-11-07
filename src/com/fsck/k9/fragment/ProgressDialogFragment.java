@@ -4,12 +4,10 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 
-import com.actionbarsherlock.app.SherlockDialogFragment;
-
-
-public class ProgressDialogFragment extends SherlockDialogFragment {
+public class ProgressDialogFragment extends DialogFragment {
     protected static final String ARG_TITLE = "title";
     protected static final String ARG_MESSAGE = "message";
 

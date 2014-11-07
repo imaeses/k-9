@@ -536,8 +536,7 @@
     <string name="account_settings_crypto_auto_signature_summary">Benyt kontoens mail addresse til at gætte signaturnøgle.</string>
     <!-- NEW: <string name="account_settings_crypto_auto_encrypt">Auto-encrypt</string>-->
     <!-- NEW: <string name="account_settings_crypto_auto_encrypt_summary">Automatically set encrypt if a public key matches a recipient.</string>-->
-    <!-- NEW: <string name="account_settings_crypto_apg_not_installed">APG not installed</string>-->
-
+    
     <string name="account_settings_mail_check_frequency_label">Frekvens for hentning af mails</string>
 
     <string name="account_settings_storage_title">Lagring</string>
@@ -895,12 +894,6 @@
     <string name="font_size_medium">Stor</string>
     <string name="font_size_large">Større</string>
     <string name="font_size_larger">Størst</string>
-
-    <string name="font_size_webview_smaller">Minst</string>
-    <string name="font_size_webview_small">Lillle</string>
-    <string name="font_size_webview_normal">Normal</string>
-    <string name="font_size_webview_large">Større</string>
-    <string name="font_size_webview_larger">Størst</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Kontroller \"Indstillinger\" -&gt; \"Benyt Gallery bug work-around\" for at kunne vedhæfte billeder og videoer med Gallery 3D.</string>

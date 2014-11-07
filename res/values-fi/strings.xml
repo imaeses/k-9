@@ -535,8 +535,7 @@
     <string name="account_settings_crypto_auto_signature_summary">Käytä tilin sähköpostiosoitetta allekirjoitusavaimen arvaamiseen.</string>
     <string name="account_settings_crypto_auto_encrypt">Automaattinen salaus</string>
     <string name="account_settings_crypto_auto_encrypt_summary">Salaa automaattisesti, jos julkinen avain täsmää vastaanottajan avaimeen.</string>
-    <string name="account_settings_crypto_apg_not_installed">APG:tä ei ole asennettu</string>
-
+    
     <string name="account_settings_mail_check_frequency_label">Kansioiden tarkistus</string>
 
     <string name="account_settings_storage_title">Tallennus</string>
@@ -894,12 +893,6 @@
     <string name="font_size_medium">Keskikoko</string>
     <string name="font_size_large">Suuri</string>
     <string name="font_size_larger">Suurin</string>
-
-    <string name="font_size_webview_smaller">Pienin</string>
-    <string name="font_size_webview_small">Pienempi</string>
-    <string name="font_size_webview_normal">Normaali</string>
-    <string name="font_size_webview_large">Suurempi</string>
-    <string name="font_size_webview_larger">Suurin</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Tarkista Asetukset -&gt; Ota käyttöön Gallery-ohjelmavirheen kierto mahdollistaaksesi kuvien tai videoiden liittämisen Gallery 3D -ohjelmalla.</string>

@@ -1,14 +1,14 @@
 package com.fsck.k9.activity;
 
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.MotionEvent;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.fsck.k9.activity.K9ActivityCommon.K9ActivityMagic;
 import com.fsck.k9.activity.misc.SwipeGestureDetector.OnSwipeGestureListener;
 
 
-public class K9FragmentActivity extends SherlockFragmentActivity implements K9ActivityMagic {
+public class K9FragmentActivity extends ActionBarActivity implements K9ActivityMagic {
 
     private K9ActivityCommon mBase;
 

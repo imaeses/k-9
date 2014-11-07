@@ -536,8 +536,7 @@
     <string name="account_settings_crypto_auto_signature_summary">Használja az email címet a titkosítási kulcshoz</string>
     <string name="account_settings_crypto_auto_encrypt">Automatikusan titkosított</string>
     <!-- NEW: <string name="account_settings_crypto_auto_encrypt_summary">Automatically set encrypt if a public key matches a recipient.</string>-->
-    <string name="account_settings_crypto_apg_not_installed">Az APG nincs telepítve</string>
-
+    
     <string name="account_settings_mail_check_frequency_label">Frissítés gyakorisága</string>
 
     <string name="account_settings_storage_title">Tárolás</string>
@@ -895,13 +894,7 @@
     <string name="font_size_medium">Közepes</string>
     <string name="font_size_large">Nagy</string>
     <string name="font_size_larger">Nagyobb</string>
-
-    <string name="font_size_webview_smaller">Kisebb</string>
-    <string name="font_size_webview_small">Kicsi</string>
-    <string name="font_size_webview_normal">Normál</string>
-    <string name="font_size_webview_large">Nagyobb</string>
-    <string name="font_size_webview_larger">Legnagyobb</string>
-
+    
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Kapcsolja be a \"Beállítások\" -&gt; \"Galéria hiba\" ha 3D galériából akar képet mellékelni.</string>
 

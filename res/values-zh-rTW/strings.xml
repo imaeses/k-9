@@ -538,8 +538,7 @@
     <string name="account_settings_crypto_auto_signature_summary">使用帳戶電子郵件回覆，則自動檢查比對簽名金鑰。</string>
     <string name="account_settings_crypto_auto_encrypt">自動加密</string>
     <string name="account_settings_crypto_auto_encrypt_summary">當檢查比對收件人公鑰符合時，自動進行加密。</string>
-    <string name="account_settings_crypto_apg_not_installed">未安裝APG</string>
-
+    
     <string name="account_settings_mail_check_frequency_label">上層信件匣檢查頻率</string>
 
     <string name="account_settings_storage_title">帳戶儲存</string>
@@ -890,12 +889,6 @@
     <string name="font_size_medium">中等</string>
     <string name="font_size_large">大</string>
     <string name="font_size_larger">最大</string>
-
-    <string name="font_size_webview_smaller">最小</string>
-    <string name="font_size_webview_small">較小</string>
-    <string name="font_size_webview_normal">正常</string>
-    <string name="font_size_webview_large">較大</string>
-    <string name="font_size_webview_larger">最大</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">選擇「設定」-&gt;「避免相簿發生錯誤」來啟用3D相簿模式新增附件或影片。</string>

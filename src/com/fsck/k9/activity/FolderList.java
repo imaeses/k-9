@@ -32,10 +32,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.SearchView;
+import android.support.v7.app.ActionBar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.SearchView;
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.FolderMode;
 import com.fsck.k9.AccountStats;
@@ -332,7 +332,7 @@ public class FolderList extends K9ListActivity {
 
     @SuppressWarnings("unchecked")
     private void restorePreviousData() {
-        final Object previousData = getLastNonConfigurationInstance();
+        final Object previousData = getLastCustomNonConfigurationInstance();
 
         if (previousData != null) {
             mAdapter.mFolders = (ArrayList<FolderInfoHolder>) previousData;
@@ -341,7 +341,7 @@ public class FolderList extends K9ListActivity {
     }
 
 
-    @Override public Object onRetainNonConfigurationInstance() {
+    @Override public Object onRetainCustomNonConfigurationInstance() {
         return (mAdapter == null) ? null : mAdapter.mFolders;
     }
 
@@ -582,7 +582,7 @@ public class FolderList extends K9ListActivity {
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getSupportMenuInflater().inflate(R.menu.folder_list_option, menu);
+        getMenuInflater().inflate(R.menu.folder_list_option, menu);
         mRefreshMenuItem = menu.findItem(R.id.check_mail);
         configureFolderSearchView(menu);
         return true;

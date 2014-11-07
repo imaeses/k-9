@@ -10,10 +10,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
-import com.actionbarsherlock.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.Window;
+import android.widget.SearchView;
 
 import android.view.View;
 import android.widget.AdapterView;
@@ -170,7 +170,7 @@ public class ChooseFolder extends K9ListActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getSupportMenuInflater().inflate(R.menu.folder_select_option, menu);
+        getMenuInflater().inflate(R.menu.folder_select_option, menu);
         configureFolderSearchView(menu);
         return true;
     }

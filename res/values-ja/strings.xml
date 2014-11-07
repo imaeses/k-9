@@ -535,8 +535,7 @@
     <string name="account_settings_crypto_auto_signature_summary">このアカウントのE-Mailアドレスから署名の鍵を自動的に決定する</string>
     <string name="account_settings_crypto_auto_encrypt">自動暗号化</string>
     <string name="account_settings_crypto_auto_encrypt_summary">公開鍵が宛先と一致するなら自動的に暗号化する</string>
-    <string name="account_settings_crypto_apg_not_installed">APGがインストールされていません</string>
-
+    
     <string name="account_settings_mail_check_frequency_label">同期フォルダの同期間隔</string>
 
     <string name="account_settings_storage_title">ストレージ</string>
@@ -893,12 +892,6 @@
     <string name="font_size_medium">中</string>
     <string name="font_size_large">大</string>
     <string name="font_size_larger">極大</string>
-
-    <string name="font_size_webview_smaller">極小</string>
-    <string name="font_size_webview_small">小</string>
-    <string name="font_size_webview_normal">標準</string>
-    <string name="font_size_webview_large">大</string>
-    <string name="font_size_webview_larger">極大</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">ギャラリ3Dを使って画像/動画を添付するには\"設定\" -&gt; \"ギャラリのバグ回避\"をチェックしてください</string>

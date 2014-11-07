@@ -561,8 +561,7 @@ de plus</string>
     <string name="account_settings_crypto_auto_signature_summary">Utiliser l\'adresse e-mail du compte pour déduire la clé de signature</string>
     <string name="account_settings_crypto_auto_encrypt">Encryption automatique</string>
     <string name="account_settings_crypto_auto_encrypt_summary">Encryption automatique si une clé publique correspond au destinataire.</string>
-    <string name="account_settings_crypto_apg_not_installed">APG non installé</string>
-
+    
     <string name="account_settings_mail_check_frequency_label">Fréquence de vérification du dossier</string>
 
     <string name="account_settings_storage_title">Stockage</string>
@@ -920,12 +919,6 @@ de plus</string>
     <string name="font_size_medium">Moyen</string>
     <string name="font_size_large">Grand</string>
     <string name="font_size_larger">Plus grand</string>
-
-    <string name="font_size_webview_smaller">Plus petit</string>
-    <string name="font_size_webview_small">Petit</string>
-    <string name="font_size_webview_normal">Normal</string>
-    <string name="font_size_webview_large">Grand</string>
-    <string name="font_size_webview_larger">Plus grand</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Cochez «\u00A0Paramètres &gt; Utiliser le contounement du bogue de Gallerie\u00A0» pour être capable d\'attacher des images ou vidéos en utilisant Gallerie 3D.</string>

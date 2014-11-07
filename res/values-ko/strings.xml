@@ -535,8 +535,7 @@
     <string name="account_settings_crypto_auto_signature_summary">계정의 이메일 주소를 통해 서명키를 추측합니다</string>
     <string name="account_settings_crypto_auto_encrypt">자동 암호화</string>
     <string name="account_settings_crypto_auto_encrypt_summary">공용 키가 수신자와 일치하면 자동으로 암호화합니다</string>
-    <string name="account_settings_crypto_apg_not_installed">APG가 설치되지 않음</string>
-
+    
     <string name="account_settings_mail_check_frequency_label">폴더 수신 빈도</string>
 
     <string name="account_settings_storage_title">저장 장치</string>
@@ -894,12 +893,6 @@
     <string name="font_size_medium">중간</string>
     <string name="font_size_large">크게</string>
     <string name="font_size_larger">더 크게</string>
-
-    <string name="font_size_webview_smaller">가장 작음</string>
-    <string name="font_size_webview_small">더 작게</string>
-    <string name="font_size_webview_normal">보통</string>
-    <string name="font_size_webview_large">더 크게</string>
-    <string name="font_size_webview_larger">가장 크게</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">갤러리 3D에서 이미지나 비디오를 첨부하려면 \"설정\" -&gt; \"갤러리 버그 회피\"를 확인하십시오.</string>

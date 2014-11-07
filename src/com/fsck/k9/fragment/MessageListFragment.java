@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
@@ -58,13 +59,12 @@ import android.widget.ListView;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.Window;
 
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.SortType;
 import com.fsck.k9.FontSizes;
@@ -85,7 +85,6 @@ import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Folder;
-
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.store.LocalStore;
@@ -103,12 +102,11 @@ import com.fsck.k9.search.SqlQueryBuilder;
 import com.handmark.pulltorefresh.library.ILoadingLayout;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
-
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
 
-public class MessageListFragment extends SherlockFragment implements OnItemClickListener,
+public class MessageListFragment extends Fragment implements OnItemClickListener,
         ConfirmationDialogFragmentListener, LoaderCallbacks<Cursor> {
 
     private static final String[] THREADED_PROJECTION = {
@@ -2227,7 +2225,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
             }
 
             if (mActionMode == null) {
-                mActionMode = getSherlockActivity().startActionMode(mActionModeCallback);
+                mActionMode = getActivity().startActionMode(mActionModeCallback);
             }
             computeBatchDirection();
             updateActionModeTitle();
@@ -2286,7 +2284,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
                 return;
             }
         } else {
-            mActionMode = getSherlockActivity().startActionMode(mActionModeCallback);
+            mActionMode = getActivity().startActionMode(mActionModeCallback);
         }
 
         if (selected) {
@@ -3543,7 +3541,7 @@ public class MessageListFragment extends SherlockFragment implements OnItemClick
         }
 
         if (mActionMode == null) {
-            mActionMode = getSherlockActivity().startActionMode(mActionModeCallback);
+            mActionMode = getActivity().startActionMode(mActionModeCallback);
         }
 
         recalculateSelectionCount();

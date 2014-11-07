@@ -535,8 +535,7 @@
     <string name="account_settings_crypto_auto_signature_summary">Naudoti paskyros el. pašto adresą parašo rakto nustatymui.</string>
     <string name="account_settings_crypto_auto_encrypt">Automatinis šifravimas</string>
     <string name="account_settings_crypto_auto_encrypt_summary">Jei viešas raktas atitinka gavėją automatiškai įjungti šifravimą.</string>
-    <string name="account_settings_crypto_apg_not_installed">AGP neįdiegta</string>
-
+    
     <string name="account_settings_mail_check_frequency_label">Aplanko tikrinimo dažnis</string>
 
     <string name="account_settings_storage_title">Saugykla</string>
@@ -871,12 +870,6 @@
     <string name="font_size_medium">Vidutinis</string>
     <string name="font_size_large">Didelis</string>
     <string name="font_size_larger">Didesnis</string>
-
-    <string name="font_size_webview_smaller">Mažiausias</string>
-    <string name="font_size_webview_small">Mažesnis</string>
-    <string name="font_size_webview_normal">Įprastas</string>
-    <string name="font_size_webview_large">Didesnis</string>
-    <string name="font_size_webview_larger">Didžiausias</string>
 
     <!-- Note: Contains references to preferences_action and misc_preferences_attachment_title -->
     <string name="message_compose_buggy_gallery">Norėdami pridėti paveikslėlius ir video naudojant Gallery 3D, pažymėkite „Nustatymai“ -&gt; „Naudoti galerijos klaidos apėjimą“</string>
