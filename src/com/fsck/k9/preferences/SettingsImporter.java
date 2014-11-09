@@ -382,7 +382,7 @@ public class SettingsImporter {
         // Mark account as disabled if the AuthType isn't EXTERNAL and the
         // settings file didn't contain a password
         boolean createAccountDisabled = AuthType.EXTERNAL != incoming.authenticationType &&
-                (incoming.password == null || incoming.password.isEmpty());
+                (incoming.password == null || incoming.password.length() == 0);
 
         if (account.outgoing == null && !WebDavStore.STORE_TYPE.equals(account.incoming.type)) {
             // All account types except WebDAV need to provide outgoing server settings
@@ -405,8 +405,8 @@ public class SettingsImporter {
             boolean outgoingPasswordNeeded = AuthType.EXTERNAL != outgoing.authenticationType &&
                     !WebDavStore.STORE_TYPE.equals(outgoing.type) &&
                     outgoing.username != null &&
-                    !outgoing.username.isEmpty() &&
-                    (outgoing.password == null || outgoing.password.isEmpty());
+                    outgoing.username.length() > 0 &&
+                    (outgoing.password == null || outgoing.password.length() == 0);
             createAccountDisabled = outgoingPasswordNeeded || createAccountDisabled;
         }
 

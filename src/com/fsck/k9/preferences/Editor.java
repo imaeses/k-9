@@ -1,5 +1,6 @@
 package com.fsck.k9.preferences;
 
+import android.annotation.TargetApi;
 import android.util.Log;
 
 import com.imaeses.squeaky.K9;
@@ -140,7 +141,7 @@ public class Editor implements android.content.SharedPreferences.Editor {
         return this;
     }
 
-    @Override
+    //@Override
     public android.content.SharedPreferences.Editor putStringSet(String arg0, Set<String> arg1) {
         throw new RuntimeException("Not implemented");
     }

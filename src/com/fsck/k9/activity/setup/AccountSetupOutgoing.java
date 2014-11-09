@@ -170,7 +170,7 @@ public class AccountSetupOutgoing extends K9Activity implements OnClickListener,
             }
             mSecurityTypeView.setSelection(mCurrentSecurityTypeViewPosition, false);
 
-            if (settings.username != null && !settings.username.isEmpty()) {
+            if (settings.username != null && settings.username.length() > 0 ) {
                 mUsernameView.setText(settings.username);
                 mRequireLoginView.setChecked(true);
                 mRequireLoginSettingsView.setVisibility(View.VISIBLE);

@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.TextView;
@@ -83,8 +84,12 @@ public class UpgradeDatabases extends K9Activity {
         intent.putExtra(EXTRA_START_INTENT, startIntent);
 
         // Make sure this activity is only running once
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
+        if( Build.VERSION.SDK_INT >= 11 ) {
+        	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        } else {
+        	intent.addFlags( Intent.FLAG_ACTIVITY_SINGLE_TOP );
+        }
+        
         context.startActivity(intent);
         return true;
     }

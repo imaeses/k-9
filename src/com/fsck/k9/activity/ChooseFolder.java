@@ -13,8 +13,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
-import android.widget.SearchView;
-
+import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.SearchViewCompat;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -29,7 +29,6 @@ import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.MessagingException;
-
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
@@ -177,13 +176,13 @@ public class ChooseFolder extends K9ListActivity {
 
     private void configureFolderSearchView(Menu menu) {
         final MenuItem folderMenuItem = menu.findItem(R.id.filter_folders);
-        final SearchView folderSearchView = (SearchView) folderMenuItem.getActionView();
-        folderSearchView.setQueryHint(getString(R.string.folder_list_filter_hint));
-        folderSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        final View folderSearchView = MenuItemCompat.getActionView( folderMenuItem );
+        SearchViewCompat.setQueryHint( folderSearchView, getString(R.string.folder_list_filter_hint) );
+        SearchViewCompat.setOnQueryTextListener(folderSearchView, new SearchViewCompat.OnQueryTextListenerCompat() {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                folderMenuItem.collapseActionView();
+                MenuItemCompat.collapseActionView( folderMenuItem );
                 return true;
             }
 

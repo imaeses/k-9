@@ -4,10 +4,11 @@ package com.fsck.k9.view;
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.security.KeyChain;
-import android.security.KeyChainAliasCallback;
+//import android.security.KeyChain;
+//import android.security.KeyChainAliasCallback;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
+@TargetApi(14)
 public class ClientCertificateSpinner extends LinearLayout {
     Activity mActivity;
     OnClientCertificateChangedListener mListener;
@@ -99,7 +101,7 @@ public class ClientCertificateSpinner extends LinearLayout {
     public void chooseCertificate() {
         // NOTE: keyTypes, issuers, hosts, port are not known before we actually
         // open a connection, thus we cannot set them here!
-        KeyChain.choosePrivateKeyAlias(mActivity, new KeyChainAliasCallback() {
+        android.security.KeyChain.choosePrivateKeyAlias(mActivity, new android.security.KeyChainAliasCallback() {
             @Override
             public void alias(String alias) {
                 if (K9.DEBUG)

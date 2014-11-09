@@ -104,8 +104,10 @@ public class MessageWebView extends RigidWebView {
             webSettings.setLoadWithOverviewMode(true);
         }
 
-        disableDisplayZoomControls();
-
+        if( Build.VERSION.SDK_INT >= 11 ) {
+        	disableDisplayZoomControls();
+        }
+        	
         webSettings.setJavaScriptEnabled(false);
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
@@ -118,8 +120,11 @@ public class MessageWebView extends RigidWebView {
 
         disableOverscrolling();
         
-        webSettings.setTextZoom(K9.getFontSizes().getMessageViewContentAsPercent());
-
+        if( Build.VERSION.SDK_INT >= 14 ) {
+        	webSettings.setTextZoom(K9.getFontSizes().getMessageViewContentAsPercent());
+        } else {
+        	webSettings.setTextSize(K9.getFontSizes().getMessageViewContent( K9.getFontSizes().getMessageViewContentAsPercent() ));
+        }
         // Disable network images by default.  This is overridden by preferences.
         blockNetworkData(true);
 

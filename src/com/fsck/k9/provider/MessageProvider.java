@@ -1,5 +1,6 @@
 package com.fsck.k9.provider;
 
+import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -816,6 +817,7 @@ public class MessageProvider extends ContentProvider {
             mCursor.unregisterDataSetObserver(observer);
         }
 
+        @TargetApi(11)
         @Override
         public int getType(int columnIndex) {
             checkClosed();

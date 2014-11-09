@@ -21,6 +21,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -28,7 +29,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ContextMenu;
-
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -220,9 +221,9 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
             runOnUiThread(new Runnable() {
                 public void run() {
                     if (progress) {
-                        mRefreshMenuItem.setActionView(R.layout.actionbar_indeterminate_progress_actionview);
+                        MenuItemCompat.setActionView( mRefreshMenuItem, R.layout.actionbar_indeterminate_progress_actionview);
                     } else {
-                        mRefreshMenuItem.setActionView(null);
+                        MenuItemCompat.setActionView( mRefreshMenuItem, null);
                     }
                 }
             });
@@ -332,8 +333,15 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
 
     public static void listAccounts(Context context) {
         Intent intent = new Intent(context, Accounts.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        
+        if( Build.VERSION.SDK_INT >= 11 ) {
+	        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP |
+	                Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        } else {
+        	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP |
+	                Intent.FLAG_ACTIVITY_SINGLE_TOP );
+        }
+        
         intent.putExtra(EXTRA_STARTUP, false);
         context.startActivity(intent);
     }

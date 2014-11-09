@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -94,6 +95,11 @@ public class AccountSetupBasics extends K9Activity
         mPasswordView.addTextChangedListener(this);
         mClientCertificateCheckBox.setOnCheckedChangeListener(this);
         mClientCertificateSpinner.setOnClientCertificateChangedListener(this);
+        
+        if( Build.VERSION.SDK_INT < 14 ) {
+        	mClientCertificateCheckBox.setVisibility( View.GONE );
+        }
+        
     }
 
     @Override

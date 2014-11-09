@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <style name="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+    
     <style name="Theme.K9.Startup" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@android:color/black</item>
     </style>
@@ -133,7 +138,7 @@
         <item name="backgroundColorChooseAccountHeader">#404040</item>
     </style>
 
-    <style name="Theme.K9.Dialog.Translucent.Dark" parent="@style/Theme.AppCompat.Dialog">
+    <style name="Theme.K9.Dialog.Translucent.Dark" parent="@style/Theme.Base.AppCompat.Dialog.FixedSize">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
@@ -142,7 +147,7 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
     </style>
 
-    <style name="Theme.K9.Dialog.Translucent.Light" parent="@style/Theme.AppCompat.Light.Dialog">
+    <style name="Theme.K9.Dialog.Translucent.Light" parent="@style/Theme.Base.AppCompat.Dialog.Light.FixedSize">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>

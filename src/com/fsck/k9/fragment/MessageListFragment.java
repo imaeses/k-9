@@ -24,8 +24,6 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -59,7 +57,8 @@ import android.widget.ListView;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -2225,7 +2224,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             }
 
             if (mActionMode == null) {
-                mActionMode = getActivity().startActionMode(mActionModeCallback);
+                mActionMode = ( ( ActionBarActivity )getActivity() ).startSupportActionMode(mActionModeCallback);
             }
             computeBatchDirection();
             updateActionModeTitle();
@@ -2284,7 +2283,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
                 return;
             }
         } else {
-            mActionMode = getActivity().startActionMode(mActionModeCallback);
+            mActionMode = ( ( ActionBarActivity )getActivity() ).startSupportActionMode(mActionModeCallback);
         }
 
         if (selected) {
@@ -3541,7 +3540,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         }
 
         if (mActionMode == null) {
-            mActionMode = getActivity().startActionMode(mActionModeCallback);
+            mActionMode = ( ( ActionBarActivity )getActivity() ).startSupportActionMode(mActionModeCallback);
         }
 
         recalculateSelectionCount();

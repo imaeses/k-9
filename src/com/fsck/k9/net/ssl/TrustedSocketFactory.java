@@ -1,5 +1,6 @@
 package com.fsck.k9.net.ssl;
 
+import android.os.Build;
 import android.util.Log;
 
 import com.imaeses.squeaky.K9;
@@ -138,7 +139,7 @@ public class TrustedSocketFactory {
 
         TrustManager[] trustManagers = new TrustManager[] { TrustManagerFactory.get(host, port) };
         KeyManager[] keyManagers = null;
-        if (clientCertificateAlias != null && !clientCertificateAlias.isEmpty()) {
+        if (clientCertificateAlias != null && clientCertificateAlias.length() != 0 && Build.VERSION.SDK_INT >= 14 ) {
             keyManagers = new KeyManager[] { new KeyChainKeyManager(K9.app, clientCertificateAlias) };
         }
 

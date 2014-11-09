@@ -14,19 +14,21 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
+
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.SortType;
 import com.fsck.k9.Preferences;
@@ -198,6 +200,9 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
             return;
         }
 
+        supportRequestWindowFeature(Window.FEATURE_PROGRESS);
+        supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        
         if (useSplitView()) {
             setContentView(R.layout.split_message_list);
         } else {
@@ -211,7 +216,7 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
         }
 
         initializeActionBar();
-
+        
         // Enable gesture detection for MessageLists
         setupGestureDetector(this);
 
@@ -1371,14 +1376,13 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
         if (mMenuButtonCheckMail != null && mMenuButtonCheckMail.isVisible()) {
             mActionBarProgress.setVisibility(ProgressBar.GONE);
             if (enable) {
-                mMenuButtonCheckMail
-                        .setActionView(mActionButtonIndeterminateProgress);
+                MenuItemCompat.setActionView( mMenuButtonCheckMail, mActionButtonIndeterminateProgress);
             } else {
-                mMenuButtonCheckMail.setActionView(null);
+                MenuItemCompat.setActionView( mMenuButtonCheckMail, null );
             }
         } else {
             if (mMenuButtonCheckMail != null)
-                mMenuButtonCheckMail.setActionView(null);
+                MenuItemCompat.setActionView( mMenuButtonCheckMail, null );
             if (enable) {
                 mActionBarProgress.setVisibility(ProgressBar.VISIBLE);
             } else {
@@ -1518,7 +1522,7 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
 
     @Override
     public void updateMenu() {
-        invalidateOptionsMenu();
+        supportInvalidateOptionsMenu();
     }
 
     @Override

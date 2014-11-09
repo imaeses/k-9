@@ -2,6 +2,7 @@ package com.fsck.k9;
 
 import android.content.SharedPreferences;
 import android.util.TypedValue;
+import android.webkit.WebSettings;
 import android.widget.TextView;
 
 import com.fsck.k9.preferences.GlobalSettings;
@@ -353,5 +354,19 @@ public class FontSizes {
         if (fontSize != FONT_DEFAULT) {
             v.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
         }
+    }
+    
+    public WebSettings.TextSize getMessageViewContent( int percent ) {
+    	if( percent <= 75 ) {
+    		return WebSettings.TextSize.SMALLEST;
+    	} else if( percent <= 100 ) {
+    		return WebSettings.TextSize.SMALLER;
+    	} else if( percent <= 150 ) {
+    		return WebSettings.TextSize.NORMAL;
+    	} else if( percent <= 200 ) {
+    		return WebSettings.TextSize.LARGER;
+    	} else {
+    		return WebSettings.TextSize.LARGEST;
+    	}
     }
 }

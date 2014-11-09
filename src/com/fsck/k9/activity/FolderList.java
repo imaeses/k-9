@@ -31,11 +31,12 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.SearchViewCompat;
 import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.SearchView;
+
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.FolderMode;
 import com.fsck.k9.AccountStats;
@@ -180,9 +181,9 @@ public class FolderList extends K9ListActivity {
             runOnUiThread(new Runnable() {
                 public void run() {
                     if (progress) {
-                        mRefreshMenuItem.setActionView(mActionBarProgressView);
+                        MenuItemCompat.setActionView( mRefreshMenuItem, mActionBarProgressView);
                     } else {
-                        mRefreshMenuItem.setActionView(null);
+                        MenuItemCompat.setActionView( mRefreshMenuItem, null);
                     }
                 }
             });
@@ -590,13 +591,13 @@ public class FolderList extends K9ListActivity {
 
     private void configureFolderSearchView(Menu menu) {
         final MenuItem folderMenuItem = menu.findItem(R.id.filter_folders);
-        final SearchView folderSearchView = (SearchView) folderMenuItem.getActionView();
-        folderSearchView.setQueryHint(getString(R.string.folder_list_filter_hint));
-        folderSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        final View folderSearchView = MenuItemCompat.getActionView( folderMenuItem );
+        SearchViewCompat.setQueryHint( folderSearchView, getString(R.string.folder_list_filter_hint) );
+        SearchViewCompat.setOnQueryTextListener( folderSearchView, new SearchViewCompat.OnQueryTextListenerCompat() {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                folderMenuItem.collapseActionView();
+                MenuItemCompat.collapseActionView( folderMenuItem );
                 mActionBarTitle.setText(getString(R.string.filter_folders_action));
                 return true;
             }
@@ -608,7 +609,7 @@ public class FolderList extends K9ListActivity {
             }
         });
 
-        folderSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+        SearchViewCompat.setOnCloseListener( folderSearchView, new SearchViewCompat.OnCloseListenerCompat() {
 
             @Override
             public boolean onClose() {
