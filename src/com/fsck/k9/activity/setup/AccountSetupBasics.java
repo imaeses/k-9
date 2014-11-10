@@ -44,6 +44,7 @@ import com.fsck.k9.mail.store.ImapStore;
 import com.fsck.k9.mail.transport.SmtpTransport;
 import com.fsck.k9.view.ClientCertificateSpinner;
 import com.fsck.k9.view.ClientCertificateSpinner.OnClientCertificateChangedListener;
+
 import com.imaeses.squeaky.R;
 import com.imaeses.squeaky.K9;
 
