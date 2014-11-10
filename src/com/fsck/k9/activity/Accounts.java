@@ -395,8 +395,6 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     @Override
     public void onCreate(Bundle icicle) {
     	
-    	requestWindowFeature(Window.FEATURE_PROGRESS);
-    	
         super.onCreate(icicle);
 
         if (!K9.isHideSpecialAccounts()) {

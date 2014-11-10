@@ -574,7 +574,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             finish();
             return;
         }
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         if (K9.getK9ComposerThemeSetting() != K9.Theme.USE_GLOBAL) {
             // theme the whole content according to the theme (except the action bar)

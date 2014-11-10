@@ -72,12 +72,11 @@ public class ChooseFolder extends K9ListActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-    	
+
     	registerContentView( R.layout.list_content_simple );
     	
         super.onCreate(savedInstanceState);
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         //setContentView(R.layout.list_content_simple);
 
         getListView().setFastScrollEnabled(true);

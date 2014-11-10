@@ -66,6 +66,7 @@
 
         <activity
             android:name="com.fsck.k9.activity.Accounts"
+            android:theme="@style/Theme.AppCompat.Light"
             android:configChanges="locale"
             android:launchMode="singleTop"
             android:uiOptions="splitActionBarWhenNarrow"
@@ -204,6 +205,7 @@
         </activity>
         <activity
             android:name="com.fsck.k9.activity.FolderList"
+            android:theme="@style/Theme.AppCompat.Light"
             android:configChanges="locale"
             android:uiOptions="splitActionBarWhenNarrow"
             >
@@ -287,6 +289,7 @@
             >
         </activity>
         <activity android:name="com.fsck.k9.activity.EmailAddressList"
+            android:theme="@style/Theme.AppCompat.Light"
             android:configChanges="locale"
             >
         </activity>

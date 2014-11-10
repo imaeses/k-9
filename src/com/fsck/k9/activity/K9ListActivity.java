@@ -1,6 +1,8 @@
 package com.fsck.k9.activity;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.view.WindowCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -23,11 +25,20 @@ public class K9ListActivity extends ActionBarActivity implements K9ActivityMagic
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	
         super.onCreate(savedInstanceState);
-        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR);
+        
+        if( Build.VERSION.SDK_INT >= 11 ) {
+        	supportRequestWindowFeature( Window.FEATURE_ACTION_BAR );
+        } else {
+        	supportRequestWindowFeature( WindowCompat.FEATURE_ACTION_BAR );
+        }
+        
         mBase = K9ActivityCommon.newInstance(this);
+        
         setContentView( mContentView );
         mListView = ( ListView )findViewById( android.R.id.list );
+    
     }
 
     @Override
