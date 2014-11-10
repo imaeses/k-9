@@ -1,6 +1,14 @@
 
 package com.fsck.k9.activity.setup;
 
+
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.util.Locale;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -10,6 +18,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -20,7 +29,9 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 
-import com.fsck.k9.*;
+import com.fsck.k9.Account;
+import com.fsck.k9.EmailAddressValidator;
+import com.fsck.k9.Preferences;
 import com.fsck.k9.activity.K9Activity;
 import com.fsck.k9.activity.setup.AccountSetupCheckSettings.CheckDirection;
 import com.fsck.k9.helper.Utility;
@@ -33,16 +44,8 @@ import com.fsck.k9.mail.store.ImapStore;
 import com.fsck.k9.mail.transport.SmtpTransport;
 import com.fsck.k9.view.ClientCertificateSpinner;
 import com.fsck.k9.view.ClientCertificateSpinner.OnClientCertificateChangedListener;
-
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.util.Locale;
-
-import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
+import com.imaeses.squeaky.K9;
 
 /**
  * Prompts the user for the email address and password.
@@ -71,6 +74,7 @@ public class AccountSetupBasics extends K9Activity
 
     private EmailAddressValidator mEmailValidator = new EmailAddressValidator();
     private boolean mCheckedIncoming = false;
+    private CheckBox mShowPasswordCheckBox;
 
     public static void actionNewAccount(Context context) {
         Intent i = new Intent(context, AccountSetupBasics.class);
@@ -87,14 +91,9 @@ public class AccountSetupBasics extends K9Activity
         mClientCertificateSpinner = (ClientCertificateSpinner)findViewById(R.id.account_client_certificate_spinner);
         mNextButton = (Button)findViewById(R.id.next);
         mManualSetupButton = (Button)findViewById(R.id.manual_setup);
-
+        mShowPasswordCheckBox = (CheckBox) findViewById(R.id.show_password);
         mNextButton.setOnClickListener(this);
         mManualSetupButton.setOnClickListener(this);
-
-        mEmailView.addTextChangedListener(this);
-        mPasswordView.addTextChangedListener(this);
-        mClientCertificateCheckBox.setOnCheckedChangeListener(this);
-        mClientCertificateSpinner.setOnClientCertificateChangedListener(this);
         
         if( Build.VERSION.SDK_INT < 14 ) {
         	mClientCertificateCheckBox.setVisibility( View.GONE );
@@ -102,10 +101,18 @@ public class AccountSetupBasics extends K9Activity
         
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        validateFields();
+    private void initializeViewListeners() {
+        mEmailView.addTextChangedListener(this);
+        mPasswordView.addTextChangedListener(this);
+        mClientCertificateCheckBox.setOnCheckedChangeListener(this);
+        mClientCertificateSpinner.setOnClientCertificateChangedListener(this);
+        mShowPasswordCheckBox.setOnCheckedChangeListener (new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                showPassword(isChecked);
+            }
+        });
+
     }
 
     @Override
@@ -134,6 +141,25 @@ public class AccountSetupBasics extends K9Activity
         }
 
         mCheckedIncoming = savedInstanceState.getBoolean(STATE_KEY_CHECKED_INCOMING);
+
+        updateViewVisibility(mClientCertificateCheckBox.isChecked());
+
+        showPassword(mShowPasswordCheckBox.isChecked());
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        /*
+         * We wait until now to initialize the listeners because we didn't want
+         * the OnCheckedChangeListener active while the
+         * mClientCertificateCheckBox state was being restored because it could
+         * trigger the pop-up of a ClientCertificateSpinner.chooseCertificate()
+         * dialog.
+         */
+        initializeViewListeners();
+        validateFields();
     }
 
     public void afterTextChanged(Editable s) {
@@ -148,45 +174,54 @@ public class AccountSetupBasics extends K9Activity
 
     @Override
     public void onClientCertificateChanged(String alias) {
-    	validateFields();
+        validateFields();
     }
-    
-   /**
-    * Called when checking the client certificate CheckBox
-    */
+
+    /**
+     * Called when checking the client certificate CheckBox
+     */
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-    	if (isChecked) {
-    		// clear password field
-    		mPasswordView.removeTextChangedListener(this);
-    		mPasswordView.setText("");
-    		mPasswordView.addTextChangedListener(this);
-    
-    		// hide password fields, show client certificate spinner
-    		mPasswordView.setVisibility(View.GONE);
-    		mClientCertificateSpinner.setVisibility(View.VISIBLE);
-    	} else {
-    		// clear client certificate spinner
-    		mClientCertificateSpinner.setOnClientCertificateChangedListener(null);
-    		mClientCertificateSpinner.setAlias(null);
-    		mClientCertificateSpinner.setOnClientCertificateChangedListener(this);
-    
-    		// show password fields, hide client certificate spinner
-    		mPasswordView.setVisibility(View.VISIBLE);
-    		mClientCertificateSpinner.setVisibility(View.GONE);
-    	}
-    	validateFields();
+        updateViewVisibility(isChecked);
+        validateFields();
+
+        // Have the user select (or confirm) the client certificate
+        if (isChecked) {
+            mClientCertificateSpinner.chooseCertificate();
+        }
     }
-    
+
+    private void updateViewVisibility(boolean usingCertificates) {
+        if (usingCertificates) {
+            // hide password fields, show client certificate spinner
+            mPasswordView.setVisibility(View.GONE);
+            mShowPasswordCheckBox.setVisibility(View.GONE);
+            mClientCertificateSpinner.setVisibility(View.VISIBLE);
+        } else {
+            // show password fields, hide client certificate spinner
+            mPasswordView.setVisibility(View.VISIBLE);
+            mShowPasswordCheckBox.setVisibility(View.VISIBLE);
+            mClientCertificateSpinner.setVisibility(View.GONE);
+        }
+    }
+
+    private void showPassword(boolean show) {
+        if (show) {
+            mPasswordView.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        } else {
+            mPasswordView.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        }
+    }
+
     private void validateFields() {
-    	boolean clientCertificateChecked = mClientCertificateCheckBox.isChecked();
-    	String clientCertificateAlias = mClientCertificateSpinner.getAlias();
+        boolean clientCertificateChecked = mClientCertificateCheckBox.isChecked();
+        String clientCertificateAlias = mClientCertificateSpinner.getAlias();
         String email = mEmailView.getText().toString();
-        
+
         boolean valid = Utility.requiredFieldValid(mEmailView)
-        				&& (Utility.requiredFieldValid(mPasswordView)
-        						|| (clientCertificateChecked && clientCertificateAlias != null))
-                        && mEmailValidator.isValidAddressOnly(email);
+                && ((!clientCertificateChecked && Utility.requiredFieldValid(mPasswordView))
+                        || (clientCertificateChecked && clientCertificateAlias != null))
+                && mEmailValidator.isValidAddressOnly(email);
 
         mNextButton.setEnabled(valid);
         mManualSetupButton.setEnabled(valid);
@@ -322,6 +357,13 @@ public class AccountSetupBasics extends K9Activity
     }
 
     protected void onNext() {
+        if (mClientCertificateCheckBox.isChecked()) {
+
+            // Auto-setup doesn't support client certificates.
+            onManualSetup();
+            return;
+        }
+
         String email = mEmailView.getText().toString();
         String[] emailParts = splitEmail(email);
         String domain = emailParts[1];
@@ -365,16 +407,16 @@ public class AccountSetupBasics extends K9Activity
         String[] emailParts = splitEmail(email);
         String user = emailParts[0];
         String domain = emailParts[1];
-        
+
         String password = null;
         String clientCertificateAlias = null;
         AuthType authenticationType = null;
         if (mClientCertificateCheckBox.isChecked()) {
-        	authenticationType = AuthType.EXTERNAL;
-        	clientCertificateAlias = mClientCertificateSpinner.getAlias();
+            authenticationType = AuthType.EXTERNAL;
+            clientCertificateAlias = mClientCertificateSpinner.getAlias();
         } else {
-        	authenticationType = AuthType.PLAIN;
-        	password = mPasswordView.getText().toString();
+            authenticationType = AuthType.PLAIN;
+            password = mPasswordView.getText().toString();
         }
 
         if (mAccount == null) {
@@ -382,18 +424,18 @@ public class AccountSetupBasics extends K9Activity
         }
         mAccount.setName(getOwnerName());
         mAccount.setEmail(email);
-        
+
         // set default uris
         // NOTE: they will be changed again in AccountSetupAccountType!
         ServerSettings storeServer = new ServerSettings(ImapStore.STORE_TYPE, "mail." + domain, -1,
-        		ConnectionSecurity.SSL_TLS_REQUIRED, authenticationType, user, password, clientCertificateAlias);
+                ConnectionSecurity.SSL_TLS_REQUIRED, authenticationType, user, password, clientCertificateAlias);
         ServerSettings transportServer = new ServerSettings(SmtpTransport.TRANSPORT_TYPE, "mail." + domain, -1,
-        		ConnectionSecurity.SSL_TLS_REQUIRED, authenticationType, user, password, clientCertificateAlias);
+                ConnectionSecurity.SSL_TLS_REQUIRED, authenticationType, user, password, clientCertificateAlias);
         String storeUri = Store.createStoreUri(storeServer);
         String transportUri = Transport.createTransportUri(transportServer);
         mAccount.setStoreUri(storeUri);
         mAccount.setTransportUri(transportUri);
-        
+
         mAccount.setDraftsFolderName(getString(R.string.special_mailbox_name_drafts));
         mAccount.setTrashFolderName(getString(R.string.special_mailbox_name_trash));
         mAccount.setSentFolderName(getString(R.string.special_mailbox_name_sent));
@@ -500,4 +542,5 @@ public class AccountSetupBasics extends K9Activity
 
         public String note;
     }
+
 }
