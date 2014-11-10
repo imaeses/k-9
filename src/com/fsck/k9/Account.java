@@ -1319,10 +1319,6 @@ public class Account implements BaseAccount {
     public Store getRemoteStore() throws MessagingException {
         return Store.getRemoteInstance(this);
     }
-    
-    public Store getRemoteStore(boolean reload) throws MessagingException {
-    	return Store.getRemoteInstance(this, reload);
-    }
 
     // It'd be great if this actually went into the store implementation
     // to get this, but that's expensive and not easily accessible
