@@ -92,6 +92,16 @@ public class Address {
     public String getAddress() {
         return mAddress;
     }
+    
+    public String getHostname() {
+    	int hostIdx = mAddress.lastIndexOf("@");
+    
+    	if (hostIdx == -1) {
+    		return null;
+    	}
+    	
+    	return mAddress.substring(hostIdx+1);
+    }
 
     public void setAddress(String address) {
         this.mAddress = address;
