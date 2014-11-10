@@ -4,8 +4,6 @@ package com.fsck.k9.mail.store;
 import android.util.Log;
 
 import com.fsck.k9.Account;
-import com.imaeses.squeaky.K9;
-import com.imaeses.squeaky.R;
 import com.fsck.k9.controller.MessageRetrievalListener;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.*;
@@ -31,6 +29,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import com.imaeses.squeaky.R;
+import com.imaeses.squeaky.K9;
 
 public class Pop3Store extends Store {
     public static final String STORE_TYPE = "POP3";
