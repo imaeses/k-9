@@ -800,8 +800,6 @@
     <string name="background_ops_label">バックグラウンド同期</string>
     <string name="background_ops_never">使用しない</string>
     <string name="background_ops_always">常時利用</string>
-    <string name="background_ops_enabled">バックグランドデータがチェックされた時</string>
-    <string name="background_ops_auto_sync">バックグランドデータと自動同期がチェックされた時</string>
     <string name="background_ops_auto_sync_only">自動同期がチェックされた時</string>
 
     <string name="batch_select_all">全選択</string>

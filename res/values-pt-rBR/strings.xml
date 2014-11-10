@@ -801,8 +801,6 @@
     <string name="background_ops_label">Sincronização em segundo plano</string>
     <string name="background_ops_never">Nunca</string>
     <string name="background_ops_always">Sempre</string>
-    <string name="background_ops_enabled">Quando \'Dados em segundo plano\' estiverem ativados</string>
-    <string name="background_ops_auto_sync">Quando \'Dados de segundo plano\' e \'Auto-sinc\' estiverem ativados</string>
     <string name="background_ops_auto_sync_only">Quando \'Auto-sinc\' estiver ativada</string>
 
     <string name="batch_select_all">Selecionar todos</string>

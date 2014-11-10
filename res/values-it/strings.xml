@@ -801,8 +801,6 @@
     <string name="background_ops_label">Sincronizzazione in background</string>
     <string name="background_ops_never">Mai</string>
     <string name="background_ops_always">Sempre</string>
-    <string name="background_ops_enabled">Quando \'Dati in background\' è selezionato</string>
-    <string name="background_ops_auto_sync">Quando \'Dati in background\' e \'Sincronizzazione automatica\' sono selezionati</string>
     <string name="background_ops_auto_sync_only">Quando \'Sincronizzazione automatica\' è selezionato</string>
 
     <string name="batch_select_all">Seleziona tutti</string>

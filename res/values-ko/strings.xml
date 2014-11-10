@@ -801,8 +801,6 @@
     <string name="background_ops_label">백그라운드 동기화</string>
     <string name="background_ops_never">하지 않음</string>
     <string name="background_ops_always">항상</string>
-    <string name="background_ops_enabled">\'백그라운드 데이터\'가 선택된 경우</string>
-    <string name="background_ops_auto_sync">\'백그라운드 데이터\'와 \'자동 동기화\'가 선택된 경우</string>
     <string name="background_ops_auto_sync_only">\'자동 동기화\' 가 선택된 경우</string>
 
     <string name="batch_select_all">모두 선택</string>

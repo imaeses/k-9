@@ -802,8 +802,6 @@
     <string name="background_ops_label">Synchronizácia na pozadí</string>
     <string name="background_ops_never">Nikdy</string>
     <string name="background_ops_always">Vždy</string>
-    <string name="background_ops_enabled">Keď je možnosť \'Dáta na pozadí\" zaškrtnutá</string>
-    <string name="background_ops_auto_sync">Keď sú možnosti \'Dáta na pozadí\' &amp; \'Automatická synchronizácia\' zaškrtnuté</string>
     <string name="background_ops_auto_sync_only">Keď je možnosť \'Automatická synchronizácia\'  zaškrtnutá</string>
 
     <string name="batch_select_all">Vybrať všetko</string>

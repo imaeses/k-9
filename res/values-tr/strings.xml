@@ -801,8 +801,6 @@
     <string name="background_ops_label">Arkaplan senkronizasyonu</string>
     <string name="background_ops_never">Asla</string>
     <string name="background_ops_always">Daima</string>
-    <string name="background_ops_enabled">\'Arkaplan verisi\' işaretli olduğu zaman</string>
-    <string name="background_ops_auto_sync">\'Arkaplan verisi\' &amp; \'Oto. Senk.\' işaretli olduğu zaman</string>
     <!-- NEW: <string name="background_ops_auto_sync_only">When \'Auto-sync\' is checked</string>-->
 
     <string name="batch_select_all">Hepsini Seç</string>

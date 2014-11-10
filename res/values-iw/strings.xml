@@ -801,8 +801,6 @@
     <string name="background_ops_label">סנכרון ברקע</string>
     <string name="background_ops_never">אף פעם</string>
     <string name="background_ops_always">תמיד</string>
-    <string name="background_ops_enabled">"מתי ש\'נתונים ברקע\' מסומן "</string>
-    <string name="background_ops_auto_sync">"מתי ש\'נתונים ברקע\' ו\'סינכרון אוטומטי\' מסומנים "</string>
     <!-- NEW: <string name="background_ops_auto_sync_only">When \'Auto-sync\' is checked</string>-->
 
     <string name="batch_select_all">בחר הכל</string>
