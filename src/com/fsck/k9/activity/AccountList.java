@@ -36,11 +36,14 @@ public abstract class AccountList extends K9ListActivity implements OnItemClickL
 
     @Override
     public void onCreate(Bundle icicle) {
+    	
+    	registerContentView( R.layout.account_list );
+    	
         super.onCreate(icicle);
 
         setResult(RESULT_CANCELED);
 
-        setContentView(R.layout.account_list);
+        //setContentView(R.layout.account_list);
 
         ListView listView = getListView();
         listView.setOnItemClickListener(this);

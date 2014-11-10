@@ -1,28 +1,33 @@
 package com.fsck.k9.activity;
 
-import android.support.v4.app.ListFragment;
+import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.os.Bundle;
 
+import com.imaeses.squeaky.R;
+import com.imaeses.squeaky.K9;
 import com.fsck.k9.activity.K9ActivityCommon.K9ActivityMagic;
 import com.fsck.k9.activity.misc.SwipeGestureDetector.OnSwipeGestureListener;
-import com.imaeses.squeaky.K9;
 
 
 public class K9ListActivity extends ActionBarActivity implements K9ActivityMagic {
 
     private K9ActivityCommon mBase;
-    private ListFragment listFragment;
+    private ListView mListView;
+    private int mContentView = R.layout.k9_list_fragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        mBase = K9ActivityCommon.newInstance(this);
         super.onCreate(savedInstanceState);
+        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR);
+        mBase = K9ActivityCommon.newInstance(this);
+        setContentView( mContentView );
+        mListView = ( ListView )findViewById( android.R.id.list );
     }
 
     @Override
@@ -80,11 +85,16 @@ public class K9ListActivity extends ActionBarActivity implements K9ActivityMagic
         return super.onKeyUp(keyCode, event);
     }
     
+    public void registerContentView( int contentView ) {
+    	mContentView = contentView;
+    }
+    
     public ListView getListView() {
-    	return listFragment.getListView();
+    	return mListView;
     }
     
     public void setListAdapter( ListAdapter listAdapter ) {
-    	listFragment.setListAdapter( listAdapter );
+    	mListView.setAdapter( listAdapter );
     }
+    
 }

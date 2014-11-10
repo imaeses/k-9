@@ -261,7 +261,7 @@ public class FolderList extends K9ListActivity {
         mActionBarProgressView = getLayoutInflater().inflate(R.layout.actionbar_indeterminate_progress_actionview, null);
         mActionBar = getSupportActionBar();
         initializeActionBar();
-        setContentView(R.layout.folder_list);
+        //setContentView(R.layout.folder_list);
         mListView = getListView();
         mListView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         mListView.setLongClickable(true);

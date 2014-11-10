@@ -430,7 +430,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         requestWindowFeature(Window.FEATURE_PROGRESS);
         mActionBar = getSupportActionBar();
         initializeActionBar();
-        setContentView(R.layout.accounts);
+        //setContentView(R.layout.accounts);
         ListView listView = getListView();
         listView.setOnItemClickListener(this);
         listView.setItemsCanFocus(false);
