@@ -488,8 +488,6 @@
     <string name="account_settings_notify_self_summary">Rodyti pranešimą mano išsiųstiems laiškams</string>
     <string name="account_settings_notification_opens_unread_label">Pranešimas atveria neskaitytus laiškus</string>
     <string name="account_settings_notification_opens_unread_summary">Atvėrus pranešimą ieško neskaitytų laiškų</string>
-    <string name="account_settings_notification_unread_count_label">Rodyti neskaitytų skaičių</string>
-    <string name="account_settings_notification_unread_count_summary">Pranešimų juostoje rodyti neskaitytų laiškų skaičių.</string>
     <string name="account_settings_mark_message_as_read_on_view_label">Atvėrus pažymėti kaip skaitytą</string>
     <string name="account_settings_mark_message_as_read_on_view_summary">Kai laiškas atveriamas peržiūrai pažymėti jį kaip skaitytą</string>
 

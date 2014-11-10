@@ -489,8 +489,6 @@
     <string name="account_settings_notify_self_summary">Vis besked for mails sendt af mig</string>
     <string name="account_settings_notification_opens_unread_label">Klik på besked, viser ulæste mails</string>
     <string name="account_settings_notification_opens_unread_summary">Søger efter ulæste mails når besked vises</string>
-    <string name="account_settings_notification_unread_count_label">Vis antal ulæste mails</string>
-    <string name="account_settings_notification_unread_count_summary">Vis antallet af ulæste mails i statusbar.</string>
     <!-- NEW: <string name="account_settings_mark_message_as_read_on_view_label">Mark as read when opened</string>-->
     <!-- NEW: <string name="account_settings_mark_message_as_read_on_view_summary">Mark a message as read when it is opened for viewing</string>-->
 

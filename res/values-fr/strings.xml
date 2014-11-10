@@ -514,8 +514,6 @@ de plus</string>
     <string name="account_settings_notify_self_summary">Afficher une notification dans la barre d\'état même lors d\'un envoi à partir d\'une identité reliée à un compte</string>
     <string name="account_settings_notification_opens_unread_label">Ouvrir message non lu via notification</string>
     <string name="account_settings_notification_opens_unread_summary">Recherche des messages non lus après un accès à partir des notifications</string>
-    <string name="account_settings_notification_unread_count_label">Afficher le nombre de messages non lus</string>
-    <string name="account_settings_notification_unread_count_summary">Afficher le nombre de messages non lus dans la barre de notification</string>
     <string name="account_settings_mark_message_as_read_on_view_label">Message lu à l\'ouverture</string>
     <string name="account_settings_mark_message_as_read_on_view_summary">Marquer le message comme lu à l\'ouverture</string>
 
