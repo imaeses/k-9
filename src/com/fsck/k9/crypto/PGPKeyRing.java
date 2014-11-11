@@ -41,6 +41,7 @@ import com.imaeses.squeaky.R;
  */
 public class PGPKeyRing extends CryptoProvider {
 
+	public static final String TAG = PGPKeyRing.class.getName();
     public static final String NAME = "pgpkeyring";
     
     public static final String PACKAGE_PAID = "com.imaeses.keyring";
@@ -280,7 +281,10 @@ public class PGPKeyRing extends CryptoProvider {
             }
             
         } catch( SecurityException e ) {
-        	post( R.string.insufficient_pgpkeyring_permissions, context ); 
+        	
+        	Log.w( TAG, e.getMessage(), e );
+        	post( R.string.insufficient_pgpkeyring_permissions, context );
+        	
         } finally {
             if( c != null ) {
                 c.close();
@@ -326,7 +330,10 @@ public class PGPKeyRing extends CryptoProvider {
             }
                 
         } catch( SecurityException e ) {
-        	post( R.string.insufficient_pgpkeyring_permissions, context );  
+        	
+        	Log.w( TAG, e.getMessage(), e );
+        	post( R.string.insufficient_pgpkeyring_permissions, context );
+        	
         } finally {
             if( c != null ) {
                 c.close();
@@ -945,7 +952,10 @@ public class PGPKeyRing extends CryptoProvider {
             }
             
         } catch( SecurityException e ) {
+        	
+        	Log.w( TAG, e.getMessage(), e );
         	post( R.string.insufficient_pgpkeyring_permissions, context );
+        
         }
 
         return true;

@@ -9,6 +9,7 @@
 -->
 <changelog>
     <release version="4.905" versioncode="19020">
+        <change>UI enhancements</change>
         <change>Configure mail notifications by folder class</change>
         <change>Add support for delete confirmation in message list </change>
         <change>Add privacy pref to omit K-9 User-Agent header</change>
