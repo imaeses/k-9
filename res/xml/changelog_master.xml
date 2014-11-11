@@ -15,6 +15,7 @@
         <change>Add preference for setting timezone to UTC</change>
         <change>Client certificate authentication</change>
         <change>Change message body font size with slider</change>
+        <change>Reenable TLSv1.1/1.2 support</change>
     </release>
     <release version="4.904.03" versioncode="19019">
        <change>Show correctly decoded first line of PGP/MIME signed messages in Message List</change>
