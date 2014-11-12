@@ -145,7 +145,7 @@ public class TrustedSocketFactory {
 
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(keyManagers, trustManagers, null);
-        SslSessionCacheHelper.setPersistentCache(context);
+        //SslSessionCacheHelper.setPersistentCache(context);
         SSLSocketFactory socketFactory = context.getSocketFactory();
         Socket trustedSocket;
         if (socket == null) {
