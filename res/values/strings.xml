@@ -969,7 +969,7 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="misc_preferences_attachment_description">Show buttons to add image/video attachments (to work around a Gallery 3D bug)</string>
 
     <!--  PGP KeyRing related -->
-    <string name="error_pgpkeyring_version_not_supported">The installed version of PGP KeyRing is not supported.</string>
+    <string name="error_pgpkeyring_version_not_supported">PGP KeyRing is either not installed or it must be updated</string>
     <string name="cannot_handle_file_extension">I do not recognize this type of file</string>
     <string name="pgp_mime_encrypted_msg">(PGP/MIME Encrypted)</string>
     <string name="must_supply_file_extension">Please provide a file extension</string>

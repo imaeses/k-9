@@ -8,6 +8,10 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="5.001.01" versioncode="19021">
+        <change>Supply action icons in action bar</change>
+        <change>Dark theme fix for message view</change>
+    </release>
     <release version="5.001" versioncode="19020">
         <change>UI enhancements</change>
         <change>Configure mail notifications by folder class</change>
