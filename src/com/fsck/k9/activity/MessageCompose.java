@@ -622,6 +622,9 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             return;
         }
 
+        // make sure crypto provider is loaded in UI thread
+        mAccount.getCryptoProvider();
+        
         mContacts = Contacts.getInstance(MessageCompose.this);
 
         mAddressAdapter = new EmailAddressAdapter(mThemeContext);
@@ -3075,10 +3078,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             })
             .create();
         case DIALOG_CHOOSE_IDENTITY:
-            Context context = new ContextThemeWrapper(this,
-                    (K9.getK9Theme() == K9.Theme.LIGHT) ?
-                            R.style.Theme_K9_Dialog_Light :
-                            R.style.Theme_K9_Dialog_Dark);
+            Context context = new ContextThemeWrapper(this, K9.getK9DialogTheme() );
             Builder builder = new AlertDialog.Builder(context);
             builder.setTitle(R.string.send_as);
             final IdentityAdapter adapter = new IdentityAdapter(context);
