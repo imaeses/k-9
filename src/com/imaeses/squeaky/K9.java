@@ -931,6 +931,10 @@ public class K9 extends Application {
     public static Theme getK9MessageViewTheme() {
         return messageViewTheme == Theme.USE_GLOBAL ? theme : messageViewTheme;
     }
+    
+    public static int getK9DialogTheme() {
+    	return (theme == Theme.LIGHT) ? R.style.Theme_K9_Dialog_Light : R.style.Theme_K9_Dialog_Dark;
+    }
 
     public static Theme getK9MessageViewThemeSetting() {
         return messageViewTheme;

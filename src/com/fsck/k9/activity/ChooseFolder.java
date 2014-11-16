@@ -74,6 +74,7 @@ public class ChooseFolder extends K9ListActivity {
     public void onCreate(Bundle savedInstanceState) {
 
     	registerContentView( R.layout.list_content_simple );
+    	setTheme( K9.getK9DialogTheme() );
     	
         super.onCreate(savedInstanceState);
 

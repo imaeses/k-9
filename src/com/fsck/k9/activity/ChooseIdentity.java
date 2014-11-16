@@ -9,11 +9,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import com.fsck.k9.Account;
 import com.fsck.k9.Identity;
 import com.fsck.k9.Preferences;
+
 import java.util.List;
 
+import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
 public class ChooseIdentity extends K9ListActivity {
@@ -29,6 +32,7 @@ public class ChooseIdentity extends K9ListActivity {
     public void onCreate(Bundle savedInstanceState) {
 
     	registerContentView( R.layout.list_content_simple );
+    	setTheme( K9.getK9DialogTheme() );
     	
         super.onCreate(savedInstanceState);
 
