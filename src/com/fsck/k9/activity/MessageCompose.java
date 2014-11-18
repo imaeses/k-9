@@ -799,6 +799,13 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             mSourceMessageProcessed = savedInstanceState.getBoolean(STATE_KEY_SOURCE_MESSAGE_PROCED, false);
         }
 
+        mEncryptCheckbox = (CheckBox)findViewById(R.id.cb_encrypt);
+        mEncryptCheckbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                updateMessageFormat();
+            }
+        });
 
         if (initFromIntent(intent)) {
             mAction = Action.COMPOSE;
@@ -841,14 +848,6 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         mReadReceipt = mAccount.isMessageReadReceiptAlways();
         mQuoteStyle = mAccount.getQuoteStyle();
-
-        mEncryptCheckbox = (CheckBox)findViewById(R.id.cb_encrypt);
-        mEncryptCheckbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                updateMessageFormat();
-            }
-        });
         
         updateFrom();
 
