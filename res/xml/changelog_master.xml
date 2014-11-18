@@ -8,6 +8,14 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="5.001.03" versioncode="19023">
+        <change>Fixed crash when sending mail from another app</change>
+    </release>
+    <release version="5.001.02" versioncode="19022">
+        <change>Fixed a bug moving mail to another folder</change>
+        <change>Fixed a crash when mailing links</change>
+        <change>Fixed Russian language warning on unviewable content</change>
+    </release>
     <release version="5.001.01" versioncode="19021">
         <change>Supply action icons in action bar</change>
         <change>Dark theme fix for message view</change>
