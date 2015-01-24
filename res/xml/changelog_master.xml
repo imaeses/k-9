@@ -8,6 +8,9 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="5.001.04" versioncide="19024">
+        <change>SqueakyMail and K-9 can now both live on the same Android 5.0 device</change>
+    </release>
     <release version="5.001.03" versioncode="19023">
         <change>Fixed crash when sending mail from another app</change>
     </release>

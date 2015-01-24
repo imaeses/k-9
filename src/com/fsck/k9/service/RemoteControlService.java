@@ -57,8 +57,8 @@ public class RemoteControlService extends CoreService {
                     try {
                         boolean needsReschedule = false;
                         boolean needsPushRestart = false;
-                        String uuid = intent.getStringExtra(K9_ACCOUNT_UUID);
-                        boolean allAccounts = intent.getBooleanExtra(K9_ALL_ACCOUNTS, false);
+                        String uuid = intent.getStringExtra(SQUEAKY_ACCOUNT_UUID);
+                        boolean allAccounts = intent.getBooleanExtra(SQUEAKY_ALL_ACCOUNTS, false);
                         if (K9.DEBUG) {
                             if (allAccounts) {
                                 Log.i(K9.LOG_TAG, "RemoteControlService changing settings for all accounts");
@@ -74,12 +74,12 @@ public class RemoteControlService extends CoreService {
                                 if (K9.DEBUG)
                                     Log.i(K9.LOG_TAG, "RemoteControlService changing settings for account " + account.getDescription());
 
-                                String notificationEnabled = intent.getStringExtra(K9_NOTIFICATION_ENABLED);
-                                String ringEnabled = intent.getStringExtra(K9_RING_ENABLED);
-                                String vibrateEnabled = intent.getStringExtra(K9_VIBRATE_ENABLED);
-                                String pushClasses = intent.getStringExtra(K9_PUSH_CLASSES);
-                                String pollClasses = intent.getStringExtra(K9_POLL_CLASSES);
-                                String pollFrequency = intent.getStringExtra(K9_POLL_FREQUENCY);
+                                String notificationEnabled = intent.getStringExtra(SQUEAKY_NOTIFICATION_ENABLED);
+                                String ringEnabled = intent.getStringExtra(SQUEAKY_RING_ENABLED);
+                                String vibrateEnabled = intent.getStringExtra(SQUEAKY_VIBRATE_ENABLED);
+                                String pushClasses = intent.getStringExtra(SQUEAKY_PUSH_CLASSES);
+                                String pollClasses = intent.getStringExtra(SQUEAKY_POLL_CLASSES);
+                                String pollFrequency = intent.getStringExtra(SQUEAKY_POLL_FREQUENCY);
 
                                 if (notificationEnabled != null) {
                                     account.setNotifyNewMail(Boolean.parseBoolean(notificationEnabled));
@@ -111,19 +111,19 @@ public class RemoteControlService extends CoreService {
                         if (K9.DEBUG)
                             Log.i(K9.LOG_TAG, "RemoteControlService changing global settings");
 
-                        String backgroundOps = intent.getStringExtra(K9_BACKGROUND_OPERATIONS);
-                        if (K9RemoteControl.K9_BACKGROUND_OPERATIONS_ALWAYS.equals(backgroundOps)
-                                || K9RemoteControl.K9_BACKGROUND_OPERATIONS_NEVER.equals(backgroundOps)
-                                || K9RemoteControl.K9_BACKGROUND_OPERATIONS_WHEN_CHECKED_AUTO_SYNC.equals(backgroundOps)) {
+                        String backgroundOps = intent.getStringExtra(SQUEAKY_BACKGROUND_OPERATIONS);
+                        if (K9RemoteControl.SQUEAKY_BACKGROUND_OPERATIONS_ALWAYS.equals(backgroundOps)
+                                || K9RemoteControl.SQUEAKY_BACKGROUND_OPERATIONS_NEVER.equals(backgroundOps)
+                                || K9RemoteControl.SQUEAKY_BACKGROUND_OPERATIONS_WHEN_CHECKED_AUTO_SYNC.equals(backgroundOps)) {
                             BACKGROUND_OPS newBackgroundOps = BACKGROUND_OPS.valueOf(backgroundOps);
                             boolean needsReset = K9.setBackgroundOps(newBackgroundOps);
                             needsPushRestart |= needsReset;
                             needsReschedule |= needsReset;
                         }
 
-                        String theme = intent.getStringExtra(K9_THEME);
+                        String theme = intent.getStringExtra(SQUEAKY_THEME);
                         if (theme != null) {
-                            K9.setK9Theme(K9RemoteControl.K9_THEME_DARK.equals(theme) ? K9.Theme.DARK : K9.Theme.LIGHT);
+                            K9.setK9Theme(K9RemoteControl.SQUEAKY_THEME_DARK.equals(theme) ? K9.Theme.DARK : K9.Theme.LIGHT);
                         }
 
                         SharedPreferences sPrefs = preferences.getPreferences();

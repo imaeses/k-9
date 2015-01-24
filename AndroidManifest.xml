@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:versionCode="19023"
-    android:versionName="5.001.03" package="com.imaeses.squeaky"
+    android:versionCode="19024"
+    android:versionName="5.001.04" package="com.imaeses.squeaky"
     >
     <uses-sdk
        android:minSdkVersion="8"
@@ -29,30 +29,30 @@
 
     <uses-permission android:name="org.thialfihar.android.apg.permission.READ_KEY_DETAILS" />
 
-    <permission android:name="com.fsck.k9.permission.READ_ATTACHMENT"
+    <permission android:name="com.imaeses.squeaky.permission.READ_ATTACHMENT"
                 android:permissionGroup="android.permission-group.MESSAGES"
                 android:protectionLevel="dangerous"
                 android:label="@string/read_attachment_label"
                 android:description="@string/read_attachment_desc"/>
-    <uses-permission android:name="com.fsck.k9.permission.READ_ATTACHMENT"/>
-    <permission android:name="com.fsck.k9.permission.REMOTE_CONTROL"
+    <uses-permission android:name="com.imaeses.squeaky.permission.READ_ATTACHMENT"/>
+    <permission android:name="com.imaeses.squeaky.permission.REMOTE_CONTROL"
                  android:permissionGroup="android.permission-group.MESSAGES"
                  android:protectionLevel="dangerous"
                  android:label="@string/remote_control_label"
                  android:description="@string/remote_control_desc"/>
-    <uses-permission android:name="com.fsck.k9.permission.REMOTE_CONTROL"/>
-    <permission android:name="com.fsck.k9.permission.READ_MESSAGES"
+    <uses-permission android:name="com.imaeses.squeaky.permission.REMOTE_CONTROL"/>
+    <permission android:name="com.imaeses.squeaky.permission.READ_MESSAGES"
                 android:permissionGroup="android.permission-group.MESSAGES"
                 android:protectionLevel="dangerous"
                 android:label="@string/read_messages_label"
                 android:description="@string/read_messages_desc"/>
-    <uses-permission android:name="com.fsck.k9.permission.READ_MESSAGES"/>
-    <permission android:name="com.fsck.k9.permission.DELETE_MESSAGES"
+    <uses-permission android:name="com.imaeses.squeaky.permission.READ_MESSAGES"/>
+    <permission android:name="com.imaeses.squeaky.permission.DELETE_MESSAGES"
                 android:permissionGroup="android.permission-group.MESSAGES"
                 android:protectionLevel="dangerous"
                 android:label="@string/delete_messages_label"
                 android:description="@string/delete_messages_desc"/>
-    <uses-permission android:name="com.fsck.k9.permission.DELETE_MESSAGES"/>
+    <uses-permission android:name="com.imaeses.squeaky.permission.DELETE_MESSAGES"/>
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
     <application
         android:icon="@drawable/icon"
@@ -319,14 +319,14 @@
         </receiver>
         <receiver android:name="com.fsck.k9.service.RemoteControlReceiver"
                android:enabled="true"
-               android:permission="com.fsck.k9.permission.REMOTE_CONTROL"
+               android:permission="com.imaeses.squeaky.permission.REMOTE_CONTROL"
                >
                <intent-filter>
-                 <action android:name="com.fsck.k9.K9RemoteControl.set"/>
+                 <action android:name="com.imaeses.squeaky.K9RemoteControl.set"/>
 
              </intent-filter>
              <intent-filter>
-                <action android:name="com.fsck.k9.K9RemoteControl.requestAccounts"/>
+                <action android:name="com.imaeses.squeaky.K9RemoteControl.requestAccounts"/>
 
              </intent-filter>
          </receiver>
@@ -383,7 +383,7 @@ otherwise it would make K-9 start at the wrong time
          <service
               android:name="com.fsck.k9.service.RemoteControlService"
               android:enabled="true"
-              android:permission="com.fsck.k9.permission.REMOTE_CONTROL"
+              android:permission="com.imaeses.squeaky.permission.REMOTE_CONTROL"
              >
           </service>
          <service
@@ -396,7 +396,7 @@ otherwise it would make K-9 start at the wrong time
             android:authorities="com.imaeses.squeaky.attachmentprovider"
             android:multiprocess="true"
             android:grantUriPermissions="true"
-            android:readPermission="com.fsck.k9.permission.READ_ATTACHMENT"
+            android:readPermission="com.imaeses.squeaky.permission.READ_ATTACHMENT"
             android:exported="true"
             />
         <provider
@@ -404,8 +404,8 @@ otherwise it would make K-9 start at the wrong time
             android:authorities="com.imaeses.squeaky.messageprovider"
             android:multiprocess="true"
             android:grantUriPermissions="true"
-            android:readPermission="com.fsck.k9.permission.READ_MESSAGES"
-            android:writePermission="com.fsck.k9.permission.DELETE_MESSAGES"
+            android:readPermission="com.imaeses.squeaky.permission.READ_MESSAGES"
+            android:writePermission="com.imaeses.squeaky.permission.DELETE_MESSAGES"
             android:exported="true"
             />
         <provider

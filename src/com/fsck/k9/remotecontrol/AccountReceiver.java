@@ -15,13 +15,13 @@ class AccountReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (K9RemoteControl.K9_REQUEST_ACCOUNTS.equals(intent.getAction())) {
+        if (K9RemoteControl.SQUEAKY_REQUEST_ACCOUNTS.equals(intent.getAction())) {
             Bundle bundle = getResultExtras(false);
             if (bundle == null) {
                 Log.w(K9RemoteControl.LOG_TAG, "Response bundle is empty");
                 return;
             }
-            receptor.accounts(bundle.getStringArray(K9RemoteControl.K9_ACCOUNT_UUIDS), bundle.getStringArray(K9RemoteControl.K9_ACCOUNT_DESCRIPTIONS));
+            receptor.accounts(bundle.getStringArray(K9RemoteControl.SQUEAKY_ACCOUNT_UUIDS), bundle.getStringArray(K9RemoteControl.SQUEAKY_ACCOUNT_DESCRIPTIONS));
         }
     }
 
