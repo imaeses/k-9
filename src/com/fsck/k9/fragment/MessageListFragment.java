@@ -1744,7 +1744,14 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             } else {
                 mHandler.updateFooter("");
             }
-            mFragmentListener.setMessageListProgress(Window.PROGRESS_END);
+            mHandler.post(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        mFragmentListener.setMessageListProgress(Window.PROGRESS_END);                
+                    }
+                }
+            );
 
         }
 
@@ -1757,7 +1764,14 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             } else {
                 mHandler.updateFooter(mContext.getString(R.string.remote_search_downloading, numResults));
             }
-            mFragmentListener.setMessageListProgress(Window.PROGRESS_START);
+            mHandler.post(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        mFragmentListener.setMessageListProgress(Window.PROGRESS_START);            
+                    }
+                }
+            );
         }
 
         @Override
