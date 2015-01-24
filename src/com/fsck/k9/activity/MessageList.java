@@ -871,18 +871,22 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
                 mMessageViewFragment.onToggleRead();
                 return true;
             }
+            case R.id.refile_archive:
             case R.id.archive: {
                 mMessageViewFragment.onArchive();
                 return true;
             }
+            case R.id.refile_spam:
             case R.id.spam: {
                 mMessageViewFragment.onSpam();
                 return true;
             }
+            case R.id.refile_move:
             case R.id.move: {
                 mMessageViewFragment.onMove();
                 return true;
             }
+            case R.id.refile_copy:
             case R.id.copy: {
                 mMessageViewFragment.onCopy();
                 return true;
