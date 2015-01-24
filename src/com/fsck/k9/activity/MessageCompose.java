@@ -2441,7 +2441,11 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         i.addCategory(Intent.CATEGORY_OPENABLE);
         i.setType(mime_type);
         mIgnoreOnPause = true;
-        startActivityForResult(Intent.createChooser(i, null), ACTIVITY_REQUEST_PICK_ATTACHMENT);
+        try {
+            startActivityForResult(Intent.createChooser(i, null), ACTIVITY_REQUEST_PICK_ATTACHMENT);
+        } catch( SecurityException e ) {
+            Toast.makeText(this, getString(R.string.bad_third_party_app), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void addAttachment(Uri uri) {

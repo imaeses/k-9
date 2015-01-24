@@ -375,9 +375,11 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(EXTRA_ACCOUNT, mAccount.getUuid());
         outState.putInt(STATE_SECURITY_TYPE_POSITION, mCurrentSecurityTypeViewPosition);
         outState.putInt(STATE_AUTH_TYPE_POSITION, mCurrentAuthTypeViewPosition);
+        if( mAccount != null ) {
+            outState.putString(EXTRA_ACCOUNT, mAccount.getUuid());
+        }
     }
 
     @Override
