@@ -87,7 +87,6 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         return fragment;
     }
 
-
     private SingleMessageView mMessageView;
     private PgpData mPgpData;
     private Account mAccount;
@@ -449,6 +448,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        
         if (mAccount.getCryptoProvider().onDecryptActivityResult(this, requestCode, resultCode, data, mPgpData)) {
             return;
         }
@@ -895,7 +895,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
     @Override
     public void onDecryptDone(PgpData pgpData) {
-    	
+        
     	if( mMessage == null ) {
     		return;
     	}
@@ -955,7 +955,11 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
 	            	String[] header = msgPart.getHeader( MimeHeader.HEADER_CONTENT_TRANSFER_ENCODING );
 	            	if( header != null ) {
-	            		msgPart.setBody( MimeUtility.decodeBody( msgPart.getBody().getInputStream(), header[ 0 ], msgPart.getMimeType() ) ); 
+	            	    
+	            	    InputStream is = msgPart.getBody().getInputStream();
+	            		msgPart.setBody( MimeUtility.decodeBody( is, header[ 0 ], msgPart.getMimeType() ) );
+	            		is.close();
+	            		
 	            	}
             		
             		String text = MimeUtility.getTextFromPart( msgPart );

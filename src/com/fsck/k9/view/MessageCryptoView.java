@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
+
 import com.fsck.k9.crypto.CryptoProvider;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.mail.Message;
@@ -13,7 +14,7 @@ import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MimeMessage;
 import com.fsck.k9.mail.internet.MimeUtility;
-
+import com.handmark.pulltorefresh.library.internal.Utils;
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
@@ -57,9 +58,10 @@ public class MessageCryptoView extends LinearLayout {
      * they should be visible.
      */
     public void updateLayout(final CryptoProvider cryptoProvider, final PgpData pgpData, final Message message) {
+       
         if (pgpData.getSignatureKeyId() != 0) {
             mCryptoSignatureUserIdRest.setText(
-                mContext.getString(R.string.key_id, Long.toHexString(pgpData.getSignatureKeyId() & 0xffffffffL)));
+                mContext.getString(R.string.key_id, Long.toHexString(pgpData.getSignatureKeyId() & 0xffffffffL).toUpperCase()));
             String userId = pgpData.getSignatureUserId();
             if (userId == null) {
                 userId = mContext.getString(R.string.unknown_crypto_signature_user_id);
@@ -72,8 +74,6 @@ public class MessageCryptoView extends LinearLayout {
             mCryptoSignatureUserId.setText(name);
             if (pgpData.getSignatureSuccess()) {
                 mCryptoSignatureStatusImage.setImageResource(R.drawable.overlay_ok);
-            } else if (pgpData.getSignatureUnknown()) {
-                mCryptoSignatureStatusImage.setImageResource(R.drawable.overlay_error);
             } else {
                 mCryptoSignatureStatusImage.setImageResource(R.drawable.overlay_error);
             }
@@ -82,6 +82,7 @@ public class MessageCryptoView extends LinearLayout {
         } else {
             mCryptoSignatureLayout.setVisibility(View.INVISIBLE);
         }
+        
         if ((message == null) && (pgpData.getDecryptedData() == null)) {
             this.setVisibility(View.GONE);
             return;

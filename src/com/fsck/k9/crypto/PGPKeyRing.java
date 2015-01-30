@@ -705,7 +705,7 @@ public class PGPKeyRing extends CryptoProvider {
                 pgpData.setSignatureKeyId( data.getLongExtra( EXTRAS_SIGNATURE_KEYID, 0 ) );
                 pgpData.setSignatureSuccess( data.getBooleanExtra( EXTRAS_SIGNATURE_SUCCESS, false ) );
                 pgpData.setSignatureUnknown( data.getBooleanExtra( EXTRAS_SIGNATURE_UNKNOWN, false ) );
-    
+                
                 //Log.w( NAME, "signature identity: " + pgpData.getSignatureUserId() + ", keyid: " + pgpData.getSignatureKeyId() + ", success: " + pgpData.getSignatureSuccess() + ", sigs unknown: " + pgpData.getSignatureUnknown() );
                 callback.onDecryptDone( pgpData );
                 
