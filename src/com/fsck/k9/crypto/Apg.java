@@ -21,7 +21,6 @@ import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MimeUtility;
-
 import com.imaeses.squeaky.R;
 
 /**
@@ -505,7 +504,7 @@ public class Apg extends CryptoProvider {
     }
 
     @Override
-    public boolean decryptFile( Fragment fragment, String filename, boolean showFile, PgpData pgpData ) {
+    public boolean decryptFile ( Fragment fragment, String filename, boolean showFile, PgpData pgpData ) {
     	return false;
     }
     

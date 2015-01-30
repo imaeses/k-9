@@ -72,6 +72,7 @@ public class K9 extends Application {
     public static Application app = null;
     public static File tempDirectory;
     public static final String LOG_TAG = "k9";
+    public static Context context;
 
     /**
      * Name of the {@link SharedPreferences} file used to store the last known version of the
@@ -419,6 +420,10 @@ public class K9 extends Application {
         }
     }
 
+    public static Context getContext() {
+        return context;
+    }
+    
     /**
      * Called throughout the application when the number of accounts has changed. This method
      * enables or disables the Compose activity, the boot receiver and the service based on
@@ -580,6 +585,9 @@ public class K9 extends Application {
 
     @Override
     public void onCreate() {
+        
+        K9.context = getApplicationContext();
+        
         maybeSetupStrictMode();
         PRNGFixes.apply();
 

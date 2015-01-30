@@ -2,20 +2,24 @@ package com.fsck.k9.crypto;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.IBinder;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.widget.Toast;
 import android.util.Log;
 
 import com.fsck.k9.activity.MessageCompose;
+import com.fsck.k9.fragment.MessageViewFragment;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
@@ -29,6 +33,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
+import com.imaeses.keyring.remote.CryptoService;
+import com.imaeses.keyring.remote.DecryptResponse;
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
@@ -51,6 +57,7 @@ public class PGPKeyRing extends CryptoProvider {
     public static final int VERSION_REQUIRED_ATTACHMENTS_MIN = 29;
     public static final int VERSION_REQUIRED_FLOATING_SIGS_MIN = 30;
     public static final int VERSION_REQUIRED_PGP_MIME_SEND = 38;
+    public static final int VERSION_REQUIRED_IDIRECT_DECRYPT_PGPMIME = 59;
 
     public static final String AUTHORITY_PAID = "com.imaeses.KeyRing";
     public static final String AUTHORITY_TRIAL = "com.imaeses.trial.KeyRing";
@@ -67,7 +74,10 @@ public class PGPKeyRing extends CryptoProvider {
     public static final int VERIFY = 105;
     public static final int ENCRYPT_FILE = 106;
     public static final int SIGN = 107;
+    
+    public static final int OP_DECRYPT_FILE = 1;
 
+    private CryptoService cryptoService;
     private Uri uriSelectPrivateSigningKey;
     private Uri uriSelectPublicEncKey;
     private Uri uriSelectPublicKeysByEmail;
@@ -540,36 +550,70 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     @Override
-    public boolean decryptFile( Fragment fragment, String filename, boolean showFile, PgpData pgpData ) {
+    public boolean decryptFile( final Fragment fragment, final String filename, final boolean showFile, final PgpData pgpData ) {
     	
     	boolean success = false;
-        
         if( filename != null && filename.length() > 0 ) {
             
-            Intent i = new Intent( PGPKeyRingIntent.DECRYPT_FILE_AND_RETURN );
-            i.addCategory( Intent.CATEGORY_DEFAULT );
-            i.setType( "text/plain" );
-            i.putExtra( EXTRAS_FILENAME, filename );
-            i.putExtra( EXTRAS_SHOW_FILE, showFile );
+            if( cryptoService != null && supportsDirectInterfaceDecryptPgpMime( fragment.getActivity().getApplicationContext() ) ) {
             
-            String destFilename = pgpData.getFilename();
-            if( destFilename != null ) {
-            	i.putExtra( EXTRAS_DEST_FILENAME, destFilename );
-            }
-            
-            try {
-            
-                fragment.startActivityForResult( i, DECRYPT_FILE );
+                doDecryptRemote( fragment, filename, showFile, pgpData );
                 success = true;
-            
-            } catch( ActivityNotFoundException e ) {
-            	post( R.string.error_activity_not_found, fragment.getActivity() );
+                
+            } else {
+                success = doDecryptActivity( fragment, filename, showFile, pgpData );
             }
             
         }
         
         return success;
-    	
+        
+    }
+    
+    private void doDecryptRemote( final Fragment fragment, final String filename, final boolean showFile, final PgpData pgpData ) {
+                
+        final String destFilename = pgpData.getFilename();
+        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, pgpData );
+        
+        worker.setShowFile( showFile );
+                
+        Runnable r = new Runnable() {
+            public void run() {
+                worker.decryptFile( filename, destFilename );
+            }
+        };
+                
+        Thread t = new Thread( r );
+        t.start();
+      
+    }
+    
+    private boolean doDecryptActivity( final Fragment fragment, final String filename, final boolean showFile, final PgpData pgpData ) {
+        
+        boolean success = false;
+        final String destFilename = pgpData.getFilename();
+                
+        Intent i = new Intent( PGPKeyRingIntent.DECRYPT_FILE_AND_RETURN );
+        i.addCategory( Intent.CATEGORY_DEFAULT );
+        i.setType( "text/plain" );
+        i.putExtra( EXTRAS_FILENAME, filename );
+        i.putExtra( EXTRAS_SHOW_FILE, showFile );
+                
+        if( destFilename != null ) {
+            i.putExtra( EXTRAS_DEST_FILENAME, destFilename );
+        }
+                
+        try {
+                
+            fragment.startActivityForResult( i, DECRYPT_FILE );
+            success = true;
+                
+        } catch( ActivityNotFoundException e ) {
+            post( R.string.error_activity_not_found, fragment.getActivity() );
+        }
+        
+        return success;
+                
     }
     
     @Override
@@ -865,34 +909,7 @@ public class PGPKeyRing extends CryptoProvider {
     
     @Override
     public boolean supportsPgpMimeReceive( Context context ) {
-    	
-    	/*
-    	boolean supportsFloatingSigs = false;
-    	
-    	if( isAvailable( context ) ) { 
-    	
-	    	PackageInfo pi = null;
-	        PackageManager packageManager = context.getPackageManager();
-	        
-	        try {
-	        	if( isTrialVersion ) {
-	        		pi = packageManager.getPackageInfo( PACKAGE_TRIAL, 0 );
-	        	} else {
-	        		pi = packageManager.getPackageInfo( PACKAGE_PAID, 0 );
-	        	}	
-	        } catch( NameNotFoundException e ) {
-	        }
-	        
-	        if( pi != null && pi.versionCode >= VERSION_REQUIRED_FLOATING_SIGS_MIN ) {
-	        	supportsFloatingSigs = true;
-	        }
-	        
-    	}
-        
-        return supportsFloatingSigs;
-        */
     	return supportsPgpMimeSend( context );
-    	
     }
     
     @Override
@@ -922,6 +939,10 @@ public class PGPKeyRing extends CryptoProvider {
         
         return supportsPgpMimeSend;
         
+    }
+    
+    public void setCryptoService( CryptoService service ) {
+        this.cryptoService = service;
     }
     
     public String getName() {
@@ -960,6 +981,35 @@ public class PGPKeyRing extends CryptoProvider {
 
         return true;
     }
+    
+    private boolean supportsDirectInterfaceDecryptPgpMime( Context context ) {
+
+        boolean supportsDirectInterfaceDecryptPgpMime = false;
+        
+        if( isAvailable( context ) ) { 
+        
+            PackageInfo pi = null;
+            PackageManager packageManager = context.getPackageManager();
+            
+            try {
+                if( isTrialVersion ) {
+                    pi = packageManager.getPackageInfo( PACKAGE_TRIAL, 0 );
+                } else {
+                    pi = packageManager.getPackageInfo( PACKAGE_PAID, 0 );
+                }   
+            } catch( NameNotFoundException e ) {
+            }
+            
+            if( pi != null && pi.versionCode >= VERSION_REQUIRED_IDIRECT_DECRYPT_PGPMIME ) {
+                supportsDirectInterfaceDecryptPgpMime = true;
+            }
+            
+        }
+        
+        return supportsDirectInterfaceDecryptPgpMime;
+        
+    }
+        
    
     private void setContentUris() {
         
@@ -992,6 +1042,66 @@ public class PGPKeyRing extends CryptoProvider {
     		}
     	
     	});
+    }
+    
+    private class CryptoWorker {
+
+        CryptoDecryptCallback callback;
+        PgpData pgpData;
+        boolean showFile;
+        
+        private CryptoWorker( CryptoDecryptCallback callback, PgpData pgpData ) {
+            
+            this.callback = callback;
+            this.pgpData = pgpData;
+            
+        }
+        
+        private void setShowFile( boolean showFile ) {
+            this.showFile = showFile;
+        }
+        
+        private void decryptFile( String filename, String destFilename ) {
+            
+            try {
+                
+                DecryptResponse response = cryptoService.decryptFile( filename, destFilename );
+                if( response.getDecryptionResult() == DecryptResponse.DEC_SUCCESS ) {
+                 
+                    pgpData.setSignatureUserId( response.getUserId() );
+                    pgpData.setSignatureKeyId( response.getKeyId() );
+                    if( response.getVerificationResult() == DecryptResponse.VER_SUCCESS ) {
+                        pgpData.setSignatureSuccess( true );
+                    } else {
+                        pgpData.setSignatureSuccess( false );
+                    }
+                    if( response.getVerificationResult() == DecryptResponse.VER_SIGNER_UNKNOWN ) {
+                        pgpData.setSignatureUnknown( true );
+                    } else {
+                        pgpData.setSignatureUnknown( false );
+                    }
+        
+                    pgpData.setFilename( response.getDestFilename() );
+                    pgpData.setShowFile( showFile );
+                    
+                    if( pgpData.showFile() ) {
+                        callback.onDecryptFileDone( pgpData );
+                    } else {
+                        callback.onDecryptDone( pgpData );
+                    }
+                    
+                } else if( response.getDecryptionResult() == DecryptResponse.DEC_PASSWORD_REQUIRED ) {
+                    callback.requestPassword( filename, destFilename, PGPKeyRing.OP_DECRYPT_FILE );
+                } else {
+                    
+                }
+                
+            } catch( Exception e ) {
+                Log.e( K9.LOG_TAG, "Error on decryption via remote serivce", e );
+            }
+            
+        }
+        
     }
     
 }

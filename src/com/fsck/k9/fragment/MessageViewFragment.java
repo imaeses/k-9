@@ -14,11 +14,14 @@ import java.util.Locale;
 import org.apache.commons.io.IOUtils;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -40,6 +43,7 @@ import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
 import com.fsck.k9.crypto.CryptoProvider;
 import com.fsck.k9.crypto.CryptoProvider.CryptoDecryptCallback;
+import com.fsck.k9.crypto.PGPKeyRing;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.fragment.ConfirmationDialogFragment.ConfirmationDialogFragmentListener;
 import com.fsck.k9.helper.FileBrowserHelper;
@@ -61,6 +65,7 @@ import com.fsck.k9.view.AttachmentView;
 import com.fsck.k9.view.AttachmentView.AttachmentFileDownloadCallback;
 import com.fsck.k9.view.MessageHeader;
 import com.fsck.k9.view.SingleMessageView;
+import com.imaeses.keyring.remote.CryptoService;
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
@@ -87,6 +92,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         return fragment;
     }
 
+    private ServiceConnection cryptoServiceConn;
     private SingleMessageView mMessageView;
     private PgpData mPgpData;
     private Account mAccount;
@@ -205,6 +211,48 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
         mController = MessagingController.getInstance(getActivity().getApplication());
         mInitialized = true;
+    }
+    
+    @Override
+    public void onStart() {
+        
+        super.onStart();
+        
+        cryptoServiceConn = new ServiceConnection() {
+
+            public void onServiceConnected( ComponentName className, IBinder service ) {
+                
+                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
+                keyring.setCryptoService( CryptoService.Stub.asInterface( service ) );
+                
+            }
+
+            public void onServiceDisconnected( ComponentName className ) {
+                
+                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
+                keyring.setCryptoService( null );
+                
+            }
+            
+        };
+        
+        if( mAccount != null && mAccount.getCryptoProvider() instanceof PGPKeyRing ) {
+            getActivity().bindService( new Intent( CryptoService.class.getName() ), cryptoServiceConn, Context.BIND_AUTO_CREATE );
+        }
+        
+    }
+    
+    @Override
+    public void onStop() {
+        
+        super.onStop();
+        
+        try {
+            getActivity().unbindService( cryptoServiceConn );
+        } catch( Exception e ) {
+            Log.w( K9.LOG_TAG, "Error unbinding from remote crypto service", e );
+        }
+        
     }
 
     @Override

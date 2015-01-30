@@ -31,7 +31,7 @@ abstract public class CryptoProvider {
     abstract public boolean encrypt(Activity activity, String data, PgpData pgpData);
     abstract public boolean encryptFile( Activity activity, String filename, PgpData pgpData );
     abstract public boolean sign( Activity activity, String filename, PgpData pgpData );
-    abstract public boolean decrypt(Fragment fragment, String data, String originalCharset, PgpData pgpData);
+    abstract public boolean decrypt( Fragment fragment, String data, String originalCharset, PgpData pgpData);
     abstract public boolean decryptFile( Fragment fragment, String filename, boolean showFile, PgpData pgpData );
     abstract public boolean verify( Fragment fragment, String filename, String sig, PgpData pgpData );
     abstract public long[] getSecretKeyIdsFromEmail(Context context, String email);
