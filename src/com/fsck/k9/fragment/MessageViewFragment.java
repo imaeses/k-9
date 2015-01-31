@@ -239,9 +239,9 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
             }
             
         };
-        
+       
         if( mAccount != null && mAccount.getCryptoProvider() instanceof PGPKeyRing ) {
-            getActivity().bindService( new Intent( CryptoService.class.getName() ), cryptoServiceConn, Context.BIND_AUTO_CREATE );
+            getActivity().bindService( new Intent( PGPKeyRing.ACTION_BIND_REMOTE ), cryptoServiceConn, Context.BIND_AUTO_CREATE );
         }
         
     }

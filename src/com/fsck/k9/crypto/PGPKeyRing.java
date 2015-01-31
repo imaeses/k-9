@@ -2,24 +2,20 @@ package com.fsck.k9.crypto;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.IBinder;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.widget.Toast;
 import android.util.Log;
 
 import com.fsck.k9.activity.MessageCompose;
-import com.fsck.k9.fragment.MessageViewFragment;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
@@ -102,6 +98,8 @@ public class PGPKeyRing extends CryptoProvider {
     public static final String EXTRAS_SHOW_KEYID_IN_SINGLE_SELECTION = "show.keyid.single.selection";
     public static final String EXTRAS_CHARSET = "charset";
     public static final String EXTRAS_SIGNATURE_ALG = "sig.algorithm";
+    
+    public static final String ACTION_BIND_REMOTE = "com.imaeses.keyring.CryptoService.BIND";
     
     public static class PGPKeyRingIntent {
         
@@ -994,7 +992,7 @@ public class PGPKeyRing extends CryptoProvider {
             
             try {
                 if( isTrialVersion ) {
-                    pi = packageManager.getPackageInfo( PACKAGE_TRIAL, 0 );
+                    return false;
                 } else {
                     pi = packageManager.getPackageInfo( PACKAGE_PAID, 0 );
                 }   
@@ -1066,9 +1064,9 @@ public class PGPKeyRing extends CryptoProvider {
                 DecryptResponse response = null;
                 
                 if( password == null ) {
-                    cryptoService.decryptFile( sourceFilename, destFilename );
+                    response = cryptoService.decryptFile( sourceFilename, destFilename );
                 } else {
-                    cryptoService.decryptFileWithPassword( sourceFilename, destFilename, password );
+                    response = cryptoService.decryptFileWithPassword( sourceFilename, destFilename, password );
                 }
                 
                 int decResult = response.getDecryptionResult();

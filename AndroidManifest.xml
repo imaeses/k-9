@@ -17,6 +17,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
+    
+    <!--  Needed for PGP KeyRing remote access -->
+    <uses-permission android:name="com.imaeses.keyring.permission.CRYPTO_PERMISSION" />
 
     <!-- Needed to mark a contact as contacted -->
     <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
