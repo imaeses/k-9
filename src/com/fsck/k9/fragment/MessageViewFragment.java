@@ -14,8 +14,11 @@ import java.util.Locale;
 import org.apache.commons.io.IOUtils;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
@@ -33,6 +36,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.fsck.k9.Account;
@@ -911,7 +915,9 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
                         File file = new File( attachment.savedName );
                         
                         mPgpData.setFilename( null );
-                    	cryptoProvider.decryptFile( MessageViewFragment.this, Uri.fromFile( file ).toString(), !download, mPgpData );
+                        mPgpData.setShowFile( !download );
+                        
+                    	cryptoProvider.decryptFile( MessageViewFragment.this, Uri.fromFile( file ).toString(), mPgpData );
                     	
                     } else {
                     	if (download) {
@@ -941,6 +947,52 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         }
     }
 
+    @Override
+    public void requestCryptoPassword( CryptoProvider.CryptoRetry retry ) {
+    
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder( getActivity() );
+        dialogBuilder.setTitle( getResources().getString( R.string.account_setup_basics_password_hint ) );
+        final EditText input = new EditText( getActivity() );
+        input.setTag( retry );
+        dialogBuilder.setView( input );
+        
+        dialogBuilder.setPositiveButton( R.string.okay_action, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick( DialogInterface dialog, int whichButton ) {
+                    
+                    String password = input.getText().toString();
+                    CryptoProvider.CryptoRetry retry = ( CryptoProvider.CryptoRetry )input.getTag();
+                    PGPKeyRing crypto = ( PGPKeyRing )mAccount.getCryptoProvider();
+                    
+                    Object[] retryParams = retry.getRetryParams();
+                    Object[] params = new Object[ retryParams.length + 2 ];
+                    int i;
+                    for( i=0; i<retryParams.length; i++ ) {
+                        params[ i ] = retryParams[ i ];
+                    }
+                    params[ ++i ] = password;
+                    params[ ++i ] = mPgpData;
+                    
+                    try {
+                        retry.getRetryMethod().invoke( crypto, params );
+                    } catch( Exception e ) {
+                        Log.e( K9.LOG_TAG, "Unable to call crypto provider via reflection", e );
+                    }
+                    
+                }
+            });
+        
+        dialogBuilder.setNegativeButton( R.string.cancel_action, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick( DialogInterface dialog, int whichButton ) {
+                    // do nothing
+                }
+            });
+            
+        dialogBuilder.show();
+        
+    }
+    
     @Override
     public void onDecryptDone(PgpData pgpData) {
         

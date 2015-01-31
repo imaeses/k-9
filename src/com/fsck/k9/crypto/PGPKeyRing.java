@@ -27,6 +27,7 @@ import com.fsck.k9.mail.internet.MimeUtility;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,8 +75,6 @@ public class PGPKeyRing extends CryptoProvider {
     public static final int VERIFY = 105;
     public static final int ENCRYPT_FILE = 106;
     public static final int SIGN = 107;
-    
-    public static final int OP_DECRYPT_FILE = 1;
 
     private CryptoService cryptoService;
     private Uri uriSelectPrivateSigningKey;
@@ -89,7 +88,6 @@ public class PGPKeyRing extends CryptoProvider {
     public static final String EXTRAS_MSG = "msg";
     public static final String EXTRAS_FILENAME = "file.name";
     public static final String EXTRAS_DEST_FILENAME = "file.dest.name";
-    public static final String EXTRAS_SHOW_FILE = "file.show";
     public static final String EXTRAS_ENCRYPTION_KEYIDS = "keys.enc";
     public static final String EXTRAS_SIGNATURE = "sig";
     public static final String EXTRAS_SIGNATURE_KEYID = "sig.key";
@@ -550,18 +548,18 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     @Override
-    public boolean decryptFile( final Fragment fragment, final String filename, final boolean showFile, final PgpData pgpData ) {
+    public boolean decryptFile( final Fragment fragment, final String filename, final PgpData pgpData ) {
     	
     	boolean success = false;
         if( filename != null && filename.length() > 0 ) {
             
             if( cryptoService != null && supportsDirectInterfaceDecryptPgpMime( fragment.getActivity().getApplicationContext() ) ) {
             
-                doDecryptRemote( fragment, filename, showFile, pgpData );
+                doDecryptRemote( fragment, filename, null, pgpData );
                 success = true;
                 
             } else {
-                success = doDecryptActivity( fragment, filename, showFile, pgpData );
+                success = doDecryptActivity( fragment, filename, pgpData );
             }
             
         }
@@ -570,13 +568,18 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
-    private void doDecryptRemote( final Fragment fragment, final String filename, final boolean showFile, final PgpData pgpData ) {
+    public boolean decryptFile( final Fragment fragment, final String filename, final String password, final PgpData pgpData ) {
+        
+        doDecryptRemote( fragment, filename, password, pgpData );
+        return true;
+        
+    }
+    
+    private void doDecryptRemote( final Fragment fragment, final String filename, String password, final PgpData pgpData ) {
                 
         final String destFilename = pgpData.getFilename();
-        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, pgpData );
-        
-        worker.setShowFile( showFile );
-                
+        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, password, pgpData );
+               
         Runnable r = new Runnable() {
             public void run() {
                 worker.decryptFile( filename, destFilename );
@@ -588,7 +591,7 @@ public class PGPKeyRing extends CryptoProvider {
       
     }
     
-    private boolean doDecryptActivity( final Fragment fragment, final String filename, final boolean showFile, final PgpData pgpData ) {
+    private boolean doDecryptActivity( final Fragment fragment, final String filename, final PgpData pgpData ) {
         
         boolean success = false;
         final String destFilename = pgpData.getFilename();
@@ -597,7 +600,6 @@ public class PGPKeyRing extends CryptoProvider {
         i.addCategory( Intent.CATEGORY_DEFAULT );
         i.setType( "text/plain" );
         i.putExtra( EXTRAS_FILENAME, filename );
-        i.putExtra( EXTRAS_SHOW_FILE, showFile );
                 
         if( destFilename != null ) {
             i.putExtra( EXTRAS_DEST_FILENAME, destFilename );
@@ -801,7 +803,6 @@ public class PGPKeyRing extends CryptoProvider {
                 pgpData.setSignatureUnknown( data.getBooleanExtra( EXTRAS_SIGNATURE_UNKNOWN, false ) );
     
         		pgpData.setFilename( data.getStringExtra( EXTRAS_FILENAME ) );
-        		pgpData.setShowFile( data.getBooleanExtra( EXTRAS_SHOW_FILE, false ) );
         		
         		if( pgpData.showFile() ) {
         			callback.onDecryptFileDone( pgpData );
@@ -1047,26 +1048,31 @@ public class PGPKeyRing extends CryptoProvider {
     private class CryptoWorker {
 
         CryptoDecryptCallback callback;
+        String password;
         PgpData pgpData;
-        boolean showFile;
         
-        private CryptoWorker( CryptoDecryptCallback callback, PgpData pgpData ) {
+        private CryptoWorker( CryptoDecryptCallback callback, String password, PgpData pgpData ) {
             
             this.callback = callback;
+            this.password = password;
             this.pgpData = pgpData;
             
         }
         
-        private void setShowFile( boolean showFile ) {
-            this.showFile = showFile;
-        }
-        
-        private void decryptFile( String filename, String destFilename ) {
+        private void decryptFile( String sourceFilename, String destFilename ) {
             
             try {
                 
-                DecryptResponse response = cryptoService.decryptFile( filename, destFilename );
-                if( response.getDecryptionResult() == DecryptResponse.DEC_SUCCESS ) {
+                DecryptResponse response = null;
+                
+                if( password == null ) {
+                    cryptoService.decryptFile( sourceFilename, destFilename );
+                } else {
+                    cryptoService.decryptFileWithPassword( sourceFilename, destFilename, password );
+                }
+                
+                int decResult = response.getDecryptionResult();
+                if( decResult == DecryptResponse.DEC_SUCCESS ) {
                  
                     pgpData.setSignatureUserId( response.getUserId() );
                     pgpData.setSignatureKeyId( response.getKeyId() );
@@ -1082,7 +1088,6 @@ public class PGPKeyRing extends CryptoProvider {
                     }
         
                     pgpData.setFilename( response.getDestFilename() );
-                    pgpData.setShowFile( showFile );
                     
                     if( pgpData.showFile() ) {
                         callback.onDecryptFileDone( pgpData );
@@ -1090,10 +1095,13 @@ public class PGPKeyRing extends CryptoProvider {
                         callback.onDecryptDone( pgpData );
                     }
                     
-                } else if( response.getDecryptionResult() == DecryptResponse.DEC_PASSWORD_REQUIRED ) {
-                    callback.requestPassword( filename, destFilename, PGPKeyRing.OP_DECRYPT_FILE );
-                } else {
+                } else if( decResult == DecryptResponse.DEC_PASSWORD_REQUIRED ) {
                     
+                    Method retryMethod = getClass().getDeclaredMethod( "decryptFile", new Class[] { String.class, String.class, String.class, PgpData.class } );
+                    callback.requestCryptoPassword( new CryptoRetry( retryMethod, new Object[] { sourceFilename, destFilename } ) );
+                    
+                } else {
+                    Log.e( K9.LOG_TAG, "Remote decryption failed: " + response.getError() );
                 }
                 
             } catch( Exception e ) {

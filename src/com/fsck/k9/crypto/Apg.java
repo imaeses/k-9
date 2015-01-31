@@ -504,7 +504,7 @@ public class Apg extends CryptoProvider {
     }
 
     @Override
-    public boolean decryptFile ( Fragment fragment, String filename, boolean showFile, PgpData pgpData ) {
+    public boolean decryptFile ( Fragment fragment, String filename, PgpData pgpData ) {
     	return false;
     }
     

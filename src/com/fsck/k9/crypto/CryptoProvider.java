@@ -1,5 +1,7 @@
 package com.fsck.k9.crypto;
 
+import java.lang.reflect.Method;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +34,7 @@ abstract public class CryptoProvider {
     abstract public boolean encryptFile( Activity activity, String filename, PgpData pgpData );
     abstract public boolean sign( Activity activity, String filename, PgpData pgpData );
     abstract public boolean decrypt( Fragment fragment, String data, String originalCharset, PgpData pgpData);
-    abstract public boolean decryptFile( Fragment fragment, String filename, boolean showFile, PgpData pgpData );
+    abstract public boolean decryptFile( Fragment fragment, String filename, PgpData pgpData );
     abstract public boolean verify( Fragment fragment, String filename, String sig, PgpData pgpData );
     abstract public long[] getSecretKeyIdsFromEmail(Context context, String email);
     abstract public long[] getPublicKeyIdsFromEmail(Context context, String email);
@@ -67,6 +69,38 @@ abstract public class CryptoProvider {
     public interface CryptoDecryptCallback {
         void onDecryptDone(PgpData pgpData);
         void onDecryptFileDone(PgpData pgpData);
+        void requestCryptoPassword(CryptoRetry retry);
     }
+    
+    public static class CryptoRetry {
+        
+        private Method retryMethod;
+        private Object[] retryParams;
+        
+        public CryptoRetry( Method retryMethod, Object[] retryParams ) {
+            
+            this.retryMethod = retryMethod;
+            this.retryParams = retryParams;
+            
+        }
+
+        public Method getRetryMethod() {
+            return retryMethod;
+        }
+
+        public void setRetryMethod( Method retryMethod ) {
+            this.retryMethod = retryMethod;
+        }
+
+        public Object[] getRetryParams() {
+            return retryParams;
+        }
+
+        public void setRetryParams( Object[] retryParams ) {
+            this.retryParams = retryParams;
+        }
+        
+    }
+    
    
 }

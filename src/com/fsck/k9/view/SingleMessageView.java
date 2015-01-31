@@ -667,7 +667,7 @@ public class SingleMessageView extends LinearLayout implements OnClickListener,
     	
     	mHandledPgpMimeEncrypted = true;
     	
-    	return cryptoProvider.decryptFile( fragment, Uri.fromFile( inputFile ).toString(), false, pgpData );
+    	return cryptoProvider.decryptFile( fragment, Uri.fromFile( inputFile ).toString(), pgpData );
     	
     }
     
