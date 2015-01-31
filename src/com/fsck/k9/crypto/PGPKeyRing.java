@@ -16,6 +16,7 @@ import android.widget.Toast;
 import android.util.Log;
 
 import com.fsck.k9.activity.MessageCompose;
+import com.fsck.k9.fragment.MessageViewFragment;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
@@ -934,8 +935,8 @@ public class PGPKeyRing extends CryptoProvider {
     private void doDecryptRemote( final Fragment fragment, final String filename, String password, final PgpData pgpData ) {
         
         final String destFilename = pgpData.getFilename();
-        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, password, pgpData );
-               
+        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, fragment, password, pgpData );
+        
         Runnable r = new Runnable() {
             public void run() {
                 worker.decryptFile( filename, destFilename );
@@ -976,7 +977,7 @@ public class PGPKeyRing extends CryptoProvider {
     
     private void doVerifyRemote( final Fragment fragment, final String filename, final String sig, final PgpData pgpData ) {
         
-        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, null, pgpData );
+        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, fragment, null, pgpData );
         
         Runnable r = new Runnable() {
             public void run() {
@@ -1081,18 +1082,22 @@ public class PGPKeyRing extends CryptoProvider {
     private class CryptoWorker {
 
         CryptoDecryptCallback callback;
+        Fragment fragment;
         String password;
         PgpData pgpData;
         
-        private CryptoWorker( CryptoDecryptCallback callback, String password, PgpData pgpData ) {
+        private CryptoWorker( CryptoDecryptCallback callback, Fragment fragment, String password, PgpData pgpData ) {
             
             this.callback = callback;
+            this.fragment = fragment;
             this.password = password;
             this.pgpData = pgpData;
             
         }
        
         private void decryptFile( final String sourceFilename, final String destFilename ) {
+            
+            progressBar( true );
             
             try {
                 
@@ -1125,11 +1130,15 @@ public class PGPKeyRing extends CryptoProvider {
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
+                           
+                            progressBar( false );
+                            
                             if( pgpData.showFile() ) {
                                 callback.onDecryptFileDone( pgpData );
                             } else {
                                 callback.onDecryptDone( pgpData );
                             }      
+                            
                         }
                     };
                     
@@ -1148,16 +1157,24 @@ public class PGPKeyRing extends CryptoProvider {
                     handler.post( r );
 
                 } else {
+                    
                     Log.e( K9.LOG_TAG, "Remote decryption failed: " + response.getError() );
+                    progressBar( false );
+                    
                 }
                 
             } catch( Exception e ) {
+                
                 Log.e( K9.LOG_TAG, "Error on decryption via remote serivce", e );
+                progressBar( false );
+                
             }
             
         }
         
         private void verify( final String filename, final String sig ) {
+            
+            progressBar( true );
             
             try {
                
@@ -1183,11 +1200,15 @@ public class PGPKeyRing extends CryptoProvider {
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
+                            
+                            progressBar( false );
+                            
                             if( pgpData.showFile() ) {
                                 callback.onDecryptFileDone( pgpData );
                             } else {
                                 callback.onDecryptDone( pgpData );
-                            }      
+                            }
+                            
                         }
                     };
                     
@@ -1197,8 +1218,23 @@ public class PGPKeyRing extends CryptoProvider {
                 }
                 
             } catch( Exception e ) {
+                
                 Log.e( K9.LOG_TAG, "Error on signature verification via remote serivce", e );
+                progressBar( false );
+                
             }
+            
+        }
+        
+        public void progressBar( final boolean display ) {
+            
+            Runnable r = new Runnable() {
+                public void run() {
+                    ( ( MessageViewFragment )fragment).showProgressBar( display );
+                }
+            };
+            
+            handler.post( r );
             
         }
         

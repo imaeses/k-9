@@ -1394,7 +1394,7 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
             }
         }
     }
-
+    
     private void restartActivity() {
         // restart the current activity, so that the theme change can be applied
         if (Build.VERSION.SDK_INT < 11) {

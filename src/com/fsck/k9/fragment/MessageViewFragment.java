@@ -37,6 +37,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.fsck.k9.Account;
@@ -107,6 +108,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
     private Listener mListener = new Listener();
     private MessageViewHandler mHandler = new MessageViewHandler();
     private LayoutInflater mLayoutInflater;
+    private ProgressBar mProgressBar;
 
     /** this variable is used to save the calling AttachmentView
      *  until the onActivityResult is called.
@@ -240,6 +242,8 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
 
         mMessageView = (SingleMessageView) view.findViewById(R.id.message_view);
+        mProgressBar = ( ProgressBar )view.findViewById( R.id.progress );
+        mProgressBar.setVisibility( View.GONE );
 
         //set a callback for the attachment view. With this callback the attachmentview
         //request the start of a filebrowser activity.
@@ -372,6 +376,14 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
 
     public boolean allHeadersVisible() {
         return mMessageView.getMessageHeaderView().additionalHeadersVisible();
+    }
+    
+    public void showProgressBar( boolean display ) {
+        if( display ) {
+            mProgressBar.setVisibility( View.VISIBLE );
+        } else {
+            mProgressBar.setVisibility( View.GONE );
+        }
     }
 
     private void delete() {
