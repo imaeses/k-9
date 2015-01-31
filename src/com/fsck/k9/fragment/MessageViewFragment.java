@@ -15,7 +15,6 @@ import org.apache.commons.io.IOUtils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,6 +27,7 @@ import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.text.InputType;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
@@ -218,38 +218,9 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
     }
     
     @Override
-    public void onStart() {
+    public void onDestroy() {
         
-        super.onStart();
-        
-        cryptoServiceConn = new ServiceConnection() {
-
-            public void onServiceConnected( ComponentName className, IBinder service ) {
-                
-                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
-                keyring.setCryptoService( CryptoService.Stub.asInterface( service ) );
-                
-            }
-
-            public void onServiceDisconnected( ComponentName className ) {
-                
-                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
-                keyring.setCryptoService( null );
-                
-            }
-            
-        };
-       
-        if( mAccount != null && mAccount.getCryptoProvider() instanceof PGPKeyRing ) {
-            getActivity().bindService( new Intent( PGPKeyRing.ACTION_BIND_REMOTE ), cryptoServiceConn, Context.BIND_AUTO_CREATE );
-        }
-        
-    }
-    
-    @Override
-    public void onStop() {
-        
-        super.onStop();
+        super.onDestroy();
         
         try {
             getActivity().unbindService( cryptoServiceConn );
@@ -318,8 +289,31 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
             Bundle args = getArguments();
             messageReference = (MessageReference) args.getParcelable(ARG_REFERENCE);
         }
+        
+        cryptoServiceConn = new ServiceConnection() {
+
+            public void onServiceConnected( ComponentName className, IBinder service ) {
+                
+                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
+                keyring.setCryptoService( CryptoService.Stub.asInterface( service ) );
+                
+            }
+
+            public void onServiceDisconnected( ComponentName className ) {
+                
+                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
+                keyring.setCryptoService( null );
+                
+            }
+            
+        };
 
         displayMessage(messageReference, (mPgpData == null));
+        
+        if( mAccount != null && mAccount.getCryptoProvider() instanceof PGPKeyRing ) {
+            getActivity().bindService( new Intent( PGPKeyRing.ACTION_BIND_REMOTE ), cryptoServiceConn, Context.BIND_AUTO_CREATE );
+        }
+
     }
 
     @Override
@@ -953,6 +947,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder( getActivity() );
         dialogBuilder.setTitle( getResources().getString( R.string.account_setup_basics_password_hint ) );
         final EditText input = new EditText( getActivity() );
+        input.setInputType( InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD );
         input.setTag( retry );
         dialogBuilder.setView( input );
         
@@ -964,14 +959,14 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
                     CryptoProvider.CryptoRetry retry = ( CryptoProvider.CryptoRetry )input.getTag();
                     PGPKeyRing crypto = ( PGPKeyRing )mAccount.getCryptoProvider();
                     
+                    int i;
                     Object[] retryParams = retry.getRetryParams();
                     Object[] params = new Object[ retryParams.length + 2 ];
-                    int i;
                     for( i=0; i<retryParams.length; i++ ) {
                         params[ i ] = retryParams[ i ];
                     }
-                    params[ ++i ] = password;
-                    params[ ++i ] = mPgpData;
+                    params[ i++ ] = password;
+                    params[ i++ ] = mPgpData;
                     
                     try {
                         retry.getRetryMethod().invoke( crypto, params );

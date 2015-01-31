@@ -1057,7 +1057,7 @@ public class PGPKeyRing extends CryptoProvider {
             
         }
         
-        private void decryptFile( String sourceFilename, String destFilename ) {
+        private void decryptFile( final String sourceFilename, final String destFilename ) {
             
             try {
                 
@@ -1087,17 +1087,31 @@ public class PGPKeyRing extends CryptoProvider {
         
                     pgpData.setFilename( response.getDestFilename() );
                     
-                    if( pgpData.showFile() ) {
-                        callback.onDecryptFileDone( pgpData );
-                    } else {
-                        callback.onDecryptDone( pgpData );
-                    }
+                    Runnable r = new Runnable() {
+                        @Override
+                        public void run() {
+                            if( pgpData.showFile() ) {
+                                callback.onDecryptFileDone( pgpData );
+                            } else {
+                                callback.onDecryptDone( pgpData );
+                            }      
+                        }
+                    };
+                    
+                    handler.post( r );
                     
                 } else if( decResult == DecryptResponse.DEC_PASSWORD_REQUIRED ) {
                     
-                    Method retryMethod = getClass().getDeclaredMethod( "decryptFile", new Class[] { String.class, String.class, String.class, PgpData.class } );
-                    callback.requestCryptoPassword( new CryptoRetry( retryMethod, new Object[] { sourceFilename, destFilename } ) );
+                    final Method retryMethod = PGPKeyRing.this.getClass().getDeclaredMethod( "decryptFile", new Class[] { Fragment.class, String.class, String.class, PgpData.class } );
+                    Runnable r = new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.requestCryptoPassword( new CryptoRetry( retryMethod, new Object[] { callback, sourceFilename } ) );        
+                        }
+                    };
                     
+                    handler.post( r );
+
                 } else {
                     Log.e( K9.LOG_TAG, "Remote decryption failed: " + response.getError() );
                 }
