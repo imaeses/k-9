@@ -97,7 +97,6 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         return fragment;
     }
 
-    private ServiceConnection cryptoServiceConn;
     private SingleMessageView mMessageView;
     private PgpData mPgpData;
     private Account mAccount;
@@ -220,19 +219,6 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
     }
     
     @Override
-    public void onDestroy() {
-        
-        super.onDestroy();
-        
-        try {
-            getActivity().unbindService( cryptoServiceConn );
-        } catch( Exception e ) {
-            Log.w( K9.LOG_TAG, "Error unbinding from remote crypto service", e );
-        }
-        
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         Context context = new ContextThemeWrapper(inflater.getContext(),
@@ -293,31 +279,8 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
             Bundle args = getArguments();
             messageReference = (MessageReference) args.getParcelable(ARG_REFERENCE);
         }
-        
-        cryptoServiceConn = new ServiceConnection() {
-
-            public void onServiceConnected( ComponentName className, IBinder service ) {
-                
-                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
-                keyring.setCryptoService( CryptoService.Stub.asInterface( service ) );
-                
-            }
-
-            public void onServiceDisconnected( ComponentName className ) {
-                
-                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
-                keyring.setCryptoService( null );
-                
-            }
-            
-        };
 
         displayMessage(messageReference, (mPgpData == null));
-        
-        if( mAccount != null && mAccount.getCryptoProvider() instanceof PGPKeyRing ) {
-            getActivity().bindService( new Intent( PGPKeyRing.ACTION_BIND_REMOTE ), cryptoServiceConn, Context.BIND_AUTO_CREATE );
-        }
-
     }
 
     @Override

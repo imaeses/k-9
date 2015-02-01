@@ -4,13 +4,16 @@ import java.util.Collection;
 import java.util.List;
 
 import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 import android.support.v4.app.FragmentTransaction;
@@ -36,6 +39,7 @@ import com.fsck.k9.activity.misc.SwipeGestureDetector.OnSwipeGestureListener;
 import com.fsck.k9.activity.setup.AccountSettings;
 import com.fsck.k9.activity.setup.FolderSettings;
 import com.fsck.k9.activity.setup.Prefs;
+import com.fsck.k9.crypto.PGPKeyRing;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.fragment.MessageListFragment;
 import com.fsck.k9.fragment.MessageViewFragment;
@@ -56,6 +60,7 @@ import com.fsck.k9.view.ViewSwitcher.OnSwitchCompleteListener;
 
 import de.cketti.library.changelog.ChangeLog;
 
+import com.imaeses.keyring.remote.CryptoService;
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 import com.imaeses.squeaky.K9.SplitViewMode;
@@ -145,6 +150,7 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
 
     private StorageManager.StorageListener mStorageListener = new StorageListenerImplementation();
 
+    private ServiceConnection cryptoServiceConn;
     private ActionBar mActionBar;
     private View mActionBarMessageList;
     private View mActionBarMessageView;
@@ -507,6 +513,48 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
             return;
         }
         StorageManager.getInstance(getApplication()).addListener(mStorageListener);
+    }
+    
+    @Override
+    public void onStop() {
+        
+        super.onStop();
+        
+        try {
+            unbindService( cryptoServiceConn );
+        } catch( Exception e ) {
+            Log.w( K9.LOG_TAG, "Error unbinding from remote crypto service", e );
+        }
+        
+    }
+    
+    @Override
+    public void onStart() {
+        
+        super.onStart();
+        
+        cryptoServiceConn = new ServiceConnection() {
+
+            public void onServiceConnected( ComponentName className, IBinder service ) {
+                
+                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
+                keyring.setCryptoService( CryptoService.Stub.asInterface( service ) );
+                
+            }
+
+            public void onServiceDisconnected( ComponentName className ) {
+                
+                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
+                keyring.setCryptoService( null );
+                
+            }
+            
+        };
+        
+        if( mAccount != null && mAccount.getCryptoProvider() instanceof PGPKeyRing ) {
+            bindService( new Intent( PGPKeyRing.ACTION_BIND_REMOTE ), cryptoServiceConn, Context.BIND_AUTO_CREATE );
+        }
+
     }
 
     @Override
