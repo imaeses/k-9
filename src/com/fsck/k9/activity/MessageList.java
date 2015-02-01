@@ -552,7 +552,14 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
         };
         
         if( mAccount != null && mAccount.getCryptoProvider() instanceof PGPKeyRing ) {
-            bindService( new Intent( PGPKeyRing.ACTION_BIND_REMOTE ), cryptoServiceConn, Context.BIND_AUTO_CREATE );
+            try {
+                bindService( new Intent( PGPKeyRing.ACTION_BIND_REMOTE ), cryptoServiceConn, Context.BIND_AUTO_CREATE );
+            } catch( SecurityException e ) {
+                
+                Toast toast = Toast.makeText(this, R.string.insufficient_pgpkeyring_permissions, Toast.LENGTH_LONG);
+                toast.show();
+                
+            }
         }
 
     }
