@@ -18,6 +18,7 @@ public class PgpData implements Serializable {
     protected boolean pgpSigned = false;
     protected String signature = null;
     protected boolean forceArmored = false;
+    protected boolean chooseKeys = false;
     
     public void setSignatureKeyId(long keyId) {
         mSignatureKeyId = keyId;
@@ -138,5 +139,13 @@ public class PgpData implements Serializable {
 	public void setForceArmored(boolean forceArmored) {
 		this.forceArmored = forceArmored;
 	}
+	
+	public boolean isChooseKeys() {
+        return chooseKeys;
+    }
+
+    public void setChooseKeys(boolean chooseKeys) {
+        this.chooseKeys = chooseKeys;
+    }
     
 }

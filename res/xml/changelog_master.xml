@@ -9,7 +9,7 @@
 -->
 <changelog>
     <release version="5.001.05" versioncode="19025">
-        <change>Directly interface with Squeaky Mail on decryption</change>
+        <change>Directly interface with PGP KeyRing on decryption (requires PGP KeyRing 1.9.6)</change>
     </release>
     <release version="5.001.04" versioncode="19024">
         <change>SqueakyMail and K-9 can now both live on the same Android 5.0 device</change>

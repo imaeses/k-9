@@ -1663,7 +1663,7 @@ public class Account implements BaseAccount {
         mCryptoProvider = null;
     }
 
-    public boolean getCryptoAutoSignature() {
+    public boolean isCryptoAutoSignature() {
         return mCryptoAutoSignature;
     }
 

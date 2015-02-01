@@ -938,7 +938,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 }
             });
              
-            if (mAccount.getCryptoAutoSignature() ) {
+            if (mAccount.isCryptoAutoSignature() ) {
                 long ids[] = crypto.getSecretKeyIdsFromEmail(this, mIdentity.getEmail());
                 if (ids != null && ids.length > 0) {
                     mPgpData.setSignatureKeyId(ids[0]);
@@ -2095,6 +2095,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
             emails.append(mIdentity.getEmail());
 
             mPreventDraftSaving = true;
+            mPgpData.setChooseKeys( !mAccount.isCryptoAutoEncrypt() );
             if (!crypto.selectEncryptionKeys(this, emails.toString(), mPgpData)) {
                 mPreventDraftSaving = false;
             }

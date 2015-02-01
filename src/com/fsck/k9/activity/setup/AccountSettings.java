@@ -708,7 +708,7 @@ public class AccountSettings extends K9PreferenceActivity {
             });
 
             mCryptoAutoSignature = (CheckBoxPreference) findPreference(PREFERENCE_CRYPTO_AUTO_SIGNATURE);
-            mCryptoAutoSignature.setChecked(mAccount.getCryptoAutoSignature());
+            mCryptoAutoSignature.setChecked(mAccount.isCryptoAutoSignature());
 
             mCryptoAutoEncrypt = (CheckBoxPreference) findPreference(PREFERENCE_CRYPTO_AUTO_ENCRYPT);
             mCryptoAutoEncrypt.setChecked(mAccount.isCryptoAutoEncrypt());

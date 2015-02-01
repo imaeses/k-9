@@ -95,6 +95,7 @@ public class PGPKeyRing extends CryptoProvider {
     public static final String EXTRAS_SELECTION_MULTI = "selection.mode.multi";
     public static final String EXTRAS_CHOSEN_KEYIDS = "chosen.keyids";
     public static final String EXTRAS_CHOSEN_KEY = "chosen.key";
+    public static final String EXTRAS_CHOOSE_KEYS = "choose.keys";
     public static final String EXTRAS_SIGNATURE_UNKNOWN = "sig.unknown";
     public static final String EXTRAS_SHOW_KEYID_IN_SINGLE_SELECTION = "show.keyid.single.selection";
     public static final String EXTRAS_CHARSET = "charset";
@@ -219,6 +220,7 @@ public class PGPKeyRing extends CryptoProvider {
             i.addCategory( Intent.CATEGORY_DEFAULT );
             i.setData( uriSelectPublicEncKey );
             i.putExtra( EXTRAS_SELECTION_MULTI, true );
+            i.putExtra( EXTRAS_CHOOSE_KEYS, pgpData.isChooseKeys() );
             
             long[] preselected = null;
                     
