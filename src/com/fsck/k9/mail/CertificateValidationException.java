@@ -25,7 +25,11 @@ public class CertificateValidationException extends MessagingException {
 
     public CertificateValidationException(final String message, Throwable throwable) {
         super(message, throwable);
-        scanForCause();
+        try {
+            scanForCause();
+        } catch( NoClassDefFoundError e ) {
+            // older versions of Android don't have KeyChainException
+        }
     }
 
     private void scanForCause() {
