@@ -9,7 +9,7 @@
 -->
 <changelog>
     <release version="5.001.05" versioncode="19025">
-        <change>Directly interface with PGP KeyRing on decryption (requires PGP KeyRing 1.9.6, paid version)</change>
+        <change>Directly interface with PGP KeyRing on decryption (requires PGP KeyRing 1.9.6)</change>
         <change>Don't ask about keys on auto-encryption</change>
     </release>
     <release version="5.001.04" versioncode="19024">
