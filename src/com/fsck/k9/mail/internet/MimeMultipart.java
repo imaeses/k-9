@@ -73,6 +73,11 @@ public class MimeMultipart extends Multipart {
     public String getContentType() {
         return mContentType;
     }
+	
+	@Override
+	public int getSize() {
+	    return 0;
+	}
     
     public void setContentType( String contentType ) throws MessagingException {
     	try {

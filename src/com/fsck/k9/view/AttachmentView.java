@@ -48,37 +48,40 @@ import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
 public class AttachmentView extends FrameLayout implements OnClickListener, OnLongClickListener {
+    
+    private static final int TEXT_PLAIN_KEYS_MAX_SIZE = 32 * 1024;
+    
     private Context mContext;
-    public Button viewButton;
-    public Button downloadButton;
-    public CheckBox decrypt;
-    //public LocalAttachmentBodyPart part;
-    public Part part;
     private Message mMessage;
     private Account mAccount;
     private MessagingController mController;
     private MessagingListener mListener;
+    private AttachmentFileDownloadCallback callback;
+    
+    public Button viewButton;
+    public Button downloadButton;
+    public CheckBox decrypt;
+    public Part part;
     public String name;
     public String savedName;
     public String contentType;
     public long size;
     public ImageView iconView;
-
-    private AttachmentFileDownloadCallback callback;
-
+    
     public AttachmentView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
     }
+    
     public AttachmentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
     }
+    
     public AttachmentView(Context context) {
         super(context);
         mContext = context;
     }
-
 
     public interface AttachmentFileDownloadCallback {
         /**
@@ -118,10 +121,19 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
             MessagingController controller, MessagingListener listener) throws MessagingException {
         boolean firstClassAttachment = true;
         part = inputPart;
+        
+        String contentDisposition = MimeUtility.unfoldAndDecode(part.getDisposition());
+        String sizeParam = MimeUtility.getHeaderParameter(contentDisposition, "size");
+        if (sizeParam != null) {
+            try {
+                size = Integer.parseInt(sizeParam);
+            } catch (NumberFormatException e) { /* ignore */ }
+        } else if( part.getBody() instanceof BinaryTempFileBody ) {
+            //size = ( ( BinaryTempFileBody )part.getBody() ).getSize();
+            size = part.getSize();
+        }
 
         contentType = MimeUtility.unfoldAndDecode(part.getContentType());
-        String contentDisposition = MimeUtility.unfoldAndDecode(part.getDisposition());
-        
         name = MimeUtility.getHeaderParameter(contentType, "name");
         if (name == null) {
             name = MimeUtility.getHeaderParameter(contentDisposition, "filename");
@@ -133,8 +145,6 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
             name = "noname" + ((extension != null) ? "." + extension : "");
         }
         
-        //Log.w( K9.LOG_TAG, "contentType: " + contentType + ", name: " + name );
-
         // Inline parts with a content-id are almost certainly components of an HTML message
         // not attachments. Only show them if the user pressed the button to show more
         // attachments.
@@ -149,16 +159,20 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         mController = controller;
         mListener = listener;
 
-        String sizeParam = MimeUtility.getHeaderParameter(contentDisposition, "size");
-        if (sizeParam != null) {
-            try {
-                size = Integer.parseInt(sizeParam);
-            } catch (NumberFormatException e) { /* ignore */ }
-        } else if( part.getBody() instanceof BinaryTempFileBody ) {
-        	size = ( ( BinaryTempFileBody )part.getBody() ).getSize();
-        }
-
         contentType = MimeUtility.getMimeTypeForViewing(part.getMimeType(), name);
+        if( contentType.startsWith( "text/plain" ) && size < TEXT_PLAIN_KEYS_MAX_SIZE ) {
+            String text = MimeUtility.getTextFromPart(part);
+            if( CryptoProvider.PGP_PUBLIC_KEY_BLOCK.matcher( text ).matches() ) {
+                String remainder = "";
+                if( contentType.length() > "text/plain".length() ) {
+                    remainder = contentType.substring( "text/plain".length() );
+                }
+                contentType = "application/pgp-keys" + remainder;
+            }
+        }
+        
+        //Log.w( K9.LOG_TAG, "contentType: " + contentType + ", size: " + size + ", name: " + name );
+        
         TextView attachmentName = (TextView) findViewById(R.id.attachment_name);
         TextView attachmentInfo = (TextView) findViewById(R.id.attachment_info);
         final ImageView attachmentIcon = (ImageView) findViewById(R.id.attachment_icon);
@@ -167,12 +181,6 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
 		decrypt.setChecked( false );
         decrypt.setVisibility( View.GONE );
         downloadButton = (Button) findViewById(R.id.download);
-        
-        /*
-        if( !( part instanceof LocalAttachmentBodyPart ) ) {
-        	downloadButton.setVisibility( View.GONE );
-        }
-        */
         
         if( ( name.endsWith( ".asc" ) && contentType.equals( "text/plain" ) ) ||
             ( ( name.endsWith( ".gpg" ) || name.endsWith( ".pgp" ) ) && contentType.equals( "application/octet-stream" ) ) ) {
@@ -375,7 +383,6 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         }
         
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        // We explicitly set the ContentType in addition to the URI because some attachment viewers (such as Polaris office 3.0.x) choke on documents without a mime type
         intent.setDataAndType(uri, contentType);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 

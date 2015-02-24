@@ -12,4 +12,5 @@ public interface Body {
     public void setEncoding(String encoding) throws UnavailableStorageException, MessagingException;
     public String getEncoding() throws UnavailableStorageException, MessagingException;
     public void writeTo(OutputStream out) throws IOException, MessagingException;
+    public int getSize();
 }

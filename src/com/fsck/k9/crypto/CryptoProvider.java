@@ -1,6 +1,7 @@
 package com.fsck.k9.crypto;
 
 import java.lang.reflect.Method;
+import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.content.Context;
@@ -20,6 +21,16 @@ abstract public class CryptoProvider {
     static final long serialVersionUID = 0x21071234;
 
     public static final String SIG_ALG = "sha256";
+    
+    public static Pattern PGP_MESSAGE = 
+            Pattern.compile( ".*?(-----BEGIN PGP MESSAGE-----.*?-----END PGP MESSAGE-----).*", Pattern.DOTALL );
+    
+    public static Pattern PGP_SIGNED_MESSAGE =
+            Pattern.compile( ".*?(-----BEGIN PGP SIGNED MESSAGE-----.*?-----BEGIN PGP SIGNATURE-----.*?-----END PGP SIGNATURE-----).*", Pattern.DOTALL );
+    
+    public static Pattern PGP_PUBLIC_KEY_BLOCK =
+            Pattern.compile( ".*?(-----BEGIN PGP PUBLIC KEY BLOCK-----.*?-----END PGP PUBLIC KEY BLOCK-----).*", Pattern.DOTALL );
+    
     
     abstract public boolean isAvailable(Context context);
     abstract public boolean isEncrypted(Message message);

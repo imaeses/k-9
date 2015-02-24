@@ -2049,11 +2049,11 @@ public class LocalStore extends Store implements Serializable {
                                                 if (MimeUtil.isMessage(type)) {
                                                     body = new LocalAttachmentMessageBody(
                                                             Uri.parse(contentUri),
-                                                            mApplication);
+                                                            mApplication, size);
                                                 } else {
                                                     body = new LocalAttachmentBody(
                                                             Uri.parse(contentUri),
-                                                            mApplication);
+                                                            mApplication, size);
                                                 }
                                             }
 
@@ -3018,10 +3018,10 @@ public class LocalStore extends Store implements Serializable {
                                                  attachmentId);
                                 if (MimeUtil.isMessage(attachment.getMimeType())) {
                                     attachment.setBody(new LocalAttachmentMessageBody(
-                                            contentUri, mApplication));
+                                            contentUri, mApplication, ( int )attachmentFile.length()));
                                 } else {
                                     attachment.setBody(new LocalAttachmentBody(
-                                            contentUri, mApplication));
+                                            contentUri, mApplication, ( int )attachmentFile.length()));
                                 }
                                 ContentValues cv = new ContentValues();
                                 cv.put("content_uri", contentUri != null ? contentUri.toString() : null);
@@ -4234,15 +4234,22 @@ public class LocalStore extends Store implements Serializable {
                 return new ByteArrayInputStream(EMPTY_BYTE_ARRAY);
             }
         }
+        
+        @Override
+        public int getSize() {
+            return mFile != null && mFile.exists() ? ( int )mFile.length() : 0;
+        }
     }
 
     public static class LocalAttachmentBody extends BinaryAttachmentBody {
         private Application mApplication;
         private Uri mUri;
+        private int mSize;
 
-        public LocalAttachmentBody(Uri uri, Application application) {
+        public LocalAttachmentBody(Uri uri, Application application, int size) {
             mApplication = application;
             mUri = uri;
+            mSize = size;
         }
 
         @Override
@@ -4261,6 +4268,10 @@ public class LocalStore extends Store implements Serializable {
         public Uri getContentUri() {
             return mUri;
         }
+        
+        public int getSize() {
+            return mSize;
+        }
     }
 
     /**
@@ -4269,8 +4280,8 @@ public class LocalStore extends Store implements Serializable {
      */
     public static class LocalAttachmentMessageBody extends LocalAttachmentBody implements CompositeBody {
 
-        public LocalAttachmentMessageBody(Uri uri, Application application) {
-            super(uri, application);
+        public LocalAttachmentMessageBody(Uri uri, Application application, int size) {
+            super(uri, application, size);
         }
 
         @Override

@@ -8,6 +8,9 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="5.001.06" versioncode="19026">
+        <change>Auto-import attached keys with text/plain MIME type, too</change>
+    </release>
     <release version="5.001.05" versioncode="19025">
         <change>Directly interface with PGP KeyRing on decryption (requires PGP KeyRing 1.9.6)</change>
         <change>Don't ask about keys on auto-encryption</change>

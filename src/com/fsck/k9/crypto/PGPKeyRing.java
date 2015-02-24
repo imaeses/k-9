@@ -27,7 +27,6 @@ import java.io.FileInputStream;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
@@ -113,12 +112,6 @@ public class PGPKeyRing extends CryptoProvider {
         public static final String SIGN_AND_RETURN = "com.imaeses.keyring.SIGN_AND_RETURN";
         
     }
-    
-    public static Pattern PGP_MESSAGE = 
-            Pattern.compile( ".*?(-----BEGIN PGP MESSAGE-----.*?-----END PGP MESSAGE-----).*", Pattern.DOTALL );
-    
-    public static Pattern PGP_SIGNED_MESSAGE =
-            Pattern.compile( ".*?(-----BEGIN PGP SIGNED MESSAGE-----.*?-----BEGIN PGP SIGNATURE-----.*?-----END PGP SIGNATURE-----).*", Pattern.DOTALL );
     
     public static PGPKeyRing createInstance() {
         return new PGPKeyRing();
@@ -554,7 +547,7 @@ public class PGPKeyRing extends CryptoProvider {
     	boolean success = false;
         if( filename != null && filename.length() > 0 ) {
             
-            if( cryptoService != null && supportsDirectInterfaceDecryptPgpMime( fragment.getActivity().getApplicationContext() ) ) {
+            if( cryptoService != null && pgpData.getFilename() != null && supportsDirectInterfaceDecryptPgpMime( fragment.getActivity().getApplicationContext() ) ) {
             
                 doDecryptRemote( fragment, filename, null, pgpData );
                 success = true;
@@ -790,7 +783,6 @@ public class PGPKeyRing extends CryptoProvider {
         }
 
         Matcher matcher = PGP_MESSAGE.matcher( data );
-       
         return matcher.matches();
         
     }

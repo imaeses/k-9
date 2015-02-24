@@ -69,7 +69,14 @@ public class BinaryTempFileBody implements Body {
     	
     	int size = 0;
     	if( mFile != null ) {
-    		size = ( int )mFile.length();
+    	    
+    		long fLen = mFile.length();
+    		if( fLen > Integer.MAX_VALUE ) {
+    		    size = Integer.MAX_VALUE;
+    		} else {
+    		    size = ( int )fLen;
+    		}
+    		
     	}
     	
     	return size;

@@ -64,6 +64,10 @@ public class TextBody implements Body {
     public String getText() {
         return mBody;
     }
+    
+    public int getSize() {
+        return mBody != null ? mBody.length() : 0;
+    }
 
     /**
      * Returns an InputStream that reads this body's text.
