@@ -54,8 +54,7 @@ public class PGPKeyRing extends CryptoProvider {
     public static final int VERSION_REQUIRED_ATTACHMENTS_MIN = 29;
     public static final int VERSION_REQUIRED_FLOATING_SIGS_MIN = 30;
     public static final int VERSION_REQUIRED_PGP_MIME_SEND = 38;
-    public static final int VERSION_REQUIRED_IDIRECT_DECRYPT_PGPMIME = 59;
-    public static final int VERSION_REQUIRED_IDIRECT = 64;
+    public static final int VERSION_REQUIRED_IDIRECT = 63;
 
     public static final String AUTHORITY_PAID = "com.imaeses.KeyRing";
     public static final String AUTHORITY_TRIAL = "com.imaeses.trial.KeyRing";
@@ -220,17 +219,9 @@ public class PGPKeyRing extends CryptoProvider {
             long[] preselected = null;
                     
             if( !pgpData.hasEncryptionKeys() ) {
-               
-            	/*
-                if( pgpData.hasSignatureKey() ) {        
-                    preselected = new long[] { pgpData.getSignatureKeyId() };
-                }
-                */
-            	
                 if( emails != null && emails.length() > 0 ) {
                     i.putExtra( EXTRAS_EMAIL_ADDRESSES, emails.split( "," ) );
                 }
-                
             } else {
                 preselected = pgpData.getEncryptionKeys();
             }
@@ -415,12 +406,7 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     /**
-     * Start the encrypt activity.
-     *
-     * @param activity
-     * @param data
-     * @param pgpData
-     * @return success or failure
+     * Encrypt and/or sign text into an inline PGP message.
      */
     @Override
     public boolean encrypt( Activity activity, String data, PgpData pgpData ) {
@@ -447,6 +433,9 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
+    /**
+     * Encrypt binary data stored in a file.
+     */
     @Override
     public boolean encryptFile( Activity activity, String filename, PgpData pgpData ) {
     	
@@ -473,6 +462,9 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
+    /**
+     * Produce a binary signature over binary data contained in a file.
+     */
     @Override
     public boolean sign( Activity activity, String filename, PgpData pgpData ) {
     	
@@ -502,6 +494,11 @@ public class PGPKeyRing extends CryptoProvider {
     	
     }
     
+    /**
+     * Decrypt and verify signatures in an inline PGP message.
+     * 
+     * @param originalCharset the character set the data was originally signed in
+     */
     @Override
     public boolean decrypt( Fragment fragment, String data, String originalCharset, PgpData pgpData ) {
         
@@ -523,13 +520,16 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
+    /**
+     * Decrypt and verify PGP data contained in a file.
+     */
     @Override
     public boolean decryptFile( final Fragment fragment, final String filename, final PgpData pgpData ) {
     	
     	boolean success = false;
         if( filename != null && filename.length() > 0 ) {
             
-            if( cryptoService != null && pgpData.getFilename() != null && supportsDirectInterfaceDecryptPgpMime( fragment.getActivity().getApplicationContext() ) ) {
+            if( cryptoService != null && pgpData.getFilename() != null && supportsDirectInterface( fragment.getActivity().getApplicationContext() ) ) {
             
                 doDecryptRemote( fragment, filename, null, pgpData );
                 success = true;
@@ -544,13 +544,16 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
    
+    /**
+     * Verify a signature calculated over binary data contained in a file.
+     */
     @Override
     public boolean verify( Fragment fragment, String filename, String sig, PgpData pgpData ) {
         
         boolean success = false;
         if( filename != null && filename.length() > 0 ) {
             
-            if( cryptoService != null && supportsDirectInterfaceDecryptPgpMime( fragment.getActivity().getApplicationContext() ) ) {
+            if( cryptoService != null && supportsDirectInterface( fragment.getActivity().getApplicationContext() ) ) {
             
                 doVerifyRemote( fragment, filename, sig, pgpData );
                 success = true;
@@ -1046,34 +1049,6 @@ public class PGPKeyRing extends CryptoProvider {
         return success;
         
     }
-    
-    private boolean supportsDirectInterfaceDecryptPgpMime( Context context ) {
-
-        boolean supportsDirectInterfaceDecryptPgpMime = false;
-        
-        if( isAvailable( context ) ) { 
-        
-            PackageInfo pi = null;
-            PackageManager packageManager = context.getPackageManager();
-            
-            try {
-                if( isTrialVersion ) {
-                    return false;
-                } else {
-                    pi = packageManager.getPackageInfo( PACKAGE_PAID, 0 );
-                }   
-            } catch( NameNotFoundException e ) {
-            }
-            
-            if( pi != null && pi.versionCode >= VERSION_REQUIRED_IDIRECT_DECRYPT_PGPMIME ) {
-                supportsDirectInterfaceDecryptPgpMime = true;
-            }
-            
-        }
-        
-        return supportsDirectInterfaceDecryptPgpMime;
-        
-    }
      
     private boolean supportsDirectInterface( Context context ) {
 
@@ -1095,6 +1070,8 @@ public class PGPKeyRing extends CryptoProvider {
             
             if( pi != null && pi.versionCode >= VERSION_REQUIRED_IDIRECT ) {
                 supportsDirectInterfaceDecryptPgpMime = true;
+            } else {
+                post( R.string.insufficient_pgpkeyring_permissions, context );
             }
             
         }
@@ -1182,19 +1159,14 @@ public class PGPKeyRing extends CryptoProvider {
                         pgpData.setSignatureUnknown( false );
                     }
         
-                    pgpData.setFilename( response.getDestFilename() );
+                    pgpData.setFilename( response.getPayload() );
                     
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
                            
                             progressBar( false );
-                            
-                            //if( pgpData.showFile() ) {
-                            //    callback.onDecryptFileDone( pgpData );
-                            //} else {
                             callback.onDecryptDone( pgpData );
-                            //}      
                             
                         }
                     };
@@ -1259,7 +1231,7 @@ public class PGPKeyRing extends CryptoProvider {
                         pgpData.setSignatureUnknown( false );
                     }
         
-                    pgpData.setDecryptedData( response.getDestFilename() );
+                    pgpData.setDecryptedData( response.getPayload() );
                     
                     Runnable r = new Runnable() {
                         @Override
@@ -1324,7 +1296,7 @@ public class PGPKeyRing extends CryptoProvider {
                         pgpData.setSignatureUnknown( false );
                     }
         
-                    pgpData.setFilename( response.getDestFilename() );
+                    pgpData.setFilename( response.getPayload() );
                     
                     Runnable r = new Runnable() {
                         @Override
@@ -1366,8 +1338,7 @@ public class PGPKeyRing extends CryptoProvider {
             
             handler.post( r );
             
-        }
-        
+        }      
         
     }
     

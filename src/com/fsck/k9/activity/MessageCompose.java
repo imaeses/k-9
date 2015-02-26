@@ -332,6 +332,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     private Menu mMenu;
 
     private boolean mSourceProcessed = false;
+    
+    private List<File> toDelete = new ArrayList<File>();
 
     enum SimpleMessageFormat {
         TEXT,
@@ -968,6 +970,19 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         updateMessageFormat();
 
         setTitle();
+    }
+    
+    @Override
+    public void onDestroy() {
+        for( File f : toDelete ) {
+            if( f.exists() ) {
+                try {
+                    f.delete();
+                } catch( Exception e ) {
+                    Log.w( K9.LOG_TAG, "Unable to delete: " + f.getAbsolutePath() );
+                }
+            }
+        }
     }
 
     /**
@@ -2324,6 +2339,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     		
     		f = File.createTempFile( "body", ".tmp", getExternalCacheDir() );
     		f.deleteOnExit();
+    		toDelete.add( f );
     		
     		os = new BufferedOutputStream( new FileOutputStream( f ) );
     		os.write( contents );

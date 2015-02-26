@@ -78,10 +78,9 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         CryptoDecryptCallback, ConfirmationDialogFragmentListener {
 
     private static final String ARG_REFERENCE = "reference";
-
     private static final String STATE_MESSAGE_REFERENCE = "reference";
     private static final String STATE_PGP_DATA = "pgpData";
-
+    
     private static final int ACTIVITY_CHOOSE_FOLDER_MOVE = 1;
     private static final int ACTIVITY_CHOOSE_FOLDER_COPY = 2;
     private static final int ACTIVITY_CHOOSE_DIRECTORY = 3;

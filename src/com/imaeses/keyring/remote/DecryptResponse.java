@@ -7,7 +7,7 @@ public final class DecryptResponse implements Parcelable {
 
     private String userId;
     private long keyId;
-    private String destFilename;
+    private String payload;
     private int decryptionResult;
     private int verificationResult;
     private String error;
@@ -55,12 +55,12 @@ public final class DecryptResponse implements Parcelable {
         this.keyId = keyId;
     }
     
-    public String getDestFilename() {
-        return destFilename;
+    public String getPayload() {
+        return payload;
     }
 
-    public void setDestFilename(String destFilename) {
-        this.destFilename = destFilename;
+    public void setPayload(String payload) {
+        this.payload = payload;
     }
 
     public int getDecryptionResult() {
@@ -98,7 +98,7 @@ public final class DecryptResponse implements Parcelable {
     public void writeToParcel(Parcel out) {
         out.writeString(userId);
         out.writeLong(keyId);
-        out.writeString(destFilename);
+        out.writeString(payload);
         out.writeInt(decryptionResult);
         out.writeInt(verificationResult);
         out.writeString(error);
@@ -107,7 +107,7 @@ public final class DecryptResponse implements Parcelable {
     public void readFromParcel(Parcel in) {
         userId = in.readString();
         keyId = in.readLong();
-        destFilename = in.readString();
+        payload = in.readString();
         decryptionResult = in.readInt();
         verificationResult = in.readInt();
         error = in.readString();

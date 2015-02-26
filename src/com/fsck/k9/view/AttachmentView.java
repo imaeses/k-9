@@ -49,7 +49,7 @@ import com.imaeses.squeaky.R;
 
 public class AttachmentView extends FrameLayout implements OnClickListener, OnLongClickListener {
     
-    private static final int TEXT_PLAIN_KEYS_MAX_SIZE = 32 * 1024;
+    private static final int TEXT_PLAIN_KEYS_MAX_SIZE = 256 * 1024;
     
     private Context mContext;
     private Message mMessage;
@@ -160,7 +160,7 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         mListener = listener;
 
         contentType = MimeUtility.getMimeTypeForViewing(part.getMimeType(), name);
-        if( contentType.startsWith( "text/plain" ) && size < TEXT_PLAIN_KEYS_MAX_SIZE ) {
+        if( name.endsWith( ".asc" ) && contentType.startsWith( "text/plain" ) && size < TEXT_PLAIN_KEYS_MAX_SIZE ) {
             String text = MimeUtility.getTextFromPart(part);
             if( CryptoProvider.PGP_PUBLIC_KEY_BLOCK.matcher( text ).matches() ) {
                 String remainder = "";
