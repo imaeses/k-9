@@ -5,13 +5,6 @@ import android.os.Parcelable;
 
 public final class DecryptResponse implements Parcelable {
 
-    private String userId;
-    private long keyId;
-    private String payload;
-    private int decryptionResult;
-    private int verificationResult;
-    private String error;
-
     public static final int NONE = 0;
     public static final int DEC_SUCCESS = 1;
     public static final int DEC_PASSWORD_REQUIRED = 2;
@@ -19,6 +12,13 @@ public final class DecryptResponse implements Parcelable {
     public static final int VER_SUCCESS = 1;
     public static final int VER_SIGNER_UNKNOWN = 2;
     public static final int VER_FAILURE = 3;
+    
+    private String userId;
+    private long keyId;
+    private String payload;
+    private int decryptionResult;
+    private int verificationResult;
+    private String error;
     
     public static final Parcelable.Creator<DecryptResponse> CREATOR = new Parcelable.Creator<DecryptResponse>() {
     

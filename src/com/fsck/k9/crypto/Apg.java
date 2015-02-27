@@ -17,6 +17,7 @@ import android.support.v4.app.Fragment;
 import android.widget.Toast;
 
 import com.fsck.k9.activity.MessageCompose;
+import com.fsck.k9.crypto.CryptoProvider.CryptoEncryptCallback;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
@@ -368,7 +369,7 @@ public class Apg extends CryptoProvider {
      * @return handled or not
      */
     @Override
-    public boolean onActivityResult(Activity activity, int requestCode, int resultCode,
+    public boolean onActivityResult(CryptoEncryptCallback callback, int requestCode, int resultCode,
                                     android.content.Intent data, PgpData pgpData) {
         switch (requestCode) {
         case Apg.SELECT_SECRET_KEY:
@@ -377,23 +378,23 @@ public class Apg extends CryptoProvider {
             }
             pgpData.setSignatureKeyId(data.getLongExtra(Apg.EXTRA_KEY_ID, 0));
             pgpData.setSignatureUserId(data.getStringExtra(Apg.EXTRA_USER_ID));
-            ((MessageCompose) activity).updateEncryptLayout();
+            callback.updateEncryptLayout();
             break;
 
         case Apg.SELECT_PUBLIC_KEYS:
             if (resultCode != Activity.RESULT_OK || data == null) {
                 pgpData.setEncryptionKeys(null);
-                ((MessageCompose) activity).onEncryptionKeySelectionDone();
+                callback.onEncryptionKeySelectionDone();
                 break;
             }
             pgpData.setEncryptionKeys(data.getLongArrayExtra(Apg.EXTRA_SELECTION));
-            ((MessageCompose) activity).onEncryptionKeySelectionDone();
+            callback.onEncryptionKeySelectionDone();
             break;
 
         case Apg.ENCRYPT_MESSAGE:
             if (resultCode != Activity.RESULT_OK || data == null) {
                 pgpData.setEncryptionKeys(null);
-                ((MessageCompose) activity).onEncryptDone();
+                callback.onEncryptDone();
                 break;
             }
             pgpData.setEncryptedData(data.getStringExtra(Apg.EXTRA_ENCRYPTED_MESSAGE));
@@ -403,7 +404,7 @@ public class Apg extends CryptoProvider {
                 pgpData.setEncryptedData(data.getStringExtra(Apg.EXTRA_DECRYPTED_MESSAGE));
             }
             if (pgpData.getEncryptedData() != null) {
-                ((MessageCompose) activity).onEncryptDone();
+                callback.onEncryptDone();
             }
             break;
 

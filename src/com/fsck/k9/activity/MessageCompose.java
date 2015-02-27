@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.util.Rfc822Tokenizer;
@@ -27,7 +28,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
-
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -44,6 +44,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,6 +62,8 @@ import com.fsck.k9.activity.misc.Attachment;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
 import com.fsck.k9.crypto.CryptoProvider;
+import com.fsck.k9.crypto.PGPKeyRing;
+import com.fsck.k9.crypto.CryptoProvider.CryptoEncryptCallback;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.fragment.ProgressDialogFragment;
 import com.fsck.k9.helper.ContactItem;
@@ -123,7 +126,7 @@ import java.util.regex.Pattern;
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
-public class MessageCompose extends K9Activity implements OnClickListener,
+public class MessageCompose extends K9Activity implements OnClickListener, CryptoEncryptCallback,
         ProgressDialogFragment.CancelListener {
 
     private static final int DIALOG_SAVE_OR_DISCARD_DRAFT_MESSAGE = 1;
@@ -318,7 +321,8 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     private CheckBox mEncryptCheckbox;
     private TextView mCryptoSignatureUserId;
     private TextView mCryptoSignatureUserIdRest;
-
+    private ProgressBar mProgressBar;
+    
     private ImageButton mAddToFromContacts;
     private ImageButton mAddCcFromContacts;
     private ImageButton mAddBccFromContacts;
@@ -639,6 +643,9 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                 Preferences.getPreferences(this).getAvailableAccounts().size() == 1) {
             mChooseIdentityButton.setVisibility(View.GONE);
         }
+        
+        mProgressBar = ( ProgressBar )findViewById( R.id.progress );
+        mProgressBar.setVisibility( View.GONE );
 
         mToView = (MultiAutoCompleteTextView) findViewById(R.id.to);
         mCcView = (MultiAutoCompleteTextView) findViewById(R.id.cc);
@@ -1123,7 +1130,62 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         return true;
     }
-
+    
+    public void showProgressBar( boolean display ) {
+        if( display ) {
+            mProgressBar.setVisibility( View.VISIBLE );
+        } else {
+            mProgressBar.setVisibility( View.GONE );
+        }
+    }
+    
+    @Override
+    public void requestCryptoPassword( CryptoProvider.CryptoRetry retry ) {
+    
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder( this );
+        dialogBuilder.setTitle( getResources().getString( R.string.account_setup_basics_password_hint ) );
+        final EditText input = new EditText( this );
+        input.setInputType( InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD );
+        input.setTag( retry );
+        dialogBuilder.setView( input );
+        
+        dialogBuilder.setPositiveButton( R.string.okay_action, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick( DialogInterface dialog, int whichButton ) {
+                    
+                    String password = input.getText().toString();
+                    CryptoProvider.CryptoRetry retry = ( CryptoProvider.CryptoRetry )input.getTag();
+                    PGPKeyRing crypto = ( PGPKeyRing )mAccount.getCryptoProvider();
+                    
+                    int i;
+                    Object[] retryParams = retry.getRetryParams();
+                    Object[] params = new Object[ retryParams.length + 2 ];
+                    for( i=0; i<retryParams.length; i++ ) {
+                        params[ i ] = retryParams[ i ];
+                    }
+                    params[ i++ ] = password;
+                    params[ i++ ] = mPgpData;
+                    
+                    try {
+                        retry.getRetryMethod().invoke( crypto, params );
+                    } catch( Exception e ) {
+                        Log.e( K9.LOG_TAG, "Unable to call crypto provider via reflection", e );
+                    }
+                    
+                }
+            });
+        
+        dialogBuilder.setNegativeButton( R.string.cancel_action, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick( DialogInterface dialog, int whichButton ) {
+                    // do nothing
+                }
+            });
+            
+        dialogBuilder.show();
+        
+    }
+        
     private void initializeCrypto() {
         if (mPgpData != null) {
             return;

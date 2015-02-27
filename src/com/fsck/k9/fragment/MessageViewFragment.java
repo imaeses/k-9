@@ -15,15 +15,12 @@ import org.apache.commons.io.IOUtils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -70,7 +67,6 @@ import com.fsck.k9.view.AttachmentView;
 import com.fsck.k9.view.AttachmentView.AttachmentFileDownloadCallback;
 import com.fsck.k9.view.MessageHeader;
 import com.fsck.k9.view.SingleMessageView;
-import com.imaeses.keyring.remote.CryptoService;
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 

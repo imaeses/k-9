@@ -35,7 +35,7 @@ abstract public class CryptoProvider {
     abstract public boolean isAvailable(Context context);
     abstract public boolean isEncrypted(Message message);
     abstract public boolean isSigned(Message message);
-    abstract public boolean onActivityResult(Activity activity, int requestCode, int resultCode,
+    abstract public boolean onActivityResult(CryptoEncryptCallback callback, int requestCode, int resultCode,
             Intent data, PgpData pgpData);
     abstract public boolean onDecryptActivityResult(CryptoDecryptCallback callback,
             int requestCode, int resultCode, Intent data, PgpData pgpData);
@@ -45,8 +45,8 @@ abstract public class CryptoProvider {
     abstract public boolean encryptFile( Activity activity, String filename, PgpData pgpData );
     abstract public boolean sign( Activity activity, String filename, PgpData pgpData );
     abstract public boolean decrypt( Fragment fragment, String data, String originalCharset, PgpData pgpData);
-    abstract public boolean decryptFile( Fragment fragment, String filename, PgpData pgpData );
-    abstract public boolean verify( Fragment fragment, String filename, String sig, PgpData pgpData );
+    abstract public boolean decryptFile( Fragment fragmen, String filename, PgpData pgpData );
+    abstract public boolean verify( Fragment fragmen, String filename, String sig, PgpData pgpData );
     abstract public long[] getSecretKeyIdsFromEmail(Context context, String email);
     abstract public long[] getPublicKeyIdsFromEmail(Context context, String email);
     abstract public boolean hasSecretKeyForEmail(Context context, String email);
@@ -81,6 +81,15 @@ abstract public class CryptoProvider {
         void onDecryptDone(PgpData pgpData);
         void onDecryptFileDone(PgpData pgpData);
         void requestCryptoPassword(CryptoRetry retry);
+        void showProgressBar(boolean display);
+    }
+    
+    public interface CryptoEncryptCallback {
+        void onEncryptDone();
+        void updateEncryptLayout();
+        void onEncryptionKeySelectionDone();
+        void requestCryptoPassword(CryptoRetry retry);
+        void showProgressBar(boolean display);
     }
     
     public static class CryptoRetry {

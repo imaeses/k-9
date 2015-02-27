@@ -15,8 +15,6 @@ import android.support.v4.app.Fragment;
 import android.widget.Toast;
 import android.util.Log;
 
-import com.fsck.k9.activity.MessageCompose;
-import com.fsck.k9.fragment.MessageViewFragment;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
@@ -32,6 +30,7 @@ import org.apache.commons.io.IOUtils;
 
 import com.imaeses.keyring.remote.CryptoService;
 import com.imaeses.keyring.remote.DecryptResponse;
+import com.imaeses.keyring.remote.EncryptResponse;
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
@@ -412,21 +411,17 @@ public class PGPKeyRing extends CryptoProvider {
     public boolean encrypt( Activity activity, String data, PgpData pgpData ) {
         
         boolean success = false;
-        
-        Intent i = new Intent( PGPKeyRingIntent.ENCRYPT_MSG_AND_RETURN );
-        i.addCategory( Intent.CATEGORY_DEFAULT );
-        i.setType( "text/plain" );
-        i.putExtra( EXTRAS_MSG, data);
-        i.putExtra( EXTRAS_ENCRYPTION_KEYIDS, pgpData.getEncryptionKeys() );
-        i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
-        
-        try {
+        if( data != null && data.length() > 0 ) {
             
-            activity.startActivityForResult( i, ENCRYPT_MESSAGE );
-            success = true;
+            if( cryptoService != null && supportsDirectInterface( activity.getApplicationContext() ) ) {
             
-        } catch( ActivityNotFoundException e ) {
-        	post( R.string.error_activity_not_found, activity );
+                doEncryptRemote( activity, data, pgpData.getEncryptionKeys(), pgpData.getSignatureKeyId(), null, pgpData );
+                success = true;
+                
+            } else {
+                success = doEncryptActivity( activity, data, pgpData );
+            }
+            
         }
         
         return success;
@@ -440,22 +435,17 @@ public class PGPKeyRing extends CryptoProvider {
     public boolean encryptFile( Activity activity, String filename, PgpData pgpData ) {
     	
         boolean success = false;
-        
-        Intent i = new Intent( PGPKeyRingIntent.ENCRYPT_FILE_AND_RETURN );
-        i.addCategory( Intent.CATEGORY_DEFAULT );
-        i.setType( "text/plain" );
-        i.putExtra( EXTRAS_FILENAME, filename );
-        i.putExtra( EXTRAS_ENCRYPTION_KEYIDS, pgpData.getEncryptionKeys() );
-        i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
-        i.putExtra( EXTRAS_SIGNATURE_ALG, SIG_ALG );
-        
-        try {
+        if( filename != null && filename.length() > 0 ) {
             
-            activity.startActivityForResult( i, ENCRYPT_FILE );
-            success = true;
+            if( cryptoService != null && supportsDirectInterface( activity.getApplicationContext() ) ) {
             
-        } catch( ActivityNotFoundException e ) {
-        	post( R.string.error_activity_not_found, activity );
+                doEncryptFileRemote( activity, filename, pgpData.getEncryptionKeys(), pgpData.getSignatureKeyId(), null, pgpData );
+                success = true;
+                
+            } else {
+                success = doEncryptFileActivity( activity, filename, pgpData );
+            }
+            
         }
         
         return success;
@@ -468,29 +458,21 @@ public class PGPKeyRing extends CryptoProvider {
     @Override
     public boolean sign( Activity activity, String filename, PgpData pgpData ) {
     	
-    	boolean success = false;
-    	
-    	if( filename != null ) {
-    		
-    		Intent i = new Intent( PGPKeyRingIntent.SIGN_AND_RETURN );
-    		i.addCategory( Intent.CATEGORY_DEFAULT );
-            i.setType( "text/plain" );
-            i.putExtra( EXTRAS_FILENAME, filename );
-            i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
-            i.putExtra( EXTRAS_SIGNATURE_ALG, SIG_ALG );
+        boolean success = false;
+        if( filename != null && filename.length() > 0 ) {
             
-            try {
-                
-                activity.startActivityForResult( i, SIGN );
+            if( cryptoService != null && supportsDirectInterface( activity.getApplicationContext() ) ) {
+            
+                doSignRemote( activity, filename, pgpData.getSignatureKeyId(), null, pgpData );
                 success = true;
-            
-            } catch( ActivityNotFoundException e ) {
-            	post( R.string.error_activity_not_found, activity );
+                
+            } else {
+                success = doSignActivity( activity, filename, pgpData );
             }
             
-    	}
-    	
-    	return success;
+        }
+        
+        return success;
     	
     }
     
@@ -578,7 +560,7 @@ public class PGPKeyRing extends CryptoProvider {
      * @return handled or not
      */
     @Override
-    public boolean onActivityResult( Activity activity, int requestCode, int resultCode, Intent data, PgpData pgpData ) {
+    public boolean onActivityResult( CryptoEncryptCallback callback, int requestCode, int resultCode, Intent data, PgpData pgpData ) {
         
         switch (requestCode) {
         
@@ -596,7 +578,7 @@ public class PGPKeyRing extends CryptoProvider {
 	            
             }
             
-        	( ( MessageCompose )activity ).updateEncryptLayout();
+            callback.updateEncryptLayout();
             
             break;
 
@@ -608,7 +590,7 @@ public class PGPKeyRing extends CryptoProvider {
                 pgpData.setEncryptionKeys( data.getLongArrayExtra( EXTRAS_CHOSEN_KEYIDS ) );
             }
             
-            ( ( MessageCompose )activity ).onEncryptionKeySelectionDone();
+            callback.onEncryptionKeySelectionDone();
             
             break;
 
@@ -620,7 +602,7 @@ public class PGPKeyRing extends CryptoProvider {
                 pgpData.setEncryptedData( data.getStringExtra( EXTRAS_MSG ) );
             }
             
-            ( ( MessageCompose )activity ).onEncryptDone();
+            callback.onEncryptDone();
             
             break;
             
@@ -635,7 +617,7 @@ public class PGPKeyRing extends CryptoProvider {
                 pgpData.setFilename( data.getStringExtra( EXTRAS_FILENAME ) );
             }
             
-            ( ( MessageCompose )activity ).onEncryptDone();
+            callback.onEncryptDone();
             
             break;
             
@@ -647,7 +629,7 @@ public class PGPKeyRing extends CryptoProvider {
         		pgpData.setSignature( data.getStringExtra( EXTRAS_SIGNATURE ) );
         	}
         	
-        	( ( MessageCompose )activity ).onEncryptDone();
+        	callback.onEncryptDone();
         	
         	break;
         		    
@@ -904,6 +886,27 @@ public class PGPKeyRing extends CryptoProvider {
         return NAME;
     }
     
+    public boolean encrypt( final Activity activity, final String msg, final long[] encKeyIds, final long signingKeyId, final String password, final PgpData pgpData ) {
+
+        doEncryptRemote( activity, msg, encKeyIds, signingKeyId, password, pgpData );
+        return true;
+        
+    }
+    
+    public boolean encryptFile( final Activity activity, final String filename, final long[] encKeyIds, final long signingKeyId, final String password, final PgpData pgpData ) {
+        
+        doEncryptFileRemote( activity, filename, encKeyIds, signingKeyId, password, pgpData );
+        return true;
+        
+    }
+    
+    public boolean sign( final Activity activity, final String filename, final long keyId, final String password, final PgpData pgpData ) {
+        
+        doSignRemote( activity, filename, keyId, password, pgpData );
+        return true;
+        
+    }
+    
     public boolean decryptFile( final Fragment fragment, final String filename, final String password, final PgpData pgpData ) {
         
         doDecryptRemote( fragment, filename, password, pgpData );
@@ -918,10 +921,56 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
+    private void doEncryptRemote( final Activity activity, final String msg, final long[] encKeyIds, final long signingKeyId, final String password, PgpData pgpData ) {
+        
+        final CryptoWorker worker = new CryptoWorker( ( CryptoEncryptCallback )activity, password, pgpData );
+        
+        Runnable r = new Runnable() {
+            public void run() {
+                worker.encrypt( msg, encKeyIds, signingKeyId, SIG_ALG );
+            }
+        };
+                
+        Thread t = new Thread( r );
+        t.start();
+        
+    }
+
+    private void doEncryptFileRemote( final Activity activity, final String filename, final long[] encKeyIds, final long signingKeyId, final String password, PgpData pgpData ) {
+        
+        final CryptoWorker worker = new CryptoWorker( ( CryptoEncryptCallback )activity, password, pgpData );
+        
+        Runnable r = new Runnable() {
+            public void run() {
+                worker.encryptFile( filename, encKeyIds, signingKeyId, SIG_ALG );
+            }
+        };
+                
+        Thread t = new Thread( r );
+        t.start();
+        
+    }
+    
+    
+    private void doSignRemote( final Activity activity, final String filename, final long keyId, final String password, PgpData pgpData ) {
+        
+        final CryptoWorker worker = new CryptoWorker( ( CryptoEncryptCallback )activity, password, pgpData );
+        
+        Runnable r = new Runnable() {
+            public void run() {
+                worker.sign( filename, keyId, SIG_ALG );
+            }
+        };
+                
+        Thread t = new Thread( r );
+        t.start();
+        
+    }
+    
     private void doDecryptRemote( final Fragment fragment, final String filename, String password, final PgpData pgpData ) {
         
         final String destFilename = pgpData.getFilename();
-        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, fragment, password, pgpData );
+        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, password, pgpData );
         
         Runnable r = new Runnable() {
             public void run() {
@@ -936,7 +985,7 @@ public class PGPKeyRing extends CryptoProvider {
     
     private void doDecryptRemote( final Fragment fragment, final String msg, final String charset, String password, final PgpData pgpData ) {
 
-        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, fragment, password, pgpData );
+        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, password, pgpData );
         
         Runnable r = new Runnable() {
             public void run() {
@@ -948,7 +997,84 @@ public class PGPKeyRing extends CryptoProvider {
         t.start();
       
     }
+   
+    public boolean doSignActivity( Activity activity, String filename, PgpData pgpData ) {
+        
+        boolean success = false;
+        
+        if( filename != null ) {
+            
+            Intent i = new Intent( PGPKeyRingIntent.SIGN_AND_RETURN );
+            i.addCategory( Intent.CATEGORY_DEFAULT );
+            i.setType( "text/plain" );
+            i.putExtra( EXTRAS_FILENAME, filename );
+            i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
+            i.putExtra( EXTRAS_SIGNATURE_ALG, SIG_ALG );
+            
+            try {
+                
+                activity.startActivityForResult( i, SIGN );
+                success = true;
+            
+            } catch( ActivityNotFoundException e ) {
+                post( R.string.error_activity_not_found, activity );
+            }
+            
+        }
+        
+        return success;
+        
+    }
     
+    public boolean doEncryptFileActivity( Activity activity, String filename, PgpData pgpData ) {
+        
+        boolean success = false;
+        
+        Intent i = new Intent( PGPKeyRingIntent.ENCRYPT_FILE_AND_RETURN );
+        i.addCategory( Intent.CATEGORY_DEFAULT );
+        i.setType( "text/plain" );
+        i.putExtra( EXTRAS_FILENAME, filename );
+        i.putExtra( EXTRAS_ENCRYPTION_KEYIDS, pgpData.getEncryptionKeys() );
+        i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
+        i.putExtra( EXTRAS_SIGNATURE_ALG, SIG_ALG );
+        
+        try {
+            
+            activity.startActivityForResult( i, ENCRYPT_FILE );
+            success = true;
+            
+        } catch( ActivityNotFoundException e ) {
+            post( R.string.error_activity_not_found, activity );
+        }
+        
+        return success;
+        
+    }
+
+    private boolean doEncryptActivity( Activity activity, String data, PgpData pgpData ) {
+        
+        boolean success = false;
+        
+        Intent i = new Intent( PGPKeyRingIntent.ENCRYPT_MSG_AND_RETURN );
+        i.addCategory( Intent.CATEGORY_DEFAULT );
+        i.setType( "text/plain" );
+        i.putExtra( EXTRAS_MSG, data);
+        i.putExtra( EXTRAS_ENCRYPTION_KEYIDS, pgpData.getEncryptionKeys() );
+        i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
+        
+        try {
+            
+            activity.startActivityForResult( i, ENCRYPT_MESSAGE );
+            success = true;
+            
+        } catch( ActivityNotFoundException e ) {
+            post( R.string.error_activity_not_found, activity );
+        }
+        
+        return success;
+        
+    }
+
     private boolean doDecryptFileActivity( final Fragment fragment, final String filename, final PgpData pgpData ) {
         
         boolean success = false;
@@ -1010,7 +1136,7 @@ public class PGPKeyRing extends CryptoProvider {
     
     private void doVerifyRemote( final Fragment fragment, final String filename, final String sig, final PgpData pgpData ) {
         
-        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, fragment, null, pgpData );
+        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, null, pgpData );
         
         Runnable r = new Runnable() {
             public void run() {
@@ -1115,23 +1241,186 @@ public class PGPKeyRing extends CryptoProvider {
     
     private class CryptoWorker {
 
-        CryptoDecryptCallback callback;
-        Fragment fragment;
+        CryptoEncryptCallback encryptCallback;
+        CryptoDecryptCallback decryptCallback;
         String password;
         PgpData pgpData;
         
-        private CryptoWorker( CryptoDecryptCallback callback, Fragment fragment, String password, PgpData pgpData ) {
+        private CryptoWorker( CryptoDecryptCallback callback, String password, PgpData pgpData ) {
             
-            this.callback = callback;
-            this.fragment = fragment;
+            this.decryptCallback = callback;
             this.password = password;
             this.pgpData = pgpData;
             
         }
        
+        private CryptoWorker( CryptoEncryptCallback callback, String password, PgpData pgpData ) {
+            
+            this.encryptCallback = callback;
+            this.password = password;
+            this.pgpData = pgpData;
+            
+        }
+        
+        private void encrypt( final String msg, final long[] encKeyIds, final long signingKeyId, final String sigAlg ) {
+         
+            progressBar( encryptCallback, true );
+            
+            try {
+            
+                EncryptResponse response = null;
+                
+                if( password == null ) {
+                    response = cryptoService.encrypt( msg, encKeyIds, signingKeyId, sigAlg );
+                } else {
+                    response = cryptoService.encryptWithPassword( msg, encKeyIds, signingKeyId, sigAlg, password );
+                }
+                
+                int encResult = response.getResult();
+                if( encResult == EncryptResponse.ENC_SUCCESS ) {
+                    
+                    pgpData.setEncryptedData( response.getPayload() );
+                    
+                    Runnable r = new Runnable() {
+                        @Override
+                        public void run() {
+                            encryptCallback.onEncryptDone();
+                        }
+                    };
+                    
+                    handler.post( r );
+                    
+                } else if( encResult == EncryptResponse.ENC_PASSWORD_REQUIRED ) {
+                    
+                    final Method retryMethod = PGPKeyRing.this.getClass().getDeclaredMethod( "encrypt", new Class[] { Activity.class, String.class, Long[].class, Long.class, String.class, PgpData.class } );
+                    Runnable r = new Runnable() {
+                        @Override
+                        public void run() {
+                            encryptCallback.requestCryptoPassword( new CryptoRetry( retryMethod, new Object[] { encryptCallback, msg, encKeyIds, signingKeyId } ) );        
+                        }
+                    };
+                    
+                    handler.post( r );
+
+                } else {
+                    Log.e( K9.LOG_TAG, "Remote encryption failed: " + response.getError() );
+                }
+                
+            } catch( Exception e ) {
+                Log.e( K9.LOG_TAG, "Error on encryption via remote serivce", e );
+            } finally {
+                progressBar( encryptCallback, false );
+            }
+            
+        }
+        
+        private void encryptFile( final String filename, final long[] encKeyIds, final long signingKeyId, final String sigAlg ) {
+            
+            progressBar( encryptCallback, true );
+            
+            try {
+            
+                EncryptResponse response = null;
+                
+                if( password == null ) {
+                    response = cryptoService.encryptFile( filename, encKeyIds, signingKeyId, sigAlg );
+                } else {
+                    response = cryptoService.encryptFileWithPassword( filename, encKeyIds, signingKeyId, sigAlg, password );
+                }
+                
+                int encResult = response.getResult();
+                if( encResult == EncryptResponse.ENC_SUCCESS ) {
+                    
+                    pgpData.setFilename( response.getPayload() );
+                    
+                    Runnable r = new Runnable() {
+                        @Override
+                        public void run() {
+                            encryptCallback.onEncryptDone();
+                        }
+                    };
+                    
+                    handler.post( r );
+                    
+                } else if( encResult == EncryptResponse.ENC_PASSWORD_REQUIRED ) {
+                    
+                    final Method retryMethod = PGPKeyRing.this.getClass().getDeclaredMethod( "encryptFile", new Class[] { Activity.class, String.class, Long[].class, Long.class, String.class, PgpData.class } );
+                    Runnable r = new Runnable() {
+                        @Override
+                        public void run() {
+                            encryptCallback.requestCryptoPassword( new CryptoRetry( retryMethod, new Object[] { encryptCallback, filename, encKeyIds, signingKeyId } ) );        
+                        }
+                    };
+                    
+                    handler.post( r );
+
+                } else {
+                    Log.e( K9.LOG_TAG, "Remote encryption failed: " + response.getError() );
+                }
+                
+            } catch( Exception e ) {
+                Log.e( K9.LOG_TAG, "Error on encryption via remote serivce", e );
+            } finally {
+                progressBar( encryptCallback, false );
+            }
+            
+        }        
+        
+        private void sign( final String filename, final long keyId, final String sigAlg ) {
+            
+            progressBar( encryptCallback, true );
+            
+            try {
+            
+                EncryptResponse response = null;
+                
+                if( password == null ) {
+                    response = cryptoService.sign( filename, keyId, sigAlg );
+                } else {
+                    response = cryptoService.signWithPassword( filename, keyId, sigAlg, password );
+                }
+                
+                int encResult = response.getResult();
+                if( encResult == EncryptResponse.ENC_SUCCESS ) {
+                    
+                    pgpData.setSignature( response.getPayload() );
+                    
+                    Runnable r = new Runnable() {
+                        @Override
+                        public void run() {
+                            encryptCallback.onEncryptDone();
+                        }
+                    };
+                    
+                    handler.post( r );
+                    
+                } else if( encResult == EncryptResponse.ENC_PASSWORD_REQUIRED ) {
+                    
+                    final Method retryMethod = PGPKeyRing.this.getClass().getDeclaredMethod( "sign", new Class[] { Activity.class, String.class, Long.class, String.class, PgpData.class } );
+                    Runnable r = new Runnable() {
+                        @Override
+                        public void run() {
+                            encryptCallback.requestCryptoPassword( new CryptoRetry( retryMethod, new Object[] { encryptCallback, filename, keyId } ) );        
+                        }
+                    };
+                    
+                    handler.post( r );
+
+                } else {
+                    Log.e( K9.LOG_TAG, "Remote encryption failed: " + response.getError() );
+                }
+                
+            } catch( Exception e ) {
+                Log.e( K9.LOG_TAG, "Error on encryption via remote serivce", e );
+            } finally {
+                progressBar( encryptCallback, false );
+            }
+            
+        }
+       
         private void decryptFile( final String sourceFilename, final String destFilename ) {
             
-            progressBar( true );
+            progressBar( decryptCallback, true );
             
             try {
                 
@@ -1164,10 +1453,7 @@ public class PGPKeyRing extends CryptoProvider {
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
-                           
-                            progressBar( false );
-                            callback.onDecryptDone( pgpData );
-                            
+                            decryptCallback.onDecryptDone( pgpData );
                         }
                     };
                     
@@ -1179,23 +1465,20 @@ public class PGPKeyRing extends CryptoProvider {
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
-                            callback.requestCryptoPassword( new CryptoRetry( retryMethod, new Object[] { callback, sourceFilename } ) );        
+                            decryptCallback.requestCryptoPassword( new CryptoRetry( retryMethod, new Object[] { decryptCallback, sourceFilename } ) );
                         }
                     };
                     
                     handler.post( r );
 
                 } else {
-                    
                     Log.e( K9.LOG_TAG, "Remote decryption failed: " + response.getError() );
-                    progressBar( false );
-                    
                 }
                 
             } catch( Exception e ) {
                 
                 Log.e( K9.LOG_TAG, "Error on decryption via remote serivce", e );
-                progressBar( false );
+                progressBar( decryptCallback, false );
                 
             }
             
@@ -1203,7 +1486,7 @@ public class PGPKeyRing extends CryptoProvider {
         
         private void decrypt( final String msg, final String charset ) {
             
-            progressBar( true );
+            progressBar( decryptCallback, true );
             
             try {
                 
@@ -1236,10 +1519,7 @@ public class PGPKeyRing extends CryptoProvider {
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
-                           
-                            progressBar( false );
-                            callback.onDecryptDone( pgpData );
-                            
+                            decryptCallback.onDecryptDone( pgpData );
                         }
                     };
                     
@@ -1251,23 +1531,20 @@ public class PGPKeyRing extends CryptoProvider {
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
-                            callback.requestCryptoPassword( new CryptoRetry( retryMethod, new Object[] { callback, msg, charset } ) );        
+                            decryptCallback.requestCryptoPassword( new CryptoRetry( retryMethod, new Object[] { decryptCallback, msg, charset } ) );        
                         }
                     };
                     
                     handler.post( r );
 
                 } else {
-                    
                     Log.e( K9.LOG_TAG, "Remote decryption failed: " + response.getError() );
-                    progressBar( false );
-                    
                 }
                 
             } catch( Exception e ) {
                 
                 Log.e( K9.LOG_TAG, "Error on decryption via remote serivce", e );
-                progressBar( false );
+                progressBar( decryptCallback, false );
                 
             }
             
@@ -1275,7 +1552,7 @@ public class PGPKeyRing extends CryptoProvider {
         
         private void verify( final String filename, final String sig ) {
             
-            progressBar( true );
+            progressBar( decryptCallback, true );
             
             try {
                
@@ -1301,15 +1578,7 @@ public class PGPKeyRing extends CryptoProvider {
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
-                            
-                            progressBar( false );
-                            
-                            if( pgpData.showFile() ) {
-                                callback.onDecryptFileDone( pgpData );
-                            } else {
-                                callback.onDecryptDone( pgpData );
-                            }
-                            
+                            decryptCallback.onDecryptDone( pgpData );
                         }
                     };
                     
@@ -1320,25 +1589,36 @@ public class PGPKeyRing extends CryptoProvider {
                 }
                 
             } catch( Exception e ) {
-                
                 Log.e( K9.LOG_TAG, "Error on signature verification via remote serivce", e );
-                progressBar( false );
-                
+            } finally {
+                progressBar( decryptCallback, false );
             }
             
         }
         
-        public void progressBar( final boolean display ) {
+        public void progressBar( final CryptoDecryptCallback callback, final boolean display ) {
             
             Runnable r = new Runnable() {
                 public void run() {
-                    ( ( MessageViewFragment )fragment).showProgressBar( display );
+                    callback.showProgressBar( display );
                 }
             };
             
             handler.post( r );
             
-        }      
+        }    
+        
+        public void progressBar( final CryptoEncryptCallback callback, final boolean display ) {
+            
+            Runnable r = new Runnable() {
+                public void run() {
+                    callback.showProgressBar( display );
+                }
+            };
+            
+            handler.post( r );
+            
+        }    
         
     }
     

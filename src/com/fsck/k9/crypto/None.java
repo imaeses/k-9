@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 
+import com.fsck.k9.crypto.CryptoProvider.CryptoEncryptCallback;
 import com.fsck.k9.mail.Message;
 
 /**
@@ -60,7 +61,7 @@ public class None extends CryptoProvider {
     }
 
     @Override
-    public boolean onActivityResult(Activity activity, int requestCode, int resultCode,
+    public boolean onActivityResult(CryptoEncryptCallback callback, int requestCode, int resultCode,
                                     android.content.Intent data, PgpData pgpData) {
         return false;
     }
