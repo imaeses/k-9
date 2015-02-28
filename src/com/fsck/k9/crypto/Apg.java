@@ -115,6 +115,11 @@ public class Apg extends CryptoProvider {
 
         return false;
     }
+    
+    @Override
+    public boolean isTrialVersion() {
+        return false;
+    }
 
     /**
      * Select the signature key.

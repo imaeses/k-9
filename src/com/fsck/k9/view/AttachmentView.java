@@ -170,7 +170,7 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
             }
         }
         
-        Log.w( K9.LOG_TAG, "contentType: " + contentType + ", size: " + size + ", name: " + name );
+        //Log.w( K9.LOG_TAG, "contentType: " + contentType + ", size: " + size + ", name: " + name );
         
         TextView attachmentName = (TextView) findViewById(R.id.attachment_name);
         TextView attachmentInfo = (TextView) findViewById(R.id.attachment_info);

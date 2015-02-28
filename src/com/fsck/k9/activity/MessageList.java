@@ -39,6 +39,7 @@ import com.fsck.k9.activity.misc.SwipeGestureDetector.OnSwipeGestureListener;
 import com.fsck.k9.activity.setup.AccountSettings;
 import com.fsck.k9.activity.setup.FolderSettings;
 import com.fsck.k9.activity.setup.Prefs;
+import com.fsck.k9.crypto.CryptoProvider;
 import com.fsck.k9.crypto.PGPKeyRing;
 import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.fragment.MessageListFragment;
@@ -521,7 +522,10 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
         super.onStop();
         
         try {
+            
             unbindService( cryptoServiceConn );
+            cryptoServiceConn = null;
+            
         } catch( Exception e ) {
             Log.w( K9.LOG_TAG, "Error unbinding from remote crypto service", e );
         }
@@ -546,6 +550,7 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
                 
                 PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
                 keyring.setCryptoService( null );
+                cryptoServiceConn = null;
                 
             }
             
@@ -556,8 +561,13 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
                 bindService( new Intent( PGPKeyRing.ACTION_BIND_REMOTE ), cryptoServiceConn, Context.BIND_AUTO_CREATE );
             } catch( SecurityException e ) {
                 
-                Toast toast = Toast.makeText(this, R.string.insufficient_pgpkeyring_permissions, Toast.LENGTH_LONG);
-                toast.show();
+                CryptoProvider cryptoProvider = mAccount.getCryptoProvider();
+                if( cryptoProvider.isAvailable( this ) && !cryptoProvider.isTrialVersion() ) {
+                    
+                    Toast toast = Toast.makeText(this, R.string.insufficient_pgpkeyring_permissions, Toast.LENGTH_LONG);
+                    toast.show();
+                    
+                }    
                 
             }
         }

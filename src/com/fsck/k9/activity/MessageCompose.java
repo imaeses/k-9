@@ -5,15 +5,18 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -123,6 +126,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.imaeses.keyring.remote.CryptoService;
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
@@ -326,6 +330,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
     private ImageButton mAddCcFromContacts;
     private ImageButton mAddBccFromContacts;
 
+    private ServiceConnection cryptoServiceConn;
     private PgpData mPgpData = null;
     private boolean mAutoEncrypt = false;
     private boolean mContinueWithoutPublicKey = false;
@@ -973,6 +978,64 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
         updateMessageFormat();
 
         setTitle();
+    }
+    
+    @Override
+    public void onStop() {
+        
+        super.onStop();
+        
+        try {
+            
+            unbindService( cryptoServiceConn );
+            cryptoServiceConn = null;
+            
+        } catch( Exception e ) {
+            Log.w( K9.LOG_TAG, "Error unbinding from remote crypto service", e );
+        }
+        
+    }
+    
+    @Override
+    public void onStart() {
+        
+        super.onStart();
+        
+        cryptoServiceConn = new ServiceConnection() {
+
+            public void onServiceConnected( ComponentName className, IBinder service ) {
+                
+                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
+                keyring.setCryptoService( CryptoService.Stub.asInterface( service ) );
+                
+            }
+
+            public void onServiceDisconnected( ComponentName className ) {
+
+                PGPKeyRing keyring = ( PGPKeyRing )mAccount.getCryptoProvider(); 
+                keyring.setCryptoService( null );
+                cryptoServiceConn = null;
+                
+            }
+            
+        };
+        
+        if( mAccount != null && mAccount.getCryptoProvider() instanceof PGPKeyRing ) {
+            try {
+                bindService( new Intent( PGPKeyRing.ACTION_BIND_REMOTE ), cryptoServiceConn, Context.BIND_AUTO_CREATE );
+            } catch( SecurityException e ) {
+                
+                CryptoProvider cryptoProvider = mAccount.getCryptoProvider();
+                if( cryptoProvider.isAvailable( this ) && !cryptoProvider.isTrialVersion() ) {
+                    
+                    Toast toast = Toast.makeText(this, R.string.insufficient_pgpkeyring_permissions, Toast.LENGTH_LONG);
+                    toast.show();
+                    
+                }    
+                
+            }
+        }
+
     }
     
     @Override

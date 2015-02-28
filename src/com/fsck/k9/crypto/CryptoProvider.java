@@ -54,6 +54,7 @@ abstract public class CryptoProvider {
     abstract public String getUserId(Context context, long keyId);
     abstract public String getName();
     abstract public boolean test(Context context);
+    abstract public boolean isTrialVersion();
     
     public boolean supportsAttachments( Context context ) {
     	return false;

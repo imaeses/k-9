@@ -164,6 +164,10 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
+    public boolean isTrialVersion() {
+        return isTrialVersion;
+    }
+    
     /**
      * Select the key for generating a signature.
      *

@@ -24,6 +24,11 @@ public class None extends CryptoProvider {
     public boolean isAvailable(Context context) {
         return false;
     }
+    
+    @Override
+    public boolean isTrialVersion() {
+        return false;
+    }
 
     @Override
     public boolean selectSecretKey(Activity activity, PgpData pgpData) {
