@@ -70,8 +70,8 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="account_recreate_dlg_instructions_fmt">All local data for \"<xliff:g id="account">%s</xliff:g>\" will be removed. Account settings will be retained.</string>
     <string name="account_clear_dlg_instructions_fmt">Local copies of messages in \"<xliff:g id="account">%s</xliff:g>\" will be removed. Account settings will be retained.</string>
     <string name="insufficient_apg_permissions">Squeaky Mail doesn\'t have permission to access APG fully, please reinstall to fix that.</string>
-    <string name="insufficient_pgpkeyring_permissions">Please reinstall Squeaky Mail for full access to PGP KeyRing.</string>
-
+    <string name="insufficient_pgpkeyring_permissions">Please reinstall or upgrade Squeaky Mail for full access to PGP KeyRing.</string>
+	<string name="insufficient_squeakymail_permissions">Please reinstall or upgrade PGP KeyRing for full access to Squeaky Mail.</string>
 
     <!-- === App Store-specific strings ======================================================= -->
 

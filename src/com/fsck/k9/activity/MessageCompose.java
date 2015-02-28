@@ -321,7 +321,6 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
     private CheckBox mEncryptCheckbox;
     private TextView mCryptoSignatureUserId;
     private TextView mCryptoSignatureUserIdRest;
-    private ProgressBar mProgressBar;
     
     private ImageButton mAddToFromContacts;
     private ImageButton mAddCcFromContacts;
@@ -644,9 +643,6 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
             mChooseIdentityButton.setVisibility(View.GONE);
         }
         
-        mProgressBar = ( ProgressBar )findViewById( R.id.progress );
-        mProgressBar.setVisibility( View.GONE );
-
         mToView = (MultiAutoCompleteTextView) findViewById(R.id.to);
         mCcView = (MultiAutoCompleteTextView) findViewById(R.id.cc);
         mBccView = (MultiAutoCompleteTextView) findViewById(R.id.bcc);
@@ -981,6 +977,9 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
     
     @Override
     public void onDestroy() {
+        
+        super.onDestroy();
+        
         for( File f : toDelete ) {
             if( f.exists() ) {
                 try {
@@ -1133,9 +1132,9 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
     
     public void showProgressBar( boolean display ) {
         if( display ) {
-            mProgressBar.setVisibility( View.VISIBLE );
+            setSupportProgressBarIndeterminateVisibility(true);
         } else {
-            mProgressBar.setVisibility( View.GONE );
+            setSupportProgressBarIndeterminateVisibility(false);
         }
     }
     

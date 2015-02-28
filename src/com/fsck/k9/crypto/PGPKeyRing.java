@@ -1197,7 +1197,7 @@ public class PGPKeyRing extends CryptoProvider {
             if( pi != null && pi.versionCode >= VERSION_REQUIRED_IDIRECT ) {
                 supportsDirectInterfaceDecryptPgpMime = true;
             } else {
-                post( R.string.insufficient_pgpkeyring_permissions, context );
+                post( R.string.insufficient_squeakymail_permissions, context );
             }
             
         }
@@ -1292,7 +1292,7 @@ public class PGPKeyRing extends CryptoProvider {
                     
                 } else if( encResult == EncryptResponse.ENC_PASSWORD_REQUIRED ) {
                     
-                    final Method retryMethod = PGPKeyRing.this.getClass().getDeclaredMethod( "encrypt", new Class[] { Activity.class, String.class, Long[].class, Long.class, String.class, PgpData.class } );
+                    final Method retryMethod = PGPKeyRing.this.getClass().getDeclaredMethod( "encrypt", new Class[] { Activity.class, String.class, long[].class, long.class, String.class, PgpData.class } );
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
@@ -1344,7 +1344,7 @@ public class PGPKeyRing extends CryptoProvider {
                     
                 } else if( encResult == EncryptResponse.ENC_PASSWORD_REQUIRED ) {
                     
-                    final Method retryMethod = PGPKeyRing.this.getClass().getDeclaredMethod( "encryptFile", new Class[] { Activity.class, String.class, Long[].class, Long.class, String.class, PgpData.class } );
+                    final Method retryMethod = PGPKeyRing.this.getClass().getDeclaredMethod( "encryptFile", new Class[] { Activity.class, String.class, long[].class, long.class, String.class, PgpData.class } );
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
@@ -1396,7 +1396,7 @@ public class PGPKeyRing extends CryptoProvider {
                     
                 } else if( encResult == EncryptResponse.ENC_PASSWORD_REQUIRED ) {
                     
-                    final Method retryMethod = PGPKeyRing.this.getClass().getDeclaredMethod( "sign", new Class[] { Activity.class, String.class, Long.class, String.class, PgpData.class } );
+                    final Method retryMethod = PGPKeyRing.this.getClass().getDeclaredMethod( "sign", new Class[] { Activity.class, String.class, long.class, String.class, PgpData.class } );
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
@@ -1475,9 +1475,9 @@ public class PGPKeyRing extends CryptoProvider {
                     Log.e( K9.LOG_TAG, "Remote decryption failed: " + response.getError() );
                 }
                 
-            } catch( Exception e ) {
-                
+            } catch( Exception e ) { 
                 Log.e( K9.LOG_TAG, "Error on decryption via remote serivce", e );
+            } finally {    
                 progressBar( decryptCallback, false );
                 
             }
@@ -1542,10 +1542,9 @@ public class PGPKeyRing extends CryptoProvider {
                 }
                 
             } catch( Exception e ) {
-                
                 Log.e( K9.LOG_TAG, "Error on decryption via remote serivce", e );
+            } finally {    
                 progressBar( decryptCallback, false );
-                
             }
             
         }        
