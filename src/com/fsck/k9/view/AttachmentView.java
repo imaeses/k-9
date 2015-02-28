@@ -129,8 +129,7 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
                 size = Integer.parseInt(sizeParam);
             } catch (NumberFormatException e) { /* ignore */ }
         } else if( part.getBody() instanceof BinaryTempFileBody ) {
-            //size = ( ( BinaryTempFileBody )part.getBody() ).getSize();
-            size = part.getSize();
+            size = ( ( BinaryTempFileBody )part.getBody() ).getSize();
         }
 
         contentType = MimeUtility.unfoldAndDecode(part.getContentType());
@@ -171,7 +170,7 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
             }
         }
         
-        //Log.w( K9.LOG_TAG, "contentType: " + contentType + ", size: " + size + ", name: " + name );
+        Log.w( K9.LOG_TAG, "contentType: " + contentType + ", size: " + size + ", name: " + name );
         
         TextView attachmentName = (TextView) findViewById(R.id.attachment_name);
         TextView attachmentInfo = (TextView) findViewById(R.id.attachment_info);
