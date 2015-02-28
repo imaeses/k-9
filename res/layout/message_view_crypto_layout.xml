@@ -49,6 +49,13 @@
                 android:layout_gravity="left"/>
         </LinearLayout>
     </LinearLayout>
+    <ProgressBar
+        	android:id="@+id/progress_crypto"
+        	android:layout_height="wrap_content"
+        	android:layout_width="wrap_content"
+        	android:layout_gravity="center_horizontal|center_vertical"
+        	android:layout_weight="1"
+        	android:focusable="true" />
     <Button
         android:text="@string/btn_decrypt"
         android:id="@+id/btn_decrypt"

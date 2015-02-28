@@ -12,9 +12,7 @@ import com.fsck.k9.crypto.PgpData;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
-import com.fsck.k9.mail.internet.MimeMessage;
 import com.fsck.k9.mail.internet.MimeUtility;
-import com.handmark.pulltorefresh.library.internal.Utils;
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
@@ -102,6 +100,7 @@ public class MessageCryptoView extends LinearLayout {
             @Override
             public void onClick(View v) {
                 try {
+                    mDecryptButton.setVisibility(View.GONE);
                     String data = null;
                     Part part = MimeUtility.findFirstPartByMimeType(message, "text/plain");
                     if (part == null) {

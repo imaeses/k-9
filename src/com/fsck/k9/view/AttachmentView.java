@@ -162,7 +162,7 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         contentType = MimeUtility.getMimeTypeForViewing(part.getMimeType(), name);
         if( name.endsWith( ".asc" ) && contentType.startsWith( "text/plain" ) && size < TEXT_PLAIN_KEYS_MAX_SIZE ) {
             String text = MimeUtility.getTextFromPart(part);
-            if( CryptoProvider.PGP_PUBLIC_KEY_BLOCK.matcher( text ).matches() ) {
+            if( text != null && CryptoProvider.PGP_PUBLIC_KEY_BLOCK.matcher( text ).matches() ) {
                 String remainder = "";
                 if( contentType.length() > "text/plain".length() ) {
                     remainder = contentType.substring( "text/plain".length() );

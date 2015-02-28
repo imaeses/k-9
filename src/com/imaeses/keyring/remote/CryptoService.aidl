@@ -6,7 +6,7 @@ import com.imaeses.keyring.remote.ImportResponse;
 
 interface CryptoService {
 
-	DecryptResponse decrypt(in String msg, in String charset);
+	DecryptResponse decrypt(in String msg, in String charset, in boolean isSigned);
 	DecryptResponse decryptWithPassword(in String msg, in String charset, in String password);
 	DecryptResponse decryptFile(in String sourceFile, in String destFile);
 	DecryptResponse decryptFileWithPassword(in String sourceFile, in String destFile, in String password);

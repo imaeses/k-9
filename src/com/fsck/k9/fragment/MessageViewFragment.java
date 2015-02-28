@@ -103,6 +103,7 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
     private MessageViewHandler mHandler = new MessageViewHandler();
     private LayoutInflater mLayoutInflater;
     private ProgressBar mProgressBar;
+    private ProgressBar mProgressBarCryptoLayout;
 
     /** this variable is used to save the calling AttachmentView
      *  until the onActivityResult is called.
@@ -225,6 +226,8 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         mMessageView = (SingleMessageView) view.findViewById(R.id.message_view);
         mProgressBar = ( ProgressBar )view.findViewById( R.id.progress );
         mProgressBar.setVisibility( View.GONE );
+        mProgressBarCryptoLayout = ( ProgressBar )view.findViewById( R.id.progress_crypto );
+        mProgressBarCryptoLayout.setVisibility( View.GONE );
 
         //set a callback for the attachment view. With this callback the attachmentview
         //request the start of a filebrowser activity.
@@ -337,11 +340,26 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
     }
     
     public void showProgressBar( boolean display ) {
-        if( display ) {
-            mProgressBar.setVisibility( View.VISIBLE );
-        } else {
-            mProgressBar.setVisibility( View.GONE );
+        
+        View v = null;
+        Activity activity = getActivity();
+        if( activity != null ) {
+            v = activity.findViewById( R.id.layout_decrypt );
         }
+      
+        if( display ) {
+            if( v != null && v.getVisibility() == View.VISIBLE ) {
+                mProgressBarCryptoLayout.setVisibility( View.VISIBLE );
+            } else {
+                mProgressBar.setVisibility( View.VISIBLE );
+            }    
+        } else {
+            
+            mProgressBarCryptoLayout.setVisibility( View.GONE );
+            mProgressBar.setVisibility( View.GONE );  
+
+        }    
+        
     }
 
     private void delete() {

@@ -755,7 +755,7 @@ public class PGPKeyRing extends CryptoProvider {
     }
 
     @Override
-    public boolean isSigned (Message message ) {
+    public boolean isSigned ( Message message ) {
              
         String data = null;
         try {
@@ -777,7 +777,7 @@ public class PGPKeyRing extends CryptoProvider {
             return false;
         }
 
-        Matcher matcher = PGP_SIGNED_MESSAGE.matcher(data);
+        Matcher matcher = PGP_SIGNED_MESSAGE.matcher( data );
         return matcher.matches();
         
     }
@@ -1478,14 +1478,15 @@ public class PGPKeyRing extends CryptoProvider {
             } catch( Exception e ) { 
                 Log.e( K9.LOG_TAG, "Error on decryption via remote serivce", e );
             } finally {    
-                progressBar( decryptCallback, false );
-                
+                progressBar( decryptCallback, false );    
             }
             
         }
         
         private void decrypt( final String msg, final String charset ) {
             
+            boolean isSigned = PGP_SIGNED_MESSAGE.matcher( msg ).matches();
+                    
             progressBar( decryptCallback, true );
             
             try {
@@ -1493,7 +1494,7 @@ public class PGPKeyRing extends CryptoProvider {
                 DecryptResponse response = null;
                 
                 if( password == null ) {
-                    response = cryptoService.decrypt( msg, charset );
+                    response = cryptoService.decrypt( msg, charset, isSigned );
                 } else {
                     response = cryptoService.decryptWithPassword( msg, charset, password );
                 }

@@ -19,7 +19,7 @@
 
 	        <!-- Header area -->
 	        <include layout="@layout/message_view_header"/>
-	
+	        
 	        <!-- Content area -->
 	        <com.fsck.k9.view.MessageWebView
 	            android:id="@+id/message_content"
@@ -62,11 +62,11 @@
 	        </LinearLayout>
 	        
 	        <ProgressBar
-        			android:id="@+id/progress"
-        			android:layout_height="wrap_content"
-        			android:layout_width="wrap_content"
-        			android:layout_gravity="center_horizontal|center_vertical"
-        			android:focusable="true" />
+        		android:id="@+id/progress"
+        		android:layout_height="wrap_content"
+        		android:layout_width="wrap_content"
+        		android:layout_gravity="center_horizontal|center_vertical"
+        		android:focusable="true" />
 	        
 	    </LinearLayout>
 	
