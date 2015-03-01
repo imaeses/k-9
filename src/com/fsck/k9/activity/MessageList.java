@@ -523,6 +523,8 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
         
         try {
             
+            // no need to set the crypto object's reference to null: either it will be replaced by another
+            // activity, we are exiting the app, or it will never be called
             unbindService( cryptoServiceConn );
             cryptoServiceConn = null;
             
@@ -564,7 +566,7 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
                 CryptoProvider cryptoProvider = mAccount.getCryptoProvider();
                 if( cryptoProvider.isAvailable( this ) && !cryptoProvider.isTrialVersion() ) {
                     
-                    Toast toast = Toast.makeText(this, R.string.insufficient_pgpkeyring_permissions, Toast.LENGTH_LONG);
+                    Toast toast = Toast.makeText(this, R.string.insufficient_squeakymail_permissions, Toast.LENGTH_LONG);
                     toast.show();
                     
                 }    

@@ -968,7 +968,6 @@ public class MessageViewFragment extends Fragment implements OnClickListener,
         dialogBuilder.setNegativeButton( R.string.cancel_action, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick( DialogInterface dialog, int whichButton ) {
-                    // do nothing
                     mMessageView.updateCryptoLayout( mAccount.getCryptoProvider(), mPgpData, mMessage);
                 }
             });

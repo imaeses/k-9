@@ -98,7 +98,6 @@ public class PGPKeyRing extends CryptoProvider {
     public static final String EXTRAS_SHOW_KEYID_IN_SINGLE_SELECTION = "show.keyid.single.selection";
     public static final String EXTRAS_CHARSET = "charset";
     public static final String EXTRAS_SIGNATURE_ALG = "sig.algorithm";
-    public static final String EXTRAS_TEXT_MESSAGE = "text.message";
     
     public static final String ACTION_BIND_REMOTE = "com.imaeses.keyring.CryptoService.BIND";
     
@@ -487,7 +486,7 @@ public class PGPKeyRing extends CryptoProvider {
      */
     @Override
     public boolean decrypt( Fragment fragment, String data, String originalCharset, PgpData pgpData ) {
-        
+             
         boolean success = false;
         if( data != null && data.length() > 0 ) {
             
@@ -677,7 +676,7 @@ public class PGPKeyRing extends CryptoProvider {
                 pgpData.setSignatureSuccess( data.getBooleanExtra( EXTRAS_SIGNATURE_SUCCESS, false ) );
                 pgpData.setSignatureUnknown( data.getBooleanExtra( EXTRAS_SIGNATURE_UNKNOWN, false ) );
     
-                String decrypted = data.getStringExtra( EXTRAS_TEXT_MESSAGE );
+                String decrypted = data.getStringExtra( EXTRAS_MSG );
                 if( decrypted == null ) {
                 	
                 	String filename = data.getStringExtra( EXTRAS_FILENAME );
@@ -696,7 +695,7 @@ public class PGPKeyRing extends CryptoProvider {
                 //Log.w( NAME, "signature identity: " + pgpData.getSignatureUserId() + ", keyid: " + pgpData.getSignatureKeyId() + ", success: " + pgpData.getSignatureSuccess() + ", sigs unknown: " + pgpData.getSignatureUnknown() );
                 callback.onDecryptDone( pgpData );
                 
-            } 
+            }
             
 
             break;

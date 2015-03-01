@@ -57,6 +57,11 @@ public class MessageCryptoView extends LinearLayout {
      */
     public void updateLayout(final CryptoProvider cryptoProvider, final PgpData pgpData, final Message message) {
        
+        if( message == null ) {
+            this.setVisibility(View.GONE);
+            return;
+        }
+        
         if (pgpData.getSignatureKeyId() != 0) {
             mCryptoSignatureUserIdRest.setText(
                 mContext.getString(R.string.key_id, Long.toHexString(pgpData.getSignatureKeyId() & 0xffffffffL).toUpperCase()));
@@ -76,15 +81,32 @@ public class MessageCryptoView extends LinearLayout {
                 mCryptoSignatureStatusImage.setImageResource(R.drawable.overlay_error);
             }
             mCryptoSignatureLayout.setVisibility(View.VISIBLE);
+            mDecryptButton.setVisibility(View.GONE);
             this.setVisibility(View.VISIBLE);
         } else {
             mCryptoSignatureLayout.setVisibility(View.INVISIBLE);
         }
         
+        if( pgpData.getDecryptedData() != null ) {
+            if( pgpData.getSignatureKeyId() == 0 ) {
+                this.setVisibility( View.GONE );
+            } else {
+                mDecryptButton.setVisibility(View.GONE);
+            }
+        }
+        
+        if( pgpData.getDecryptedData() != null || pgpData.getSignatureKeyId() != 0L ) {
+            return;
+        }
+        
+        /*
         if ((message == null) && (pgpData.getDecryptedData() == null)) {
             this.setVisibility(View.GONE);
             return;
         }
+        */
+        
+        /*
         if (pgpData.getDecryptedData() != null) {
             if (pgpData.getSignatureKeyId() == 0) {
                 this.setVisibility(View.GONE);
@@ -94,7 +116,7 @@ public class MessageCryptoView extends LinearLayout {
             }
             return;
         }
-
+        */
 
         mDecryptButton.setOnClickListener(new OnClickListener() {
             @Override
