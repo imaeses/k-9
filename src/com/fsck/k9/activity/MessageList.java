@@ -566,7 +566,8 @@ public class MessageList extends K9FragmentActivity implements MessageListFragme
                 CryptoProvider cryptoProvider = mAccount.getCryptoProvider();
                 if( cryptoProvider.isAvailable( this ) && !cryptoProvider.isTrialVersion() ) {
                     
-                    Toast toast = Toast.makeText(this, R.string.insufficient_squeakymail_permissions, Toast.LENGTH_LONG);
+                    // PGP KeyRing was installed *after* Squeaky Mail, so the user hasn't approved the required permissions
+                    Toast toast = Toast.makeText(this, R.string.insufficient_pgpkeyring_permissions, Toast.LENGTH_LONG);
                     toast.show();
                     
                 }    

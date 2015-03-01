@@ -23,7 +23,7 @@ interface CryptoService {
 	ImportResponse generateKeyring(in String userId, in String algMaster, in boolean masterCanSign, in boolean masterCanEncrypt, in long masterExpiry, in String masterMetadata, in String algSubkey, in boolean subkeyCanSign, in boolean subkeyCanEncrypt, in long subkeyExpiry, in String subkeyMetadata, in String password);
 
 	int addUserId(in long keyId, in String userId, in String password);
-	int addSubkey(in long masterKeyId, in String algSubkey, in boolean canSign, in boolean canEncrypt, in long subkeyExpiry, in String password, in String metadata);
+	int addSubkey(in long masterKeyId, in String algSubkey, in boolean canSign, in boolean canEncrypt, in long subkeyExpiry, in String metadata, in String password);
 	int changeKeyExpiration(in long keyId, in long expiry, in String password);
 	int revokeKey(in long keyId, in boolean keyCompromised, in String password);
 	int certify(in long certifyingKeyId, in long certifiedKeyId, in String password);
