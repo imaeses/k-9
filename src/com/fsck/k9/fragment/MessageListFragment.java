@@ -2842,22 +2842,30 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         }
 
         public void showSelectAll(boolean show) {
-            if (mActionMode != null) {
+            if (mActionMode != null && mSelectAll != null) {
                 mSelectAll.setVisible(show);
             }
         }
 
         public void showMarkAsRead(boolean show) {
             if (mActionMode != null) {
-                mMarkAsRead.setVisible(show);
-                mMarkAsUnread.setVisible(!show);
+                if( mMarkAsRead != null ) {
+                    mMarkAsRead.setVisible(show);
+                }
+                if( mMarkAsUnread != null ) {
+                    mMarkAsUnread.setVisible(!show);
+                }    
             }
         }
 
         public void showFlag(boolean show) {
             if (mActionMode != null) {
-                mFlag.setVisible(show);
-                mUnflag.setVisible(!show);
+                if( mFlag != null ) {
+                    mFlag.setVisible(show);
+                }
+                if( mUnflag != null ) {
+                    mUnflag.setVisible(!show);
+                }    
             }
         }
 
