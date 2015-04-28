@@ -197,8 +197,6 @@ public class MimeMessage extends Message {
     public int getSize() {
         
         int size = mSize;
-        Log.w( K9.LOG_TAG, "size is: " + size);
-        Log.w(K9.LOG_TAG, "body is a " + mBody.getClass().getName());
         if( size == 0 ) {
             size = mBody.getSize();
         }

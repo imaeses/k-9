@@ -9,7 +9,9 @@
 -->
 <changelog>
     <release version="5.001.08" versioncode="19028">
-        <change>Fixed 0-byte eml attachments</change>
+        <change>Fixed zero-byte eml attachments</change>
+        <change>Expand auto-import of public key attachments (ending in .asc) to all mime types</change>
+        <change>Auto-import public key attachments when there are other attachments, too</change>
     </release>
     <release version="5.001.07" versioncode="19027">
         <change>Directly interface with PGP KeyRing on encryption and inline decryption (requires PGP KeyRing 1.9.10)</change>

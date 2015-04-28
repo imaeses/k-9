@@ -35,21 +35,22 @@ import com.fsck.k9.crypto.CryptoProvider;
 import com.fsck.k9.helper.MediaScannerNotifier;
 import com.fsck.k9.helper.SizeFormatter;
 import com.fsck.k9.helper.Utility;
+import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.BinaryTempFileBody;
 import com.fsck.k9.mail.internet.MimeHeader;
 import com.fsck.k9.mail.internet.MimeUtility;
+import com.fsck.k9.mail.internet.TextBody;
 import com.fsck.k9.mail.store.LocalStore.LocalAttachmentBodyPart;
 import com.fsck.k9.provider.AttachmentProvider;
-
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 
 public class AttachmentView extends FrameLayout implements OnClickListener, OnLongClickListener {
     
-    private static final int TEXT_PLAIN_KEYS_MAX_SIZE = 256 * 1024;
+    private static final int TEXT_PLAIN_KEYS_MAX_SIZE = 512 * 1024;
     
     private Context mContext;
     private Message mMessage;
@@ -161,12 +162,13 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         mListener = listener;
 
         contentType = MimeUtility.getMimeTypeForViewing(part.getMimeType(), name);
-        if( name.endsWith( ".asc" ) && contentType.startsWith( "text/plain" ) && size < TEXT_PLAIN_KEYS_MAX_SIZE ) {
+        if( name.endsWith( ".asc" ) && !contentType.startsWith( "application/pgp-keys" ) && size < TEXT_PLAIN_KEYS_MAX_SIZE ) {
             String text = MimeUtility.getTextFromPart(part);
             if( text != null && CryptoProvider.PGP_PUBLIC_KEY_BLOCK.matcher( text ).matches() ) {
                 String remainder = "";
-                if( contentType.length() > "text/plain".length() ) {
-                    remainder = contentType.substring( "text/plain".length() );
+                int index = contentType.indexOf( ";" );
+                if( index >= 0 ) {
+                    remainder = contentType.substring( index );
                 }
                 contentType = "application/pgp-keys" + remainder;
             }
@@ -378,9 +380,34 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         if( part instanceof LocalAttachmentBodyPart ) {
         	uri = AttachmentProvider.getAttachmentUriForViewing(mAccount, ( ( LocalAttachmentBodyPart )part ).getAttachmentId());
         } else if( part.getBody() instanceof BinaryTempFileBody ){
-        	uri = Uri.fromFile( ( ( BinaryTempFileBody )part.getBody() ).getFile() );
-        } else {
-        	return;
+        	uri = Uri.fromFile( ( ( BinaryTempFileBody )part.getBody() ).getFile() );	
+        } else if( part.getBody() instanceof TextBody ) {
+            
+            OutputStream os = null;
+            BinaryTempFileBody btfb = new BinaryTempFileBody();
+            try {
+                
+                TextBody body = ( TextBody )part.getBody();
+                os = btfb.getOutputStream();
+                os.write( body.getText().getBytes() );
+              
+            } catch( Exception e ) {
+                
+                Log.w( K9.LOG_TAG, e.getMessage(), e );
+                return;
+                
+            } finally {
+                if( os != null ) {
+                    try {
+                        os.close();
+                    } catch( Exception e ) {
+                        Log.w( K9.LOG_TAG, "Unable to close output stream", e );
+                    }
+                }
+            }
+            
+            uri = Uri.fromFile( btfb.getFile() );
+            
         }
         
         Intent intent = new Intent(Intent.ACTION_VIEW);
