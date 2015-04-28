@@ -5,8 +5,11 @@ import java.util.ArrayList;
 
 import org.apache.james.mime4j.util.MimeUtil;
 
+import android.util.Log;
+
 import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.mail.internet.TextBody;
+import com.imaeses.squeaky.K9;
 
 public abstract class Multipart implements CompositeBody {
     protected Part mParent;
@@ -36,6 +39,19 @@ public abstract class Multipart implements CompositeBody {
     public int getCount() {
         return mParts.size();
     }
+    
+    @Override
+    public int getSize() {
+        
+        int size = 0;
+        for( Part p : mParts ) {
+            size += p.getSize();
+        }
+        
+        return size;
+        
+    }
+    
 
     public boolean removeBodyPart(BodyPart part) {
         part.setParent(null);

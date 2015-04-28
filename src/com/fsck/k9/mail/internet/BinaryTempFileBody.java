@@ -1,8 +1,12 @@
 package com.fsck.k9.mail.internet;
 
+import android.util.Log;
+
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.filter.Base64OutputStream;
+import com.imaeses.squeaky.K9;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mime4j.codec.Base64InputStream;
 import org.apache.james.mime4j.codec.QuotedPrintableInputStream;

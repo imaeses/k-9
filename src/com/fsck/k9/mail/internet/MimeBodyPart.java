@@ -142,7 +142,10 @@ public class MimeBodyPart extends BodyPart {
     }
 
     public int getSize() {
-        return mSize;
+        if( mSize != 0 ) {
+            return mSize;
+        }
+        return mBody.getSize();
     }
     
     public void writeHeadersTo( OutputStream out ) throws IOException {

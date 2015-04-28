@@ -73,12 +73,7 @@ public class MimeMultipart extends Multipart {
     public String getContentType() {
         return mContentType;
     }
-	
-	@Override
-	public int getSize() {
-	    return 0;
-	}
-    
+
     public void setContentType( String contentType ) throws MessagingException {
     	try {
 	    	mBoundary = MimeUtility.getHeaderParameter(contentType, "boundary");
@@ -144,7 +139,20 @@ public class MimeMultipart extends Multipart {
     }
 
     public InputStream getInputStream() throws MessagingException {
-        return null;
+        
+        InputStream is = null;
+        try {
+            
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            writeTo( baos );
+            is = new ByteArrayInputStream( baos.toByteArray() );
+            
+        } catch( IOException e ) {
+            Log.w( K9.LOG_TAG, e.getMessage(), e );
+        }
+        
+        return is;
+        
     }
 
     @Override

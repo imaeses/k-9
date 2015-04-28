@@ -128,8 +128,10 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
             try {
                 size = Integer.parseInt(sizeParam);
             } catch (NumberFormatException e) { /* ignore */ }
-        } else if( part.getBody() instanceof BinaryTempFileBody ) {
-            size = ( ( BinaryTempFileBody )part.getBody() ).getSize();
+        //} else if( part.getBody() instanceof BinaryTempFileBody ) {
+        //    size = ( ( BinaryTempFileBody )part.getBody() ).getSize();
+        } else {
+            size = part.getSize();
         }
 
         contentType = MimeUtility.unfoldAndDecode(part.getContentType());
