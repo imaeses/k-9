@@ -1068,7 +1068,7 @@ public class MimeUtility {
                 }
 
                 final String mimeType = part.getMimeType();
-                if ((mimeType != null) && MimeUtility.mimeTypeMatches(mimeType, "text/*")) {
+                if (mimeType != null) {
                     /*
                      * We've got a text part, so let's see if it needs to be processed further.
                      */
