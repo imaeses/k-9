@@ -152,7 +152,7 @@ public class LocalStore extends Store implements Serializable {
      */
     private static final int THREAD_FLAG_UPDATE_BATCH_SIZE = 500;
 
-    public static final int DB_VERSION = 51;
+    public static final int DB_VERSION = 52;
 
 
     public static String getColumnNameForFlag(Flag flag) {
@@ -728,6 +728,13 @@ public class LocalStore extends Store implements Serializable {
                     	
                     	db.update("folders", cv, "name = ?",
                     			new String[] { getAccount().getInboxFolderName() });
+                    }
+                }
+                if (db.getVersion() < 52 ) {
+                    try {
+                        db.execSQL( "ALTER TABLE messages ADD original_charset TEXT" );
+                    } catch (SQLiteException e) {
+                        Log.e(K9.LOG_TAG, "Unable to add original_charset column to messages");
                     }
                 }
 
@@ -1907,13 +1914,14 @@ public class LocalStore extends Store implements Serializable {
                                     mp.setSubType("mixed");
                                     boolean pgpMime = false;
                                     try {
-                                        cursor = db.rawQuery("SELECT html_content, text_content, mime_type, signed_multipart FROM messages "
+                                        cursor = db.rawQuery("SELECT html_content, text_content, mime_type, signed_multipart, original_charset FROM messages "
                                                              + "WHERE id = ?",
                                                              new String[] { Long.toString(localMessage.mId) });
                                         cursor.moveToNext();
                                         String htmlContent = cursor.getString(0);
                                         String textContent = cursor.getString(1);
                                         String mimeType = cursor.getString(2);
+                                        String originalCharset = cursor.getString( 4 );
                                         if (mimeType != null && mimeType.toLowerCase(Locale.US).startsWith("multipart/")) {
                                             // If this is a multipart message, preserve both text
                                             // and html parts, as well as the subtype.
@@ -1929,7 +1937,9 @@ public class LocalStore extends Store implements Serializable {
                                                 mp.addBodyPart(bp);
                                             }
 
-                                            if( mimeType.contains( "multipart/signed" ) ) {
+                                            if( mimeType.contains( "multipart/alternative" ) ){
+                                                message.setOriginalCharset( originalCharset );
+                                            } else if( mimeType.contains( "multipart/signed" ) ) {
                                         		
                                         		String multipartSignedText = cursor.getString( 3 );
                                         		if( multipartSignedText != null ) {
@@ -1975,7 +1985,7 @@ public class LocalStore extends Store implements Serializable {
                                                 MimeBodyPart bp = new MimeBodyPart(body, "text/plain");
                                                 mp.addBodyPart(bp);
                                             }
-                                            message.setOriginalCharset( MimeUtility.getHeaderParameter( mimeType, "charset" ) );
+                                            message.setOriginalCharset( originalCharset );
                                         } else if (mimeType != null && mimeType.contains("text/html")) {
                                             // If it's html, add only the html part. The MIME
                                             // container will drop away below.
@@ -1984,7 +1994,8 @@ public class LocalStore extends Store implements Serializable {
                                                 MimeBodyPart bp = new MimeBodyPart(body, "text/html");
                                                 mp.addBodyPart(bp);
                                             }
-                                            message.setOriginalCharset( MimeUtility.getHeaderParameter( mimeType, "charset" ) );
+                                            //Log.w(K9.LOG_TAG,"retrieved mime type: " + mimeType );
+                                            message.setOriginalCharset( originalCharset );
                                         } else {
                                             // MIME type not set. Grab whatever part we can get,
                                             // with Text taking precedence. This preserves pre-HTML
@@ -2689,6 +2700,7 @@ public class LocalStore extends Store implements Serializable {
                                     cv.put("internal_date",  message.getInternalDate() == null
                                            ? System.currentTimeMillis() : message.getInternalDate().getTime());
                                     cv.put("mime_type", message.getContentType() );
+                                    cv.put("original_charset", message.getOriginalCharset() );
                                     cv.put("empty", 0);
                                     
                                     String messageId = message.getMessageId();

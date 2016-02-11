@@ -9,6 +9,7 @@ public class EncryptResponse implements Parcelable {
     public static final int ENC_SUCCESS = 1;
     public static final int ENC_PASSWORD_REQUIRED = 2;
     public static final int ENC_FAILURE = 3;
+    public static final int ENC_NFC_ERROR = 4;
     
     private int result;
     private String payload;

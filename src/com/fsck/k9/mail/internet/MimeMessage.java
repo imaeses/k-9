@@ -661,6 +661,7 @@ public class MimeMessage extends Message {
             byte[] rawByteValue = null;
             byte[] rawBytes = parsedField.getRaw().toByteArray();
         	String raw = new String( rawBytes );
+        	String value = parsedField.getBody().trim();
        
         	if( raw.length() > 0 ) {
         		
@@ -674,6 +675,11 @@ public class MimeMessage extends Message {
                 ((Part)stack.peek()).addHeader(parsedField.getName(), parsedField.getBody().trim(), rawByteValue);
             } catch (MessagingException me) {
                 throw new Error(me);
+            }
+            
+            if( parsedField.getName().equals( MimeHeader.HEADER_CONTENT_TYPE ) && value != null && value.contains( "charset" ) ) {
+                //Log.w(K9.LOG_TAG, "Setting original content type: " + value);
+                mOriginalCharset = MimeUtility.getHeaderParameter( value, "charset" );;
             }
         }
     }

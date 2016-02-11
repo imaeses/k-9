@@ -12,6 +12,7 @@ import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.mail.filter.CountingOutputStream;
 import com.fsck.k9.mail.filter.EOLConvertingOutputStream;
 import com.fsck.k9.mail.internet.MimeMultipart;
+import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.mail.store.UnavailableStorageException;
 import com.imaeses.squeaky.K9;
 
@@ -36,8 +37,8 @@ public abstract class Message implements Part, CompositeBody {
     // this is the content that was originally signed for unencrypted PGP/MIME messages
     protected MimeMultipart signedMultipart;
     
-   // this is the original charset before the messages was converted and stored as utf-8 (useful for inline signed messages)
-    private String mOriginalCharset;
+    // the original charset before the messages was converted and stored as utf-8 (useful for inline signed messages)
+    protected String mOriginalCharset;
     
     public void setSignedMultipart( MimeMultipart signedMultipart ) {
     	this.signedMultipart = signedMultipart;
@@ -46,15 +47,15 @@ public abstract class Message implements Part, CompositeBody {
     public MimeMultipart getSignedMultipart() {
     	return signedMultipart;
     }
-
-    public void setOriginalCharset( String charset ) {
-    	mOriginalCharset = charset;
-    }
     
     public String getOriginalCharset() {
     	return mOriginalCharset;
     }
-
+    
+    public void setOriginalCharset( String originalCharset ) {
+        mOriginalCharset = originalCharset;
+    }
+    
     public boolean olderThan(Date earliestDate) {
         if (earliestDate == null) {
             return false;

@@ -9,6 +9,8 @@ public final class DecryptResponse implements Parcelable {
     public static final int DEC_SUCCESS = 1;
     public static final int DEC_PASSWORD_REQUIRED = 2;
     public static final int DEC_FAILURE = 3;
+    public static final int DEC_NFC_ERROR = 4;
+    public static final int DEC_KEY_UNKNOWN = 5;
     public static final int VER_SUCCESS = 1;
     public static final int VER_SIGNER_UNKNOWN = 2;
     public static final int VER_FAILURE = 3;

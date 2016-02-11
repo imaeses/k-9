@@ -53,7 +53,7 @@ public class PGPKeyRing extends CryptoProvider {
     public static final int VERSION_REQUIRED_ATTACHMENTS_MIN = 29;
     public static final int VERSION_REQUIRED_FLOATING_SIGS_MIN = 30;
     public static final int VERSION_REQUIRED_PGP_MIME_SEND = 38;
-    public static final int VERSION_REQUIRED_IDIRECT = 63;
+    public static final int VERSION_REQUIRED_IDIRECT = 66;
 
     public static final String AUTHORITY_PAID = "com.imaeses.KeyRing";
     public static final String AUTHORITY_TRIAL = "com.imaeses.trial.KeyRing";
@@ -98,6 +98,7 @@ public class PGPKeyRing extends CryptoProvider {
     public static final String EXTRAS_SHOW_KEYID_IN_SINGLE_SELECTION = "show.keyid.single.selection";
     public static final String EXTRAS_CHARSET = "charset";
     public static final String EXTRAS_SIGNATURE_ALG = "sig.algorithm";
+    public static final String EXTRAS_AUTO_CHOOSE_SMARTCARD_FOR_SIGNING = "auto.choose.smartcard";
     
     public static final String ACTION_BIND_REMOTE = "com.imaeses.keyring.CryptoService.BIND";
     
@@ -168,7 +169,7 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     /**
-     * Select the key for generating a signature.
+     * Have the user select the key for generating a signature.
      *
      * @param activity
      * @param pgpData
@@ -183,6 +184,7 @@ public class PGPKeyRing extends CryptoProvider {
          
             Intent i = new Intent( Intent.ACTION_PICK );
             i.putExtra( EXTRAS_SHOW_KEYID_IN_SINGLE_SELECTION, true );
+            i.putExtra( EXTRAS_AUTO_CHOOSE_SMARTCARD_FOR_SIGNING, true );
             i.addCategory( Intent.CATEGORY_DEFAULT );
             i.setData( uriSelectPrivateSigningKey );
             
@@ -244,7 +246,10 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     /**
-     * Get key ids in secret key rings based on a given email. For signing keys.
+     * Get key ids in secret key rings based on a given email without user interaction.
+     * For signing keys.
+     * 
+     * todo: get this off the UI thread
      *
      * @param context
      * @param email The email in question.
@@ -253,6 +258,21 @@ public class PGPKeyRing extends CryptoProvider {
     @Override
     public long[] getSecretKeyIdsFromEmail( Context context, String email ) {
     
+        if( cryptoService != null ) {
+        
+            try {
+                
+                long signingKeyId = cryptoService.getOpenpgpSmartcardSigningKeyId();
+                if( signingKeyId != 0L ) {
+                    return new long[] { signingKeyId };
+                }
+                
+            } catch( Exception e ) {
+                Log.e( K9.LOG_TAG, "Error checking for Openpgp smartcard via remote serivce", e );
+            }
+            
+        }
+        
         String[] projection = new String[] { PROVIDER_KEYID };
         
         long[] keyids = null;
@@ -926,7 +946,11 @@ public class PGPKeyRing extends CryptoProvider {
     
     private void doEncryptRemote( final Activity activity, final String msg, final long[] encKeyIds, final long signingKeyId, final String password, PgpData pgpData ) {
         
-        final CryptoWorker worker = new CryptoWorker( ( CryptoEncryptCallback )activity, password, pgpData );
+        final CryptoWorker worker = new CryptoWorker(
+                ( CryptoEncryptCallback )activity,
+                activity,
+                password,
+                pgpData );
         
         Runnable r = new Runnable() {
             public void run() {
@@ -941,7 +965,11 @@ public class PGPKeyRing extends CryptoProvider {
 
     private void doEncryptFileRemote( final Activity activity, final String filename, final long[] encKeyIds, final long signingKeyId, final String password, PgpData pgpData ) {
         
-        final CryptoWorker worker = new CryptoWorker( ( CryptoEncryptCallback )activity, password, pgpData );
+        final CryptoWorker worker = new CryptoWorker(
+                ( CryptoEncryptCallback )activity,
+                activity,
+                password,
+                pgpData );
         
         Runnable r = new Runnable() {
             public void run() {
@@ -957,7 +985,11 @@ public class PGPKeyRing extends CryptoProvider {
     
     private void doSignRemote( final Activity activity, final String filename, final long keyId, final String password, PgpData pgpData ) {
         
-        final CryptoWorker worker = new CryptoWorker( ( CryptoEncryptCallback )activity, password, pgpData );
+        final CryptoWorker worker = new CryptoWorker(
+                ( CryptoEncryptCallback )activity,
+                activity,
+                password,
+                pgpData );
         
         Runnable r = new Runnable() {
             public void run() {
@@ -973,7 +1005,11 @@ public class PGPKeyRing extends CryptoProvider {
     private void doDecryptRemote( final Fragment fragment, final String filename, String password, final PgpData pgpData ) {
         
         final String destFilename = pgpData.getFilename();
-        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, password, pgpData );
+        final CryptoWorker worker = new CryptoWorker(
+                ( CryptoDecryptCallback )fragment,
+                fragment.getActivity(),
+                password,
+                pgpData );
         
         Runnable r = new Runnable() {
             public void run() {
@@ -988,7 +1024,11 @@ public class PGPKeyRing extends CryptoProvider {
     
     private void doDecryptRemote( final Fragment fragment, final String msg, final String charset, String password, final PgpData pgpData ) {
 
-        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, password, pgpData );
+        final CryptoWorker worker = new CryptoWorker(
+                ( CryptoDecryptCallback )fragment,
+                fragment.getActivity(),
+                password,
+                pgpData );
         
         Runnable r = new Runnable() {
             public void run() {
@@ -1139,7 +1179,11 @@ public class PGPKeyRing extends CryptoProvider {
     
     private void doVerifyRemote( final Fragment fragment, final String filename, final String sig, final PgpData pgpData ) {
         
-        final CryptoWorker worker = new CryptoWorker( ( CryptoDecryptCallback )fragment, null, pgpData );
+        final CryptoWorker worker = new CryptoWorker(
+                ( CryptoDecryptCallback )fragment,
+                fragment.getActivity(),
+                null,
+                pgpData );
         
         Runnable r = new Runnable() {
             public void run() {
@@ -1242,25 +1286,39 @@ public class PGPKeyRing extends CryptoProvider {
     	});
     }
     
+    private void post( final String msg, final Context context ) {
+        handler.post( new Runnable() {
+        
+            @Override
+            public void run() {
+                Toast.makeText( context, msg, Toast.LENGTH_LONG ).show();
+            }
+        
+        });
+    }
+    
     private class CryptoWorker {
 
         CryptoEncryptCallback encryptCallback;
         CryptoDecryptCallback decryptCallback;
+        Context context;
         String password;
         PgpData pgpData;
         
-        private CryptoWorker( CryptoDecryptCallback callback, String password, PgpData pgpData ) {
+        private CryptoWorker( CryptoDecryptCallback callback, Context context, String password, PgpData pgpData ) {
             
             this.decryptCallback = callback;
             this.password = password;
+            this.context = context;
             this.pgpData = pgpData;
             
         }
        
-        private CryptoWorker( CryptoEncryptCallback callback, String password, PgpData pgpData ) {
+        private CryptoWorker( CryptoEncryptCallback callback, Context context, String password, PgpData pgpData ) {
             
             this.encryptCallback = callback;
             this.password = password;
+            this.context = context;
             this.pgpData = pgpData;
             
         }
@@ -1305,6 +1363,8 @@ public class PGPKeyRing extends CryptoProvider {
                     
                     handler.post( r );
 
+                } else if( encResult == EncryptResponse.ENC_NFC_ERROR ) {    
+                    post( response.getError(), context );
                 } else {
                     Log.e( K9.LOG_TAG, "Remote encryption failed: " + response.getError() );
                 }
@@ -1356,7 +1416,8 @@ public class PGPKeyRing extends CryptoProvider {
                     };
                     
                     handler.post( r );
-
+                } else if( encResult == EncryptResponse.ENC_NFC_ERROR ) {    
+                    post( response.getError(), context );
                 } else {
                     Log.e( K9.LOG_TAG, "Remote encryption failed: " + response.getError() );
                 }
@@ -1409,6 +1470,8 @@ public class PGPKeyRing extends CryptoProvider {
                     
                     handler.post( r );
 
+                } else if( encResult == EncryptResponse.ENC_NFC_ERROR ) {    
+                    post( response.getError(), context );    
                 } else {
                     Log.e( K9.LOG_TAG, "Remote encryption failed: " + response.getError() );
                 }
@@ -1473,7 +1536,8 @@ public class PGPKeyRing extends CryptoProvider {
                     };
                     
                     handler.post( r );
-
+                } else if( decResult == DecryptResponse.DEC_NFC_ERROR || decResult == DecryptResponse.DEC_KEY_UNKNOWN ) {    
+                    post( response.getError(), context );
                 } else {
                     Log.e( K9.LOG_TAG, "Remote decryption failed: " + response.getError() );
                 }
@@ -1541,6 +1605,8 @@ public class PGPKeyRing extends CryptoProvider {
                     
                     handler.post( r );
 
+                } else if( decResult == DecryptResponse.DEC_NFC_ERROR || decResult == DecryptResponse.DEC_KEY_UNKNOWN ) {   
+                    post( response.getError(), context );    
                 } else {
                     Log.e( K9.LOG_TAG, "Remote decryption failed: " + response.getError() );
                 }

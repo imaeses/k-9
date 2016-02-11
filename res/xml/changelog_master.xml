@@ -8,6 +8,10 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="5.001.09" versioncode="19029">
+        <change>Support for OpenPGP v2.0 Smartcards (requires PGP KeyRing 2.2)</change>
+        <change>Fixed a problem verifying PGP inline signed, unencrypted messages in certain languages</change>
+    </release>
     <release version="5.001.08" versioncode="19028">
         <change>Fixed zero-byte eml attachments</change>
         <change>Expand auto-import of public key attachments (ending in .asc) to all mime types</change>

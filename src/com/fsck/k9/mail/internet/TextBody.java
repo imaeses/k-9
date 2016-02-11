@@ -5,12 +5,9 @@ import android.util.Log;
 
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.MessagingException;
-import com.imaeses.squeaky.K9;
 
 import java.io.*;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.james.mime4j.codec.QuotedPrintableInputStream;
 import org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
 import org.apache.james.mime4j.util.MimeUtil;
 
@@ -96,6 +93,10 @@ public class TextBody implements Body {
 
     public void setCharset(String charset) {
         mCharset = charset;
+    }
+    
+    public String getCharset() {
+        return mCharset;
     }
 
     public Integer getComposedMessageLength() {

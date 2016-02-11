@@ -20,10 +20,10 @@ interface CryptoService {
 	EncryptResponse encryptFileWithPassword(in String sourceFile, in long[] encKeyIds, in long sigKeyId, in String sigAlg, in String password);
 	
 	ImportResponse importCertificate(in String filename);
-	ImportResponse generateKeyring(in String userId, in String algMaster, in boolean masterCanSign, in boolean masterCanEncrypt, in long masterExpiry, in String masterMetadata, in String algSubkey, in boolean subkeyCanSign, in boolean subkeyCanEncrypt, in long subkeyExpiry, in String subkeyMetadata, in String password);
+	ImportResponse generateKeyring(in String userId, in String algMaster, in boolean masterCanSign, in boolean masterCanEncrypt, in long masterExpiry, in String algSubkey, in boolean subkeyCanSign, in boolean subkeyCanEncrypt, in long subkeyExpiry, in String password);
 
 	int addUserId(in long keyId, in String userId, in String password);
-	int addSubkey(in long masterKeyId, in String algSubkey, in boolean canSign, in boolean canEncrypt, in long subkeyExpiry, in String metadata, in String password);
+	int addSubkey(in long masterKeyId, in String algSubkey, in boolean canSign, in boolean canEncrypt, in long subkeyExpiry, in String password);
 	int changeKeyExpiration(in long keyId, in long expiry, in String password);
 	int revokeKey(in long keyId, in boolean keyCompromised, in String password);
 	int certify(in long certifyingKeyId, in long certifiedKeyId, in String password);
@@ -33,5 +33,7 @@ interface CryptoService {
 	long[] getSecretKeyIdsFromEmail(in String email);
 	long[] getPublicKeyIdsFromEmail(in String email);
 	String getUserId(in long keyId);
+	
+	long getOpenpgpSmartcardSigningKeyId();
 
 }
