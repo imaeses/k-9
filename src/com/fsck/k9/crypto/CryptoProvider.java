@@ -20,7 +20,7 @@ import com.fsck.k9.mail.Message;
 abstract public class CryptoProvider {
     static final long serialVersionUID = 0x21071234;
 
-    public static final String SIG_ALG = "sha256";
+    //public static final String SIG_ALG = "sha256";
     
     public static Pattern PGP_MESSAGE = 
             Pattern.compile( ".*?(-----BEGIN PGP MESSAGE-----.*?-----END PGP MESSAGE-----).*", Pattern.DOTALL );

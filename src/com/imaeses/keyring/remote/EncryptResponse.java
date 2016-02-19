@@ -14,6 +14,7 @@ public class EncryptResponse implements Parcelable {
     private int result;
     private String payload;
     private String error;
+    private String sigAlg;
     
     public static final Parcelable.Creator<EncryptResponse> CREATOR = new Parcelable.Creator<EncryptResponse>() {
         
@@ -58,6 +59,14 @@ public class EncryptResponse implements Parcelable {
         this.error = error;
     }
     
+    public String getSigAlg() {
+        return sigAlg;
+    }
+
+    public void setSigAlg(String sigAlg) {
+        this.sigAlg = sigAlg;
+    }
+
     public int describeContents() {
         return 0;
     }
@@ -70,12 +79,14 @@ public class EncryptResponse implements Parcelable {
         out.writeInt(result);
         out.writeString(payload);
         out.writeString(error);
+        out.writeString(sigAlg);
     }
 
     public void readFromParcel(Parcel in) {
         result = in.readInt();
         payload = in.readString();
         error = in.readString();
+        sigAlg = in.readString();
     }
     
 }

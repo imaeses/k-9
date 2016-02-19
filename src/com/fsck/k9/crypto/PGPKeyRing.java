@@ -11,6 +11,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.widget.Toast;
 import android.util.Log;
@@ -53,7 +54,7 @@ public class PGPKeyRing extends CryptoProvider {
     public static final int VERSION_REQUIRED_ATTACHMENTS_MIN = 29;
     public static final int VERSION_REQUIRED_FLOATING_SIGS_MIN = 30;
     public static final int VERSION_REQUIRED_PGP_MIME_SEND = 38;
-    public static final int VERSION_REQUIRED_IDIRECT = 66;
+    public static final int VERSION_REQUIRED_IDIRECT = 68;
 
     public static final String AUTHORITY_PAID = "com.imaeses.KeyRing";
     public static final String AUTHORITY_TRIAL = "com.imaeses.trial.KeyRing";
@@ -78,27 +79,27 @@ public class PGPKeyRing extends CryptoProvider {
     private Uri uriSelectPrivateKeysByEmail;
     private Uri uriSelectPrimaryUserIdByKeyid;
     private boolean isTrialVersion;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler( Looper.getMainLooper() );
 
-    public static final String EXTRAS_MSG = "msg";
-    public static final String EXTRAS_FILENAME = "file.name";
+    public static final String EXTRAS_AUTO_CHOOSE_SMARTCARD_FOR_SIGNING = "auto.choose.smartcard";
+    public static final String EXTRAS_CHARSET = "charset";
+    public static final String EXTRAS_CHOSEN_KEY = "chosen.key";
+    public static final String EXTRAS_CHOSEN_KEYIDS = "chosen.keyids";
+    public static final String EXTRAS_CHOOSE_KEYS = "choose.keys";
     public static final String EXTRAS_DEST_FILENAME = "file.dest.name";
+    public static final String EXTRAS_EMAIL_ADDRESSES = "email.addresses";
     public static final String EXTRAS_ENCRYPTION_KEYIDS = "keys.enc";
+    public static final String EXTRAS_FILENAME = "file.name";
+    public static final String EXTRAS_MSG = "msg";
+    public static final String EXTRAS_PRESELECTED = "keys.preselected";
+    public static final String EXTRAS_SELECTION_MULTI = "selection.mode.multi";
+    public static final String EXTRAS_SHOW_KEYID_IN_SINGLE_SELECTION = "show.keyid.single.selection";
     public static final String EXTRAS_SIGNATURE = "sig";
+    public static final String EXTRAS_SIGNATURE_ALGORITHM = "sig.algorithm";
     public static final String EXTRAS_SIGNATURE_KEYID = "sig.key";
     public static final String EXTRAS_SIGNATURE_SUCCESS = "sig.success";
     public static final String EXTRAS_SIGNATURE_IDENTITY = "sig.identity";
-    public static final String EXTRAS_EMAIL_ADDRESSES = "email.addresses";
-    public static final String EXTRAS_PRESELECTED = "keys.preselected";
-    public static final String EXTRAS_SELECTION_MULTI = "selection.mode.multi";
-    public static final String EXTRAS_CHOSEN_KEYIDS = "chosen.keyids";
-    public static final String EXTRAS_CHOSEN_KEY = "chosen.key";
-    public static final String EXTRAS_CHOOSE_KEYS = "choose.keys";
     public static final String EXTRAS_SIGNATURE_UNKNOWN = "sig.unknown";
-    public static final String EXTRAS_SHOW_KEYID_IN_SINGLE_SELECTION = "show.keyid.single.selection";
-    public static final String EXTRAS_CHARSET = "charset";
-    public static final String EXTRAS_SIGNATURE_ALG = "sig.algorithm";
-    public static final String EXTRAS_AUTO_CHOOSE_SMARTCARD_FOR_SIGNING = "auto.choose.smartcard";
     
     public static final String ACTION_BIND_REMOTE = "com.imaeses.keyring.CryptoService.BIND";
     
@@ -131,7 +132,7 @@ public class PGPKeyRing extends CryptoProvider {
      * @return whether a suitable version of PGPKeyRing was found
      */
     @Override
-    public boolean isAvailable( Context context ) {
+    public boolean isAvailable( final Context context ) {
               
         boolean isSuitable = false;
                   
@@ -176,7 +177,11 @@ public class PGPKeyRing extends CryptoProvider {
      * @return success or failure
      */
     @Override
-    public boolean selectSecretKey( Activity activity, PgpData pgpData ) {
+    public boolean selectSecretKey( final Activity activity, final PgpData pgpData ) {
+        
+        if( activity == null ) {
+            return false;
+        }
         
         boolean success = false;
         
@@ -208,10 +213,15 @@ public class PGPKeyRing extends CryptoProvider {
      * @return success or failure
      */
     @Override
-    public boolean selectEncryptionKeys( Activity activity, String emails, PgpData pgpData ) {
+    public boolean selectEncryptionKeys( final Activity activity, final String emails,
+            final PgpData pgpData ) {
+       
+        if( activity == null ) {
+            return false;
+        }
         
         boolean success = false;
-        
+       
         try {
          
             Intent i = new Intent( Intent.ACTION_PICK );
@@ -256,8 +266,12 @@ public class PGPKeyRing extends CryptoProvider {
      * @return key ids
      */
     @Override
-    public long[] getSecretKeyIdsFromEmail( Context context, String email ) {
+    public long[] getSecretKeyIdsFromEmail( final Context context, final String email ) {
     
+        if( context == null ) {
+            return new long[ 0 ];
+        }
+        
         if( cryptoService != null ) {
         
             try {
@@ -320,8 +334,12 @@ public class PGPKeyRing extends CryptoProvider {
      * @return key ids
      */
     @Override
-    public long[] getPublicKeyIdsFromEmail( Context context, String email ) {
+    public long[] getPublicKeyIdsFromEmail( final Context context, final String email ) {
     
+        if( context == null ) {
+            return new long[ 0 ];
+        }
+        
         String[] projection = new String[] { PROVIDER_KEYID };
         
         long[] keyids = null;
@@ -369,7 +387,7 @@ public class PGPKeyRing extends CryptoProvider {
      * @return true if there is a secret key for this email.
      */
     @Override
-    public boolean hasSecretKeyForEmail( Context context, String email ) {
+    public boolean hasSecretKeyForEmail( final Context context, final String email ) {
         
         long[] keyids = getSecretKeyIdsFromEmail( context, email );
         return keyids != null && keyids.length > 0;
@@ -384,7 +402,7 @@ public class PGPKeyRing extends CryptoProvider {
      * @return true if there is a public key for this email.
      */
     @Override
-    public boolean hasPublicKeyForEmail( Context context, String email ) {
+    public boolean hasPublicKeyForEmail( final Context context, final String email ) {
         
         long[] keyids = getPublicKeyIdsFromEmail( context, email );
         return keyids != null && keyids.length > 0;
@@ -399,8 +417,12 @@ public class PGPKeyRing extends CryptoProvider {
      * @return user id
      */
     @Override
-    public String getUserId( Context context, long keyId ) {
+    public String getUserId( final Context context, final long keyId ) {
     
+        if( context == null ) {
+            return "";
+        }
+        
         String[] projection = new String[] { PROVIDER_USERID };
         
         Uri.Builder builder = uriSelectPrimaryUserIdByKeyid.buildUpon();
@@ -431,7 +453,11 @@ public class PGPKeyRing extends CryptoProvider {
      * Encrypt and/or sign text into an inline PGP message.
      */
     @Override
-    public boolean encrypt( Activity activity, String data, PgpData pgpData ) {
+    public boolean encrypt( final Activity activity, final String data, final PgpData pgpData ) {
+        
+        if( activity == null ) {
+            return false;
+        }
         
         boolean success = false;
         if( data != null && data.length() > 0 ) {
@@ -455,8 +481,12 @@ public class PGPKeyRing extends CryptoProvider {
      * Encrypt binary data stored in a file.
      */
     @Override
-    public boolean encryptFile( Activity activity, String filename, PgpData pgpData ) {
+    public boolean encryptFile( final Activity activity, final String filename, final PgpData pgpData ) {
     	
+        if( activity == null ) {
+            return false;
+        }
+        
         boolean success = false;
         if( filename != null && filename.length() > 0 ) {
             
@@ -479,8 +509,12 @@ public class PGPKeyRing extends CryptoProvider {
      * Produce a binary signature over binary data contained in a file.
      */
     @Override
-    public boolean sign( Activity activity, String filename, PgpData pgpData ) {
+    public boolean sign( final Activity activity, final String filename, final PgpData pgpData ) {
     	
+        if( activity == null ) {
+            return false;
+        }
+        
         boolean success = false;
         if( filename != null && filename.length() > 0 ) {
             
@@ -505,8 +539,13 @@ public class PGPKeyRing extends CryptoProvider {
      * @param originalCharset the character set the data was originally signed in
      */
     @Override
-    public boolean decrypt( Fragment fragment, String data, String originalCharset, PgpData pgpData ) {
+    public boolean decrypt( final Fragment fragment, final String data, final String originalCharset,
+            PgpData pgpData ) {
              
+        if( fragment == null ) {
+            return false;
+        }
+        
         boolean success = false;
         if( data != null && data.length() > 0 ) {
             
@@ -531,6 +570,10 @@ public class PGPKeyRing extends CryptoProvider {
     @Override
     public boolean decryptFile( final Fragment fragment, final String filename, final PgpData pgpData ) {
     	
+        if( fragment == null ) {
+            return false;
+        }
+        
     	boolean success = false;
         if( filename != null && filename.length() > 0 ) {
             
@@ -553,7 +596,12 @@ public class PGPKeyRing extends CryptoProvider {
      * Verify a signature calculated over binary data contained in a file.
      */
     @Override
-    public boolean verify( Fragment fragment, String filename, String sig, PgpData pgpData ) {
+    public boolean verify( final Fragment fragment, final String filename, final String sig,
+            final PgpData pgpData ) {
+        
+        if( fragment == null ) {
+            return false;
+        }
         
         boolean success = false;
         if( filename != null && filename.length() > 0 ) {
@@ -583,7 +631,12 @@ public class PGPKeyRing extends CryptoProvider {
      * @return handled or not
      */
     @Override
-    public boolean onActivityResult( CryptoEncryptCallback callback, int requestCode, int resultCode, Intent data, PgpData pgpData ) {
+    public boolean onActivityResult( final CryptoEncryptCallback callback, final int requestCode,
+            final int resultCode, final Intent data, final PgpData pgpData ) {
+        
+        if( callback == null ) {
+            return false;
+        }
         
         switch (requestCode) {
         
@@ -648,8 +701,11 @@ public class PGPKeyRing extends CryptoProvider {
         	
         	if( resultCode != Activity.RESULT_OK || data == null ) { 
         		pgpData.setSignatureKeyId( 0L );
-        	} else {	
+        	} else {
+        	    
         		pgpData.setSignature( data.getStringExtra( EXTRAS_SIGNATURE ) );
+        		pgpData.setAlgorithm( data.getStringExtra( EXTRAS_SIGNATURE_ALGORITHM ) );
+        		
         	}
         	
         	callback.onEncryptDone();
@@ -666,8 +722,13 @@ public class PGPKeyRing extends CryptoProvider {
     }
 
     @Override
-    public boolean onDecryptActivityResult( CryptoDecryptCallback callback, int requestCode, int resultCode, Intent data, PgpData pgpData ) {
+    public boolean onDecryptActivityResult( final CryptoDecryptCallback callback, final int requestCode,
+            final int resultCode, final Intent data, final PgpData pgpData ) {
 
+        if( callback == null ) {
+            return false;
+        }
+        
         switch( requestCode ) {
         
         case VERIFY:
@@ -750,8 +811,12 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     @Override
-    public boolean isEncrypted( Message message ) {
+    public boolean isEncrypted( final Message message ) {
               
+        if( message == null ) {
+            return false;
+        }
+        
         String data = null;
         try {
             
@@ -778,8 +843,12 @@ public class PGPKeyRing extends CryptoProvider {
     }
 
     @Override
-    public boolean isSigned ( Message message ) {
+    public boolean isSigned ( final Message message ) {
              
+        if( message == null ) {
+            return false;
+        }
+        
         String data = null;
         try {
             
@@ -806,8 +875,12 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     @Override
-    public boolean supportsAttachments( Context context ) {
+    public boolean supportsAttachments( final Context context ) {
     	
+        if( context == null ) {
+            return false;
+        }
+        
     	boolean supportsAttachments = false;
     	
     	if( isAvailable( context ) ) { 
@@ -835,13 +908,17 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     @Override
-    public boolean supportsPgpMimeReceive( Context context ) {
+    public boolean supportsPgpMimeReceive( final Context context ) {
     	return supportsPgpMimeSend( context );
     }
     
     @Override
-    public boolean supportsPgpMimeSend( Context context ) {
+    public boolean supportsPgpMimeSend( final Context context ) {
 
+        if( context == null ) {
+            return false;
+        }
+        
     	boolean supportsPgpMimeSend = false;
     	
     	if( isAvailable( context ) ) { 
@@ -874,7 +951,11 @@ public class PGPKeyRing extends CryptoProvider {
      * @return success or failure
      */
     @Override
-    public boolean test( Context context ) {
+    public boolean test( final Context context ) {
+        
+        if( context == null ) {
+            return false;
+        }
         
         if ( !isAvailable( context ) ) {
             return false;
@@ -909,42 +990,68 @@ public class PGPKeyRing extends CryptoProvider {
         return NAME;
     }
     
-    public boolean encrypt( final Activity activity, final String msg, final long[] encKeyIds, final long signingKeyId, final String password, final PgpData pgpData ) {
+    public boolean encrypt( final Activity activity, final String msg, final long[] encKeyIds,
+            final long signingKeyId, final String password, final PgpData pgpData ) {
 
+        if( activity == null ) {
+            return false;
+        }
+        
         doEncryptRemote( activity, msg, encKeyIds, signingKeyId, password, pgpData );
         return true;
         
     }
     
-    public boolean encryptFile( final Activity activity, final String filename, final long[] encKeyIds, final long signingKeyId, final String password, final PgpData pgpData ) {
+    public boolean encryptFile( final Activity activity, final String filename, final long[] encKeyIds,
+            final long signingKeyId, final String password, final PgpData pgpData ) {
+        
+        if( activity == null ) {
+            return false;
+        }
         
         doEncryptFileRemote( activity, filename, encKeyIds, signingKeyId, password, pgpData );
         return true;
         
     }
     
-    public boolean sign( final Activity activity, final String filename, final long keyId, final String password, final PgpData pgpData ) {
+    public boolean sign( final Activity activity, final String filename, final long keyId,
+            final String password, final PgpData pgpData ) {
+        
+        if( activity == null ) {
+            return false;
+        }
         
         doSignRemote( activity, filename, keyId, password, pgpData );
         return true;
         
     }
     
-    public boolean decryptFile( final Fragment fragment, final String filename, final String password, final PgpData pgpData ) {
+    public boolean decryptFile( final Fragment fragment, final String filename, final String password,
+            final PgpData pgpData ) {
+        
+        if( fragment == null ) {
+            return false;
+        }
         
         doDecryptRemote( fragment, filename, password, pgpData );
         return true;
         
     }
     
-    public boolean decrypt( final Fragment fragment, final String data, final String originalCharset, final String password, final PgpData pgpData ) {
+    public boolean decrypt( final Fragment fragment, final String data, final String originalCharset,
+            final String password, final PgpData pgpData ) {
+        
+        if( fragment == null ) {
+            return false;
+        }
         
         doDecryptRemote( fragment, data, originalCharset, password, pgpData );
         return true;
         
     }
     
-    private void doEncryptRemote( final Activity activity, final String msg, final long[] encKeyIds, final long signingKeyId, final String password, PgpData pgpData ) {
+    private void doEncryptRemote( final Activity activity, final String msg, final long[] encKeyIds,
+            final long signingKeyId, final String password, PgpData pgpData ) {
         
         final CryptoWorker worker = new CryptoWorker(
                 ( CryptoEncryptCallback )activity,
@@ -954,7 +1061,7 @@ public class PGPKeyRing extends CryptoProvider {
         
         Runnable r = new Runnable() {
             public void run() {
-                worker.encrypt( msg, encKeyIds, signingKeyId, SIG_ALG );
+                worker.encrypt( msg, encKeyIds, signingKeyId, null, null );
             }
         };
                 
@@ -963,7 +1070,8 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
 
-    private void doEncryptFileRemote( final Activity activity, final String filename, final long[] encKeyIds, final long signingKeyId, final String password, PgpData pgpData ) {
+    private void doEncryptFileRemote( final Activity activity, final String filename, final long[] encKeyIds,
+            final long signingKeyId, final String password, PgpData pgpData ) {
         
         final CryptoWorker worker = new CryptoWorker(
                 ( CryptoEncryptCallback )activity,
@@ -973,7 +1081,7 @@ public class PGPKeyRing extends CryptoProvider {
         
         Runnable r = new Runnable() {
             public void run() {
-                worker.encryptFile( filename, encKeyIds, signingKeyId, SIG_ALG );
+                worker.encryptFile( filename, encKeyIds, signingKeyId, null, null );
             }
         };
                 
@@ -983,7 +1091,8 @@ public class PGPKeyRing extends CryptoProvider {
     }
     
     
-    private void doSignRemote( final Activity activity, final String filename, final long keyId, final String password, PgpData pgpData ) {
+    private void doSignRemote( final Activity activity, final String filename, final long keyId,
+            final String password, PgpData pgpData ) {
         
         final CryptoWorker worker = new CryptoWorker(
                 ( CryptoEncryptCallback )activity,
@@ -993,7 +1102,7 @@ public class PGPKeyRing extends CryptoProvider {
         
         Runnable r = new Runnable() {
             public void run() {
-                worker.sign( filename, keyId, SIG_ALG );
+                worker.sign( filename, keyId, null );
             }
         };
                 
@@ -1002,7 +1111,8 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
-    private void doDecryptRemote( final Fragment fragment, final String filename, String password, final PgpData pgpData ) {
+    private void doDecryptRemote( final Fragment fragment, final String filename, String password,
+            final PgpData pgpData ) {
         
         final String destFilename = pgpData.getFilename();
         final CryptoWorker worker = new CryptoWorker(
@@ -1022,7 +1132,8 @@ public class PGPKeyRing extends CryptoProvider {
       
     }
     
-    private void doDecryptRemote( final Fragment fragment, final String msg, final String charset, String password, final PgpData pgpData ) {
+    private void doDecryptRemote( final Fragment fragment, final String msg, final String charset,
+            String password, final PgpData pgpData ) {
 
         final CryptoWorker worker = new CryptoWorker(
                 ( CryptoDecryptCallback )fragment,
@@ -1040,8 +1151,28 @@ public class PGPKeyRing extends CryptoProvider {
         t.start();
       
     }
-   
-    public boolean doSignActivity( Activity activity, String filename, PgpData pgpData ) {
+    
+    private void doVerifyRemote( final Fragment fragment, final String filename, final String sig,
+            final PgpData pgpData ) {
+        
+        final CryptoWorker worker = new CryptoWorker(
+                ( CryptoDecryptCallback )fragment,
+                fragment.getActivity(),
+                null,
+                pgpData );
+        
+        Runnable r = new Runnable() {
+            public void run() {
+                worker.verify( filename, sig );
+            }
+        };
+                
+        Thread t = new Thread( r );
+        t.start();
+        
+    }
+    
+    private boolean doSignActivity( final Activity activity, final String filename, final PgpData pgpData ) {
         
         boolean success = false;
         
@@ -1052,7 +1183,7 @@ public class PGPKeyRing extends CryptoProvider {
             i.setType( "text/plain" );
             i.putExtra( EXTRAS_FILENAME, filename );
             i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
-            i.putExtra( EXTRAS_SIGNATURE_ALG, SIG_ALG );
+            //i.putExtra( EXTRAS_SIGNATURE_ALG, SIG_ALG );
             
             try {
                 
@@ -1069,7 +1200,11 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
-    public boolean doEncryptFileActivity( Activity activity, String filename, PgpData pgpData ) {
+    private boolean doEncryptFileActivity( final Activity activity, final String filename, final PgpData pgpData ) {
+        
+        if( activity == null ) {
+            return false;
+        }
         
         boolean success = false;
         
@@ -1079,7 +1214,7 @@ public class PGPKeyRing extends CryptoProvider {
         i.putExtra( EXTRAS_FILENAME, filename );
         i.putExtra( EXTRAS_ENCRYPTION_KEYIDS, pgpData.getEncryptionKeys() );
         i.putExtra( EXTRAS_SIGNATURE_KEYID, pgpData.getSignatureKeyId() );
-        i.putExtra( EXTRAS_SIGNATURE_ALG, SIG_ALG );
+        //i.putExtra( EXTRAS_SIGNATURE_ALG, SIG_ALG );
         
         try {
             
@@ -1093,8 +1228,8 @@ public class PGPKeyRing extends CryptoProvider {
         return success;
         
     }
-
-    private boolean doEncryptActivity( Activity activity, String data, PgpData pgpData ) {
+   
+    private boolean doEncryptActivity( final Activity activity, final String data, final PgpData pgpData ) {
         
         boolean success = false;
         
@@ -1145,7 +1280,8 @@ public class PGPKeyRing extends CryptoProvider {
                 
     }
     
-    public boolean doDecryptActivity( Fragment fragment, String data, String originalCharset, PgpData pgpData ) {
+    public boolean doDecryptActivity( final Fragment fragment, final String data,
+            final String originalCharset, final PgpData pgpData ) {
         
         boolean success = false;
         
@@ -1177,26 +1313,8 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
     
-    private void doVerifyRemote( final Fragment fragment, final String filename, final String sig, final PgpData pgpData ) {
-        
-        final CryptoWorker worker = new CryptoWorker(
-                ( CryptoDecryptCallback )fragment,
-                fragment.getActivity(),
-                null,
-                pgpData );
-        
-        Runnable r = new Runnable() {
-            public void run() {
-                worker.verify( filename, sig );
-            }
-        };
-                
-        Thread t = new Thread( r );
-        t.start();
-        
-    }
-    
-    private boolean doVerifyActivity( Fragment fragment, String filename, String sig, PgpData pgpData ) {
+    private boolean doVerifyActivity( final Fragment fragment, final String filename, final String sig,
+            final PgpData pgpData ) {
         
         boolean success = false;
         
@@ -1223,7 +1341,7 @@ public class PGPKeyRing extends CryptoProvider {
         
     }
      
-    private boolean supportsDirectInterface( Context context ) {
+    private boolean supportsDirectInterface( final Context context ) {
 
         boolean supportsDirectInterfaceDecryptPgpMime = false;
         
@@ -1323,7 +1441,7 @@ public class PGPKeyRing extends CryptoProvider {
             
         }
         
-        private void encrypt( final String msg, final long[] encKeyIds, final long signingKeyId, final String sigAlg ) {
+        private void encrypt( final String msg, final long[] encKeyIds, final long signingKeyId, final String sigAlg, final String encAlg ) {
          
             progressBar( encryptCallback, true );
             
@@ -1332,9 +1450,9 @@ public class PGPKeyRing extends CryptoProvider {
                 EncryptResponse response = null;
                 
                 if( password == null ) {
-                    response = cryptoService.encrypt( msg, encKeyIds, signingKeyId, sigAlg );
+                    response = cryptoService.encrypt( msg, encKeyIds, signingKeyId, sigAlg, encAlg );
                 } else {
-                    response = cryptoService.encryptWithPassword( msg, encKeyIds, signingKeyId, sigAlg, password );
+                    response = cryptoService.encryptWithPassword( msg, encKeyIds, signingKeyId, sigAlg, encAlg, password );
                 }
                 
                 int encResult = response.getResult();
@@ -1377,7 +1495,7 @@ public class PGPKeyRing extends CryptoProvider {
             
         }
         
-        private void encryptFile( final String filename, final long[] encKeyIds, final long signingKeyId, final String sigAlg ) {
+        private void encryptFile( final String filename, final long[] encKeyIds, final long signingKeyId, final String sigAlg, final String encAlg ) {
             
             progressBar( encryptCallback, true );
             
@@ -1386,9 +1504,9 @@ public class PGPKeyRing extends CryptoProvider {
                 EncryptResponse response = null;
                 
                 if( password == null ) {
-                    response = cryptoService.encryptFile( filename, encKeyIds, signingKeyId, sigAlg );
+                    response = cryptoService.encryptFile( filename, encKeyIds, signingKeyId, sigAlg, encAlg );
                 } else {
-                    response = cryptoService.encryptFileWithPassword( filename, encKeyIds, signingKeyId, sigAlg, password );
+                    response = cryptoService.encryptFileWithPassword( filename, encKeyIds, signingKeyId, sigAlg, encAlg, password );
                 }
                 
                 int encResult = response.getResult();
@@ -1448,6 +1566,7 @@ public class PGPKeyRing extends CryptoProvider {
                 if( encResult == EncryptResponse.ENC_SUCCESS ) {
                     
                     pgpData.setSignature( response.getPayload() );
+                    pgpData.setAlgorithm( response.getSigAlg() );
                     
                     Runnable r = new Runnable() {
                         @Override
@@ -1536,6 +1655,7 @@ public class PGPKeyRing extends CryptoProvider {
                     };
                     
                     handler.post( r );
+                    
                 } else if( decResult == DecryptResponse.DEC_NFC_ERROR || decResult == DecryptResponse.DEC_KEY_UNKNOWN ) {    
                     post( response.getError(), context );
                 } else {

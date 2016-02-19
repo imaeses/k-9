@@ -8,6 +8,9 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="5.001.10" versioncode="19030">
+        <change>Use preferred encryption and signature algorithms, as specified in PGP KeyRing</change>
+    </release>
     <release version="5.001.09" versioncode="19029">
         <change>Support for OpenPGP v2.0 Smartcards (requires PGP KeyRing 2.2)</change>
         <change>Fixed a problem verifying PGP inline signed, unencrypted messages in certain languages</change>

@@ -14,10 +14,10 @@ interface CryptoService {
 	
 	EncryptResponse sign(in String sourceFile, in long keyId, in String sigAlg);
 	EncryptResponse signWithPassword(in String sourceFile, in long keyId, in String sigAlg, in String password);
-	EncryptResponse encrypt(in String msg, in long[] encKeyIds, in long sigKeyId, in String sigAlg);
-	EncryptResponse encryptWithPassword(in String msg, in long[] encKeyIds, in long sigKeyId, in String sigAlg, in String password);
-	EncryptResponse encryptFile(in String sourceFile, in long[] encKeyIds, in long sigKeyId, in String sigAlg);
-	EncryptResponse encryptFileWithPassword(in String sourceFile, in long[] encKeyIds, in long sigKeyId, in String sigAlg, in String password);
+	EncryptResponse encrypt(in String msg, in long[] encKeyIds, in long sigKeyId, in String sigAlg, in String encAlg);
+	EncryptResponse encryptWithPassword(in String msg, in long[] encKeyIds, in long sigKeyId, in String sigAlg, in String encAlg, in String password);
+	EncryptResponse encryptFile(in String sourceFile, in long[] encKeyIds, in long sigKeyId, in String sigAlg, in String encAlg);
+	EncryptResponse encryptFileWithPassword(in String sourceFile, in long[] encKeyIds, in long sigKeyId, in String sigAlg, in String encAlg, in String password);
 	
 	ImportResponse importCertificate(in String filename);
 	ImportResponse generateKeyring(in String userId, in String algMaster, in boolean masterCanSign, in boolean masterCanEncrypt, in long masterExpiry, in String algSubkey, in boolean subkeyCanSign, in boolean subkeyCanEncrypt, in long subkeyExpiry, in String password);

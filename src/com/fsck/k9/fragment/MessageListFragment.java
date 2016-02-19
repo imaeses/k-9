@@ -2502,6 +2502,10 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
     private void displayFolderChoice(int requestCode, Account account, Folder folder,
             List<Message> messages) {
 
+        if( account == null ) {
+            return;
+        }
+        
         Intent intent = new Intent(getActivity(), ChooseFolder.class);
         intent.putExtra(ChooseFolder.EXTRA_ACCOUNT, account.getUuid());
         intent.putExtra(ChooseFolder.EXTRA_SEL_FOLDER, account.getLastSelectedFolderName());

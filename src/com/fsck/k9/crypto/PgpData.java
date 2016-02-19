@@ -11,6 +11,7 @@ public class PgpData implements Serializable {
     protected boolean mSignatureUnknown = false;
     protected String mDecryptedData = null;
     protected String mEncryptedData = null;
+    protected String algorithm = null;
     protected String filename = null;
     protected String fullDecryptedMimeMessage = null;
     protected boolean showFile = false;
@@ -58,6 +59,14 @@ public class PgpData implements Serializable {
 
     public void setDecryptedData(String data) {
         mDecryptedData = data;
+    }
+    
+    public String getAlgorithm() {
+        return algorithm;
+    }
+    
+    public void setAlgorithm( String algorithm ) {
+        this.algorithm = algorithm;
     }
 
     public void setSignatureUserId(String userId) {
