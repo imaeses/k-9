@@ -16,8 +16,8 @@
 
 
     <!-- Used in the about dialog -->
-    <string name="app_authors">Google, The K-9 Dog Walkers.</string>
-    <string name="app_copyright_fmt">Copyright 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers. Portions Copyright 2006-<xliff:g>%s</xliff:g> the Android Open Source Project.</string>
+    <string name="app_authors">Google, The K-9 Dog Walkers, Adam Wasserman.</string>
+    <string name="app_copyright_fmt">Copyright 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers. Portions Copyright 2006-<xliff:g>%s</xliff:g> the Android Open Source Project. Copyright 2013-<xliff:g>%s</xliff:g> Adam Wasserman.</string>
     <string name="app_license">Ліцензія Apache License, Version 2.0.</string>
 
 
@@ -954,6 +954,8 @@
     <plurals name="dialog_confirm_spam_message">
         <item quantity="one">Ви дійсно хочете перемістити це повідомлення у папку „Спам“?</item>
         <item quantity="other">Ви дійсно хочете перемістити <xliff:g id="message_count">%1$d</xliff:g> повідомлень у папку „Спам“?</item>
+        <item quantity="few">Ви дійсно хочете перемістити <xliff:g id="message_count">%1$d</xliff:g> повідомлень у папку „Спам“?</item>
+        <item quantity="many">Ви дійсно хочете перемістити <xliff:g id="message_count">%1$d</xliff:g> повідомлень у папку „Спам“?</item>
     </plurals>
     <string name="dialog_confirm_spam_confirm_button">Так</string>
     <string name="dialog_confirm_spam_cancel_button">Ні</string>
@@ -983,6 +985,7 @@
     <plurals name="settings_import_success">
         <item quantity="one">1 обліковий запис</item>
         <item quantity="few"><xliff:g id="numAccounts">%s</xliff:g> облікові записи</item>
+        <item quantity="many"><xliff:g id="numAccounts">%s</xliff:g> облікові записи</item>
         <item quantity="other"><xliff:g id="numAccounts">%s</xliff:g> облікових записів</item>
     </plurals>
     <string name="settings_export_failure">Не вдалося експортувати налаштування</string>
@@ -997,12 +1000,15 @@
         <item quantity="one">пароль сервера</item>
         <item quantity="few">паролі сервера</item>
         <item quantity="other">паролів сервера</item>
+        <item quantity="many">паролів сервера</item>
     </plurals>
     <string name="settings_import_incoming_server">Сервер вхідної пошти (<xliff:g id="hostname">%s</xliff:g>):</string>
     <string name="settings_import_outgoing_server">Сервер вихідної пошти (<xliff:g id="hostname">%s</xliff:g>):</string>
     <plurals name="settings_import_setting_passwords">
         <item quantity="one">Установка пароля…</item>
         <item quantity="other">Установка паролів…</item>
+        <item quantity="few">Установка паролів…</item>
+        <item quantity="many">Установка паролів…</item>
     </plurals>
     <string name="settings_import_use_incoming_server_password">Використовувати пароль сервера вхідної пошти</string>
     <string name="activate_account_action">Активувати</string>

@@ -17,8 +17,8 @@
 
 
     <!-- Used in the about dialog -->
-    <string name="app_authors">Google, The K-9 Dog Walkers.</string>
-    <string name="app_copyright_fmt">Copyright 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers. Portions Copyright 2006-<xliff:g>%s</xliff:g> the Android Open Source Project.</string>
+    <string name="app_authors">Google, The K-9 Dog Walkers, Adam Wasserman.</string>
+    <string name="app_copyright_fmt">Copyright 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers. Portions Copyright 2006-<xliff:g>%s</xliff:g> the Android Open Source Project. Portions Copyright 2013-<xliff:g>%s</xliff:g> Adam Wasserman.</string>
     <string name="app_license">Под лицензией Apache 2.0.</string>
 
 
@@ -944,6 +944,7 @@
     <plurals name="dialog_confirm_delete_message">
         <item quantity="one">Сообщение будет удалено. Продолжить?</item>
         <item quantity="other">Сообщения (<xliff:g id="message_count">%1$d</xliff:g> шт.) будут удалены. Продолжить?</item>
+        <item quantity="many">Сообщения (<xliff:g id="message_count">%1$d</xliff:g> шт.) будут удалены. Продолжить?</item>
     </plurals>
     <string name="dialog_confirm_delete_confirm_button">ОК</string>
     <string name="dialog_confirm_delete_cancel_button">Отмена</string>
@@ -952,6 +953,7 @@
     <plurals name="dialog_confirm_spam_message">
         <item quantity="one">Сообщение будет перемещено в Спам. Продолжить?</item>
         <item quantity="other">Сообщения (<xliff:g id="message_count">%1$d</xliff:g> шт.) будут перемещены в Спам. Продолжить?</item>
+        <item quantity="many">Сообщения (<xliff:g id="message_count">%1$d</xliff:g> шт.) будут перемещены в Спам. Продолжить?</item>
     </plurals>
     <string name="dialog_confirm_spam_confirm_button">ОК</string>
     <string name="dialog_confirm_spam_cancel_button">Отмена</string>
@@ -980,8 +982,8 @@
     <string name="settings_import_success">Импортировано: <xliff:g id="accounts">%s</xliff:g> из <xliff:g id="filename">%s</xliff:g></string>
     <plurals name="settings_import_success">
         <item quantity="one">1 ящик</item>
-        <item quantity="few"><xliff:g id="numAccounts">%s</xliff:g> ящика</item>
         <item quantity="other"><xliff:g id="numAccounts">%s</xliff:g> ящиков</item>
+        <item quantity="many"><xliff:g id="numAccounts">%s</xliff:g> ящиков</item>
     </plurals>
     <string name="settings_export_failure">Сбой экспорта настроек</string>
     <string name="settings_import_failure">Сбой импорта настроек из <xliff:g id="filename">%s</xliff:g></string>
@@ -993,14 +995,15 @@
     <string name="settings_import_activate_account_intro">Для включения ящика \"<xliff:g id="account">%s</xliff:g>\" необходимо ввести <xliff:g id="server_passwords">%s</xliff:g></string>
     <plurals name="settings_import_server_passwords">
         <item quantity="one">пароль</item>
-        <item quantity="few">пароли</item>
         <item quantity="other">пароли</item>
+        <item quantity="many">пароли</item>
     </plurals>
     <string name="settings_import_incoming_server">Сервер входящей почты (<xliff:g id="hostname">%s</xliff:g>):</string>
     <string name="settings_import_outgoing_server">Сервер исходящей почты (<xliff:g id="hostname">%s</xliff:g>):</string>
     <plurals name="settings_import_setting_passwords">
         <item quantity="one">Проверка пароля…</item>
         <item quantity="other">Проверка паролей…</item>
+        <item quantity="many">Проверка паролей…</item>
     </plurals>
     <string name="settings_import_use_incoming_server_password">Как для входящей</string>
     <string name="activate_account_action">Включить</string>

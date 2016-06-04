@@ -16,8 +16,8 @@
 
 
     <!-- Used in the about dialog -->
-    <string name="app_authors">Google, The K-9 Dog Walkers.</string>
-    <string name="app_copyright_fmt">Copyright 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers. Porcións Copyright 2006-<xliff:g>%s</xliff:g> the Android Open Source Project.</string>
+    <string name="app_authors">Google, The K-9 Dog Walkers, Adam Wasserman.</string>
+    <string name="app_copyright_fmt">Copyright 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers. Porcións Copyright 2006-<xliff:g>%s</xliff:g> the Android Open Source Project. Porcións Copyright 2013-<xliff:g>%s</xliff:g> Adam Wasserman.</string>
     <string name="app_license">Licienciado baixo a Licencia Apache, Version 2.0.</string>
 
 

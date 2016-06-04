@@ -16,8 +16,8 @@
 
 
     <!-- Used in the about dialog -->
-    <string name="app_authors">Google, The K-9 Dog Walkers.</string>
-    <string name="app_copyright_fmt">Autorinės teisės 2008-<xliff:g>%s</xliff:g> K-9 Dog Walkers. Dalis autorinių teisių priklauso 2006-<xliff:g>%s</xliff:g> the Android Open Source Project.</string>
+    <string name="app_authors">Google, The K-9 Dog Walkers, Adam Wasserman.</string>
+    <string name="app_copyright_fmt">Autorinės teisės 2008-<xliff:g>%s</xliff:g> K-9 Dog Walkers. Dalis autorinių teisių priklauso 2006-<xliff:g>%s</xliff:g> the Android Open Source Project. Dalis autorinių teisių priklauso 2013-<xliff:g>%s</xliff:g> Adam Wasserman.</string>
     <string name="app_license">Išleista pagal Apache License sąlygas, versija 2.</string>
 
 

@@ -27,8 +27,8 @@
 
 
     <!-- Used in the about dialog -->
-    <string name="app_authors">Google, The K-9 Dog Walkers.</string>
-    <string name="app_copyright_fmt">Copyright 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers. Portions Copyright 2006-<xliff:g>%s</xliff:g> the Android Open Source Project.</string>
+    <string name="app_authors">Google, The K-9 Dog Walkers, Adam Wasserman.</string>
+    <string name="app_copyright_fmt">Copyright 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers. Portions Copyright 2006-<xliff:g>%s</xliff:g> the Android Open Source Project. Portions Copyright 2013-<xliff:g>%s</xliff:g> Adam Wasserman.</string>
     <string name="app_license">Wszelkie prawa zastrzeżone</string>
 
 
@@ -955,6 +955,8 @@
     <plurals name="dialog_confirm_delete_message">
         <item quantity="one">Na pewno chcesz usunąć wiadomość?</item>
         <item quantity="other">Na pewno chcesz usunąć <xliff:g id="message_count">%1$d</xliff:g> wiadomości?</item>
+        <item quantity="few">Na pewno chcesz usunąć <xliff:g id="message_count">%1$d</xliff:g> wiadomości?</item>
+        <item quantity="many">Na pewno chcesz usunąć <xliff:g id="message_count">%1$d</xliff:g> wiadomości?</item>
     </plurals>
     <string name="dialog_confirm_delete_confirm_button">Usuń</string>
     <string name="dialog_confirm_delete_cancel_button">Nie usuwaj</string>
@@ -963,6 +965,8 @@
     <plurals name="dialog_confirm_spam_message">
         <item quantity="one">Na pewno przenieść wiadomość do spamu?</item>
         <item quantity="other">Na pewno przenieść <xliff:g id="message_count">%1$d</xliff:g> wiadomości do spamu?</item>
+        <item quantity="few">Na pewno przenieść <xliff:g id="message_count">%1$d</xliff:g> wiadomości do spamu?</item>
+        <item quantity="many">Na pewno przenieść <xliff:g id="message_count">%1$d</xliff:g> wiadomości do spamu?</item>
     </plurals>
     <string name="dialog_confirm_spam_confirm_button">Tak</string>
     <string name="dialog_confirm_spam_cancel_button">Nie</string>
@@ -992,6 +996,8 @@
     <plurals name="settings_import_success">
         <item quantity="one">1 konto</item>
         <item quantity="other"><xliff:g id="numAccounts">%s</xliff:g> kont</item>
+        <item quantity="few"><xliff:g id="numAccounts">%s</xliff:g> kont</item>
+        <item quantity="many"><xliff:g id="numAccounts">%s</xliff:g> kont</item>
     </plurals>
     <string name="settings_export_failure">Błąd eksportu</string>
     <string name="settings_import_failure">Błąd importu z <xliff:g id="filename">%s</xliff:g></string>
@@ -1004,12 +1010,16 @@
     <plurals name="settings_import_server_passwords">
         <item quantity="one">hasło serwera</item>
         <item quantity="other">hasła serwera</item>
+        <item quantity="few">hasła serwera</item>
+        <item quantity="many">hasła serwera</item>
     </plurals>
     <string name="settings_import_incoming_server">Serwer przychodzący (<xliff:g id="hostname">%s</xliff:g>):</string>
     <string name="settings_import_outgoing_server">Serwer wychodzący (<xliff:g id="hostname">%s</xliff:g>):</string>
     <plurals name="settings_import_setting_passwords">
         <item quantity="one">Ustawiam hasło…</item>
         <item quantity="other">Ustawiam hasła…</item>
+        <item quantity="few">Ustawiam hasła…</item>
+        <item quantity="many">Ustawiam hasła…</item>
     </plurals>
     <string name="settings_import_use_incoming_server_password">Użyj hasła serwera przychodzącego</string>
     <string name="activate_account_action">Aktywuj</string>

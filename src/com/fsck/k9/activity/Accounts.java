@@ -1285,9 +1285,9 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         new String[] {"jutf7", "http://jutf7.sourceforge.net/"},
         new String[] {"JZlib", "http://www.jcraft.com/jzlib/"},
         new String[] {"Commons IO", "http://commons.apache.org/io/"},
+        new String[] {"Jsoup", "https://jsoup.org/"},
         new String[] {"Mime4j", "http://james.apache.org/mime4j/"},
         new String[] {"HtmlCleaner", "http://htmlcleaner.sourceforge.net/"},
-        new String[] {"ActionBarSherlock", "http://actionbarsherlock.com/"},
         new String[] {"Android-PullToRefresh", "https://github.com/chrisbanes/Android-PullToRefresh"},
         new String[] {"ckChangeLog", "https://github.com/cketti/ckChangeLog"},
         new String[] {"HoloColorPicker", "https://github.com/LarsWerkman/HoloColorPicker"}
@@ -1318,7 +1318,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                               getString(R.string.app_revision_url) +
                               "</a>"))
         .append("</p><hr/><p>")
-        .append(String.format(getString(R.string.app_copyright_fmt), year, year))
+        .append(String.format(getString(R.string.app_copyright_fmt), year, year, year))
         .append("</p><hr/><p>")
         .append(getString(R.string.app_license))
         .append("</p><hr/><p>");

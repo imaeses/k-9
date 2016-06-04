@@ -16,8 +16,8 @@
 
 
     <!-- Used in the about dialog -->
-    <string name="app_authors">Google, das K-9-Team und viele Weitere.</string>
-    <string name="app_copyright_fmt">\u00a9 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers.\nTeile \u00a9 2006-<xliff:g>%s</xliff:g> Android Open Source Project.</string>
+    <string name="app_authors">Google, Adam Wasserman, das K-9-Team und viele Weitere.</string>
+    <string name="app_copyright_fmt">\u00a9 2008-<xliff:g>%s</xliff:g> The K-9 Dog Walkers.\nTeile \u00a9 2006-<xliff:g>%s</xliff:g> Android Open Source Project. \nTeile \u00a9 2013-<xliff:g>%s</xliff:g> Adam Wasserman.</string>
     <string name="app_license">Lizenziert unter der Apache License, Version 2.0.</string>
 
 

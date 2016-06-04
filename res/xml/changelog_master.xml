@@ -8,6 +8,10 @@
      They are automatically updated with "ant bump-version".
 -->
 <changelog>
+    <release version="5.001.11" versioncode="19031">
+        <change>Enabled editing of quoted text for encrypted messages</change>
+        <change>Cleaned up formatting of quoted text</change>
+    </release>
     <release version="5.001.10" versioncode="19030">
         <change>Use preferred encryption and signature algorithms, as specified in PGP KeyRing</change>
     </release>

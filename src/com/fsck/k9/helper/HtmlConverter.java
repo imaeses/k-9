@@ -6,12 +6,17 @@ import android.util.Log;
 
 import com.imaeses.squeaky.K9;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.safety.Whitelist;
 import org.xml.sax.XMLReader;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -47,6 +52,48 @@ public class HtmlConverter {
         return Html.fromHtml(html, null, new HtmlToTextTagHandler()).toString()
                .replace(PREVIEW_OBJECT_CHARACTER, PREVIEW_OBJECT_REPLACEMENT)
                .replace(NBSP_CHARACTER, NBSP_REPLACEMENT);
+    }
+    
+    // only detects blockquotes directly under a body element
+    public static String htmlToQuotedText(final String html, final String quotedPrefix) {
+        
+        Document doc = Jsoup.parseBodyFragment( Jsoup.clean( html, Whitelist.basic() ) );
+        Element body = doc.getElementsByTag("body").first();
+        List<Element> nodes = body.children();
+        for( Element node : nodes ) {
+            if( node.tagName() != null ) {
+                if( node.tagName().toLowerCase().equals( "blockquote") ) {
+                    handleBlockquoteForQuotedText( node, quotedPrefix, 1 );
+                }    
+            }
+        }
+
+        return htmlToText(doc.html());
+        
+    }
+    
+    private static void handleBlockquoteForQuotedText( final Element blockquote, final String quotedPrefix, final int depth ) {
+        
+        String prefix = "";
+        for( int i=0; i<depth; i++ ) {
+            prefix += quotedPrefix;
+        }
+        
+        blockquote.prependText( prefix );
+        
+        List<Element> nodes = blockquote.children();
+        for( Element node : nodes ) {
+            if( node.tagName() != null ) {
+                
+                String tagName = node.tagName().toLowerCase();
+                if( tagName.equals( "br" ) ) {
+                    node.after( prefix );
+                } else if( tagName.equals( "blockquote" ) ) {
+                    handleBlockquoteForQuotedText( node, quotedPrefix, depth+1 );
+                }
+                
+            }    
+        }
     }
 
     /**
@@ -125,7 +172,7 @@ public class HtmlConverter {
             return null;
         }
     }
-
+    
     private static final int MAX_SMART_HTMLIFY_MESSAGE_LENGTH = 1024 * 256 ;
 
     /**
@@ -160,7 +207,7 @@ public class HtmlConverter {
                 case '\n':
                     // pine treats <br> as two newlines, but <br/> as one newline.  Use <br/> so our messages aren't
                     // doublespaced.
-                    buff.append("<br />");
+                    buff.append("<br/>");
                     break;
                 case '\r':
                     break;
@@ -182,7 +229,7 @@ public class HtmlConverter {
     private static final String HTML_BLOCKQUOTE_START = "<blockquote class=\"gmail_quote\" " +
             "style=\"margin: 0pt 0pt 1ex 0.8ex; border-left: 1px solid $$COLOR$$; padding-left: 1ex;\">";
     private static final String HTML_BLOCKQUOTE_END = "</blockquote>";
-    private static final String HTML_NEWLINE = "<br />";
+    private static final String HTML_NEWLINE = "<br/>";
 
     /**
      * Convert a text string into an HTML document.
@@ -282,7 +329,7 @@ public class HtmlConverter {
                );
 
         // Replace lines of -,= or _ with horizontal rules
-        text = text.replaceAll("\\s*([-=_]{30,}+)\\s*", "<hr />");
+        text = text.replaceAll("\\s*([-=_]{30,}+)\\s*", "<hr/>");
 
         /*
          * Unwrap multi-line paragraphs into single line paragraphs that are

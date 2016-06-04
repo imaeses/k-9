@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.Html;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -1623,8 +1624,8 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
                 }
             }
 
-            String quotedText = null;
-            if( mSourceMessageBody != null ) {
+            String quotedText = mQuotedText.getCharacters();
+            if( mSourceMessageBody != null && quotedText.length() == 0 ) {
             	if( mSourceMessageBodyIsMimeMessage ) {
             		try {
             			
@@ -1662,12 +1663,15 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
             		Log.w( K9.LOG_TAG, "Unable to quote original, decrypted plain text", e );
             	}
             	
-            	quotedText = quotedText.replace( "\r\n", "\n" );
-            	quotedText = quotedText.replace( "\n", "\r\n" );
-            	
+            	//quotedText = quotedText.replace( "\r\n", "\n" );
+            	//quotedText = quotedText.replace( "\n", "\r\n" );
+            
+            }	
+            /*
             } else {
             	quotedText = mQuotedText.getCharacters();
             }
+            */
             
             if (includeQuotedText && quotedText.length() > 0) {
                 if (replyAfterQuote) {
@@ -2976,7 +2980,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
             break;
         case R.id.quoted_text_edit:
             mForcePlainText = true;
-            if (mMessageReference != null && mSourceMessageBody == null ) { // shouldn't happen...
+            if (mMessageReference != null) { // shouldn't happen...
                 MessagingController.getInstance(getApplication()).addListener(mListener);
                 final Account account = Preferences.getPreferences(this).getAccount(mMessageReference.accountUuid);
                 final String folderName = mMessageReference.folderName;
@@ -3765,11 +3769,11 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
         }
     }
 
-    // Regexes to check for signature.
     private static final Pattern DASH_SIGNATURE_PLAIN = Pattern.compile("\r\n-- \r\n.*", Pattern.DOTALL);
     private static final Pattern DASH_SIGNATURE_HTML = Pattern.compile("(<br( /)?>|\r?\n)-- <br( /)?>", Pattern.CASE_INSENSITIVE);
     private static final Pattern BLOCKQUOTE_START = Pattern.compile("<blockquote", Pattern.CASE_INSENSITIVE);
     private static final Pattern BLOCKQUOTE_END = Pattern.compile("</blockquote>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern LINEBREAK = Pattern.compile("<br( /)?>", Pattern.CASE_INSENSITIVE);
 
     /**
      * Build and populate the UI with the quoted message.
@@ -3798,10 +3802,13 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
 
         // Handle the original message in the reply
         // If we already have mSourceMessageBody, use that.  It's pre-populated if we've got crypto going on.
-        String content = (mSourceMessageBody != null && !mSourceMessageBodyIsMimeMessage) ?
-                mSourceMessageBody :
-                getBodyTextFromMessage(mSourceMessage, mQuotedTextFormat);
-
+        String content = "";
+        if(mSourceMessageBody != null) {
+            content = mSourceMessageBody;
+        } else {
+            content = getBodyTextFromMessage(mSourceMessage, mQuotedTextFormat);
+        }
+        
         if (mQuotedTextFormat == SimpleMessageFormat.HTML) {
             // Strip signature.
             // closing tags such as </div>, </span>, </table>, </pre> will be cut off.
@@ -3884,20 +3891,29 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
             mQuotedHTML.setText(mQuotedHtmlContent.getQuotedContent());
 
             // TODO: Also strip the signature from the text/plain part
-            mQuotedText.setCharacters(quoteOriginalTextMessage(mSourceMessage,
-                    getBodyTextFromMessage(mSourceMessage, SimpleMessageFormat.TEXT), mQuoteStyle));
+            //mQuotedText.setCharacters(quoteOriginalTextMessage(mSourceMessage,
+            //        getBodyTextFromMessage(mSourceMessage, SimpleMessageFormat.TEXT), mQuoteStyle));
 
-        } else if (mQuotedTextFormat == SimpleMessageFormat.TEXT) {
-            if (mAccount.isStripSignature() &&
-                    (mAction == Action.REPLY || mAction == Action.REPLY_ALL)) {
-                if (DASH_SIGNATURE_PLAIN.matcher(content).find()) {
-                    content = DASH_SIGNATURE_PLAIN.matcher(content).replaceFirst("\r\n");
-                }
-            }
-
-            String quotedText = quoteOriginalTextMessage(mSourceMessage, HtmlConverter.htmlToText( content ), mQuoteStyle);
-            mQuotedText.setCharacters(quotedText);
+        } else if( mQuotedTextFormat == SimpleMessageFormat.TEXT && mSourceMessageBody != null ) {
+            
+            if( content.startsWith( "<pre class=\"k9mail\">" ) ) {
+                
+                content = content.substring( "<pre class=\"k9mail\">".length() );
+                content = content.substring( 0, content.length()-5 );
+                
+            }    
+                    
+            content = HtmlConverter.htmlToQuotedText( content, mAccount.getQuotePrefix() );
         }
+            
+        if (mAccount.isStripSignature() &&
+                    (mAction == Action.REPLY || mAction == Action.REPLY_ALL)) {
+            if (DASH_SIGNATURE_PLAIN.matcher(content).find()) {
+                content = DASH_SIGNATURE_PLAIN.matcher(content).replaceFirst("\r\n");
+            }
+        }
+
+        mQuotedText.setCharacters(quoteOriginalTextMessage(mSourceMessage, content, mQuoteStyle));
 
         if (showQuotedText) {
             showOrHideQuotedText(QuotedTextMode.SHOW);
@@ -3905,7 +3921,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
             showOrHideQuotedText(QuotedTextMode.HIDE);
         }
     }
-
+    
     /**
      * Fetch the body text from a message in the desired message format. This method handles
      * conversions between formats (html to text and vice versa) if necessary.
@@ -4382,7 +4398,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
 
             final String prefix = mAccount.getQuotePrefix();
             final String wrappedText = Utility.wrap(body, REPLY_WRAP_LINE_WIDTH - prefix.length());
-
+            
             // "$" and "\" in the quote prefix have to be escaped for
             // the replaceAll() invocation.
             final String escapedPrefix = prefix.replaceAll("(\\\\|\\$)", "\\\\$1");

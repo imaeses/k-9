@@ -16,8 +16,8 @@
 
 
     <!-- Used in the about dialog -->
-    <string name="app_authors">Google, The K-9 Dog Walkers.</string>
-    <string name="app_copyright_fmt">Πνευματικά δικαιώματα 2008-<xliff:g>%s</xliff:g> από The K-9 Dog Walkers. Τμηματικά πνευματικά δικαιώματα 2006-<xliff:g>%s</xliff:g> από το Android Open Source Project.</string>
+    <string name="app_authors">Google, The K-9 Dog Walkers, Adam Wasserman.</string>
+    <string name="app_copyright_fmt">Πνευματικά δικαιώματα 2008-<xliff:g>%s</xliff:g> από The K-9 Dog Walkers. Τμηματικά πνευματικά δικαιώματα 2006-<xliff:g>%s</xliff:g> από το Android Open Source Project. Τμηματικά πνευματικά δικαιώματα 2013-<xliff:g>%s</xliff:g> από το Adam Wasserman.</string>
     <string name="app_license">Διέπεται από την άδεια χρήσης Apache, έκδοση 2.0.</string>
 
 
