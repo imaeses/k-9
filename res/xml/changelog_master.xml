@@ -9,6 +9,7 @@
 -->
 <changelog>
     <release version="5.001.11" versioncode="19031">
+        <change>Fixed supression of HTML parts on sending</change>
         <change>Enabled editing of quoted text for encrypted messages</change>
         <change>Cleaned up formatting of quoted text</change>
     </release>

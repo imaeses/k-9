@@ -69,7 +69,6 @@ import com.fsck.k9.mail.FetchProfile;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mail.Folder.FolderType;
-
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.BodyPart;
 import com.fsck.k9.mail.Message;
@@ -103,7 +102,6 @@ import com.fsck.k9.search.SearchAccount;
 import com.fsck.k9.search.SearchSpecification;
 import com.fsck.k9.search.SqlQueryBuilder;
 import com.fsck.k9.service.NotificationActionService;
-
 import com.imaeses.squeaky.K9;
 import com.imaeses.squeaky.R;
 import com.imaeses.squeaky.K9.Intents;
@@ -3690,9 +3688,8 @@ public class MessagingController implements Runnable {
                         continue;
                     }
 
-
-
                     localFolder.fetch(new Message[] { message }, fp, null);
+                    
                     try {
 
 
@@ -3715,7 +3712,7 @@ public class MessagingController implements Runnable {
                         	signedParts.remove( message.getUid() );
                         	
                         } 
-                        	
+                        
                         transport.sendMessage(message);
                         
                         message.setFlag(Flag.X_SEND_IN_PROGRESS, false);

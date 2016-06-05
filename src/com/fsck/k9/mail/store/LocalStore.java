@@ -1936,8 +1936,13 @@ public class LocalStore extends Store implements Serializable {
                                                 MimeBodyPart bp = new MimeBodyPart(body, "text/plain");
                                                 mp.addBodyPart(bp);
                                             }
+                                            
+                                            if (htmlContent != null) {
+                                                TextBody html = new TextBody(htmlContent);
+                                                mp.addBodyPart(new MimeBodyPart(html, "text/html"));
+                                            }
 
-                                            if( mimeType.contains( "multipart/alternative" ) ){
+                                            if( mimeType.contains( "multipart/alternative" ) ) {
                                                 message.setOriginalCharset( originalCharset );
                                             } else if( mimeType.contains( "multipart/signed" ) ) {
                                         		
@@ -1969,7 +1974,7 @@ public class LocalStore extends Store implements Serializable {
 	                                            // If it turns out that this is the only part in the parent
 	                                            // MimeMultipart, it'll get fixed below before we attach to
 	                                            // the message.
-	                                            if (textContent != null && htmlContent != null && !mimeType.equalsIgnoreCase("multipart/alternative")) {
+	                                            if (textContent != null && htmlContent != null && !mimeType.contains("multipart/alternative")) {
 	                                                MimeMultipart alternativeParts = mp;
 	                                                alternativeParts.setSubType("alternative");
 	                                                mp = new MimeMultipart();

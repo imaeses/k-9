@@ -20,7 +20,6 @@ import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.text.Html;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -213,7 +212,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
      * - "Aw:" (german: abbreviation for "Antwort")
      */
     private static final Pattern PREFIX = Pattern.compile("^AW[:\\s]\\s*", Pattern.CASE_INSENSITIVE);
-
+  
     /**
      * The account used for message composition.
      */
@@ -245,8 +244,8 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
      * <p>
      * The contents of this string will be used instead of the body of a referenced message when
      * replying to or forwarding a message.<br>
-     * Right now this is only used when replying to a signed or encrypted message. It then contains
-     * the stripped/decrypted body of that message.
+     * Right now this is only used when replying to or forwarding a signed or encrypted message. 
+     * It then contains the stripped/decrypted body of that message.
      * </p>
      * <p><strong>Note:</strong>
      * When this field is not {@code null} we assume that the message we are composing right now
@@ -302,7 +301,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
      * a text/plain message.
      */
     private boolean mForcePlainText = false;
-
+    
     private Button mChooseIdentityButton;
     private LinearLayout mCcWrapper;
     private LinearLayout mBccWrapper;
@@ -1513,6 +1512,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
      *         original message.
      */
     private TextBody buildText(boolean isDraft, SimpleMessageFormat messageFormat, String text, boolean pgpInlineSignedMsg ) {
+        
         // The length of the formatted version of the user-supplied text/reply
         int composedMessageLength;
 
@@ -1547,7 +1547,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
 
             // Do we have to modify an existing message to include our reply?
             if (includeQuotedText && mQuotedHtmlContent != null) {
-           
+                
                 if (K9.DEBUG) {
                     Log.d(K9.LOG_TAG, "insertable: " + mQuotedHtmlContent.toDebugString());
                 }
@@ -1561,7 +1561,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
 
                 // Convert the text to HTML
                 text = HtmlConverter.textToHtmlFragment(text);
-
+                
                 /*
                  * Set the insertion location based upon our reply after quote setting.
                  * Additionally, add some extra separators between the composed message and quoted
@@ -1596,7 +1596,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
                 composedMessageLength = text.length();
                 composedMessageOffset = mQuotedHtmlContent.getInsertionPoint();
                 text = mQuotedHtmlContent.toString();
-
+                
             } else {
                 // There is no text to quote so simply append the signature if available
                 if (!isDraft) {
@@ -1613,6 +1613,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
             }
 
         } else {
+        
             // Capture composed message length before we start attaching quoted parts and signatures.
             composedMessageLength = text.length();
             composedMessageOffset = 0;
@@ -1696,7 +1697,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
         	composedMessageLength += "\r\n".length();
         	
         }
-        
+
         TextBody body = new TextBody(text);
         body.setComposedMessageLength(composedMessageLength);
         body.setComposedMessageOffset(composedMessageOffset);
@@ -1831,7 +1832,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
             // Add the identity to the message.
             message.addHeader(K9.IDENTITY_HEADER, buildIdentityHeader(textBody, bodyPlain));
         }
-
+        
         return message;
     }
 
@@ -2979,7 +2980,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
             mDraftNeedsSaving = true;
             break;
         case R.id.quoted_text_edit:
-            mForcePlainText = true;
+            mForcePlainText = true;   
             if (mMessageReference != null) { // shouldn't happen...
                 MessagingController.getInstance(getApplication()).addListener(mListener);
                 final Account account = Preferences.getPreferences(this).getAccount(mMessageReference.accountUuid);
@@ -3773,8 +3774,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
     private static final Pattern DASH_SIGNATURE_HTML = Pattern.compile("(<br( /)?>|\r?\n)-- <br( /)?>", Pattern.CASE_INSENSITIVE);
     private static final Pattern BLOCKQUOTE_START = Pattern.compile("<blockquote", Pattern.CASE_INSENSITIVE);
     private static final Pattern BLOCKQUOTE_END = Pattern.compile("</blockquote>", Pattern.CASE_INSENSITIVE);
-    private static final Pattern LINEBREAK = Pattern.compile("<br( /)?>", Pattern.CASE_INSENSITIVE);
-
+    
     /**
      * Build and populate the UI with the quoted message.
      *
@@ -3798,13 +3798,23 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
             mQuotedTextFormat = SimpleMessageFormat.HTML;
         }
 
-        // TODO -- I am assuming that mSourceMessageBody will always be a text part.  Is this a safe assumption?
-
-        // Handle the original message in the reply
+        // Handle the original message in the reply/forwarding
         // If we already have mSourceMessageBody, use that.  It's pre-populated if we've got crypto going on.
         String content = "";
         if(mSourceMessageBody != null) {
-            content = mSourceMessageBody;
+            if( mSourceMessageBodyIsMimeMessage ) {
+                try {
+                    
+                    ByteArrayInputStream bais = new ByteArrayInputStream( mSourceMessageBody.getBytes() );
+                    MimeMessage m = new MimeMessage( bais );
+                    content = getBodyTextFromMessage( m, mQuotedTextFormat );
+                    
+                } catch( Exception e ) {
+                    Log.w(K9.LOG_TAG, e );
+                }
+            } else {
+                content = mSourceMessageBody;
+            } 
         } else {
             content = getBodyTextFromMessage(mSourceMessage, mQuotedTextFormat);
         }
@@ -3890,31 +3900,32 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
             // Load the message with the reply header.
             mQuotedHTML.setText(mQuotedHtmlContent.getQuotedContent());
 
-            // TODO: Also strip the signature from the text/plain part
-            //mQuotedText.setCharacters(quoteOriginalTextMessage(mSourceMessage,
-            //        getBodyTextFromMessage(mSourceMessage, SimpleMessageFormat.TEXT), mQuoteStyle));
+            // Load the message with quoted plain text
+            String quotedText = HtmlConverter.htmlToQuotedText( content, mAccount.getQuotePrefix() );
+            mQuotedText.setCharacters(quoteOriginalTextMessage(mSourceMessage, quotedText, mQuoteStyle));
 
-        } else if( mQuotedTextFormat == SimpleMessageFormat.TEXT && mSourceMessageBody != null ) {
+        } else {
             
             if( content.startsWith( "<pre class=\"k9mail\">" ) ) {
-                
+            
                 content = content.substring( "<pre class=\"k9mail\">".length() );
                 content = content.substring( 0, content.length()-5 );
                 
-            }    
-                    
-            content = HtmlConverter.htmlToQuotedText( content, mAccount.getQuotePrefix() );
-        }
-            
-        if (mAccount.isStripSignature() &&
-                    (mAction == Action.REPLY || mAction == Action.REPLY_ALL)) {
-            if (DASH_SIGNATURE_PLAIN.matcher(content).find()) {
-                content = DASH_SIGNATURE_PLAIN.matcher(content).replaceFirst("\r\n");
+                content = HtmlConverter.htmlToQuotedText( content, mAccount.getQuotePrefix() );
+                
             }
-        }
+            
+            if (mAccount.isStripSignature() &&
+                    (mAction == Action.REPLY || mAction == Action.REPLY_ALL)) {
+                if (DASH_SIGNATURE_PLAIN.matcher(content).find()) {
+                    content = DASH_SIGNATURE_PLAIN.matcher(content).replaceFirst("\r\n");
+                }
+            }
 
-        mQuotedText.setCharacters(quoteOriginalTextMessage(mSourceMessage, content, mQuoteStyle));
-
+            mQuotedText.setCharacters(quoteOriginalTextMessage(mSourceMessage, content, mQuoteStyle));
+            
+        } 
+        
         if (showQuotedText) {
             showOrHideQuotedText(QuotedTextMode.SHOW);
         } else {
@@ -4134,7 +4145,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
         	            try {
         	            	
         	            	String mimeType = mSourceMessage.getMimeType();
-        		            if( !mCryptoSignatureCheckbox.isChecked() && mimeType.contains( "multipart/signed" ) ) {
+        		            if( mCryptoSignatureCheckbox != null && !mCryptoSignatureCheckbox.isChecked() && mimeType.contains( "multipart/signed" ) ) {
         			                
         		            	long ids[] = crypto.getSecretKeyIdsFromEmail( MessageCompose.this, mIdentity.getEmail() );
         			            if( ids != null && ids.length > 0 ) {
@@ -4151,7 +4162,7 @@ public class MessageCompose extends K9Activity implements OnClickListener, Crypt
         			                
         			            updateEncryptLayout();
         			              
-        		            } else if( !mEncryptCheckbox.isChecked() && mimeType.contains( "multipart/encrypted" ) ) {
+        		            } else if( mEncryptCheckbox != null && !mEncryptCheckbox.isChecked() && mimeType.contains( "multipart/encrypted" ) ) {
         		            	mEncryptCheckbox.setChecked( true );
         		            }
         		            
